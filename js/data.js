@@ -113,6 +113,9 @@ const CLASSES = [
     hasPickpocket: false,
     hasDiceGame: false,
     startingGold: 20,
+    hasStudy: true,
+    hasPotioniTab: true,
+    studyPerDay: 2,
   },
   {
     id: 'paladino',
@@ -637,6 +640,510 @@ const DB = {
           failText: "La tua analisi era sbagliata. Troppo tardi." }
       ],
       rewards: { xp: 400, goldMin: 300, goldMax: 600, fameXp: 50, itemChance: 0.65, itemTier: 3 }
+    },
+
+    /* ═══════════════  MAGO — TIER 1 (0+ fama) ═══════════════ */
+    {
+      id: 201, tier: 1, minFame: 0, classMission: 'mago',
+      name: "Il Grimorio Perduto",
+      desc: "Un prezioso libro di magia è stato rubato dalla biblioteca della torre. Il mago anziano è disperato.",
+      type: "recupero",
+      approaches: [
+        { label: "Analizzare la traccia arcana", stat: "int", dc: 11,
+          successText: "La tua mente coglie i residui magici. Trovi il grimorio in un nascondiglio vicino.",
+          partialText: "La traccia è debole ma sufficiente. Recuperi il libro con qualche difficoltà.",
+          failText: "La traccia è troppo dispersa. Il grimorio rimane perduto per oggi." },
+        { label: "Cercare di nascosto", stat: "dex", dc: 13,
+          successText: "Ti muovi furtivo tra i vicoli. Il ladro non si accorge di te mentre recuperi il grimorio.",
+          partialText: "Trovi il ladro ma fa resistenza. Il libro è tuo, ma con qualche danno.",
+          failText: "Il ladro ti vede e fugge con il grimorio." }
+      ],
+      rewards: { xp: 60, goldMin: 10, goldMax: 22, fameXp: 5, itemChance: 0.1, itemTier: 1, ingredientChance: 0.4, ingredientTierMax: 1 }
+    },
+    {
+      id: 202, tier: 1, minFame: 0, classMission: 'mago',
+      name: "Identificare l'Artefatto",
+      desc: "Un mercante ha trovato un oggetto strano nel suo magazzino. Teme sia maledetto. Vuole che qualcuno lo analizzi.",
+      type: "analisi",
+      approaches: [
+        { label: "Rituali di identificazione", stat: "int", dc: 12,
+          successText: "Il tuo studio rivela l'oggetto: un amuleto di protezione dimenticato. Prezioso.",
+          partialText: "Riesci a capire che non è pericoloso, ma i dettagli ti sfuggono.",
+          failText: "L'analisi fallisce. L'oggetto rimane un mistero e il mercante non ti paga." }
+      ],
+      rewards: { xp: 65, goldMin: 12, goldMax: 28, fameXp: 5, itemChance: 0.1, itemTier: 1, ingredientChance: 0.4, ingredientTierMax: 1 }
+    },
+    {
+      id: 203, tier: 1, minFame: 0, classMission: 'mago',
+      name: "La Creatura nel Magazzino",
+      desc: "Un piccolo costrutto magico è sfuggito al suo padrone e ha devastato un magazzino. Va fermato.",
+      type: "eliminazione",
+      approaches: [
+        { label: "Disattivare il nucleo magico", stat: "int", dc: 11,
+          successText: "Individui il nucleo di energia. Con il giusto incantesimo lo disattivi senza danni.",
+          partialText: "Riesci a indebolirlo ma il costrutto si danneggia parzialmente nel processo.",
+          failText: "Il costrutto è più complesso del previsto. Fuggi prima che distrugga anche te." },
+        { label: "Smontarlo con la forza", stat: "str", dc: 14,
+          successText: "Lo afferri e lo smonti pezzo per pezzo. Efficace, se non elegante.",
+          partialText: "Lo danneggi abbastanza da bloccarlo, ma rischi qualche graffio.",
+          failText: "Il costrutto è troppo resistente. Ti allontani sconfitto." }
+      ],
+      rewards: { xp: 70, goldMin: 14, goldMax: 30, fameXp: 6, itemChance: 0.15, itemTier: 1, ingredientChance: 0.4, ingredientTierMax: 1 }
+    },
+    {
+      id: 204, tier: 1, minFame: 0, classMission: 'mago',
+      name: "L'Apprendista Fuggiasco",
+      desc: "Un giovane apprendista è fuggito dalla scuola di magia dopo aver rubato un incantesimo proibito.",
+      type: "recupero",
+      approaches: [
+        { label: "Convincerlo a tornare", stat: "cha", dc: 11,
+          successText: "Le tue parole toccano il ragazzo. Capisce i rischi e torna con te.",
+          partialText: "Lo convinci a tornare, ma è diffidente. Missione compiuta a metà.",
+          failText: "Il ragazzo non si fida. Fugge più lontano." },
+        { label: "Prevedere i suoi movimenti", stat: "int", dc: 13,
+          successText: "Anticipi i suoi pensieri: uno studente in fuga cerca sempre la stessa cosa. Lo trovi.",
+          partialText: "La tua previsione era quasi giusta. Lo trovi ma ha già usato l'incantesimo.",
+          failText: "Le tue deduzioni erano errate. Le tracce si perdono." }
+      ],
+      rewards: { xp: 60, goldMin: 10, goldMax: 22, fameXp: 5, itemChance: 0.1, itemTier: 1, ingredientChance: 0.4, ingredientTierMax: 1 }
+    },
+    {
+      id: 205, tier: 1, minFame: 0, classMission: 'mago',
+      name: "Raccogliere Erbe Magiche",
+      desc: "Una spedizione in una zona pericolosa per raccogliere erbe rare necessarie a un laboratorio.",
+      type: "raccolta",
+      approaches: [
+        { label: "Seguire i sensi magici", stat: "wis", dc: 11,
+          successText: "I tuoi sensi guidano ogni passo. Raccogli le erbe più pure senza rischi.",
+          partialText: "Trovi le erbe ma la zona è più pericolosa del previsto. Ne recuperi metà.",
+          failText: "Perdi la via nel bosco. Torni a mani vuote." },
+        { label: "Muoversi in silenzio", stat: "dex", dc: 13,
+          successText: "Ti muovi come un'ombra tra le bestie. Le erbe sono tue senza disturbare nulla.",
+          partialText: "Quasi silenzioso, ma una bestia ti sente. Scappi con qualche raccolta.",
+          failText: "Fai troppo rumore. Le bestie ti cacciano via." }
+      ],
+      rewards: { xp: 55, goldMin: 8, goldMax: 20, fameXp: 5, itemChance: 0.05, itemTier: 1, ingredientChance: 0.6, ingredientTierMax: 1 }
+    },
+    {
+      id: 206, tier: 1, minFame: 0, classMission: 'mago',
+      name: "La Trappola di Rune",
+      desc: "Delle rune esplosive sono state incise su una porta del mercato. La città è in pericolo.",
+      type: "disinnesco",
+      approaches: [
+        { label: "Disattivare le rune con precisione", stat: "int", dc: 12,
+          successText: "Le tue mani tremano, ma la mente è ferma. Le rune si spengono una a una.",
+          partialText: "Ne disattivi la maggior parte. La piccola esplosione rimanente non fa danni gravi.",
+          failText: "Tocchi la sequenza sbagliata. La porta esplode, per fortuna senza feriti." }
+      ],
+      rewards: { xp: 70, goldMin: 15, goldMax: 30, fameXp: 6, itemChance: 0.15, itemTier: 1, ingredientChance: 0.4, ingredientTierMax: 1 }
+    },
+    {
+      id: 207, tier: 1, minFame: 0, classMission: 'mago',
+      name: "Il Sogno Ricorrente",
+      desc: "Un villaggio è tormentato da incubi ogni notte. Qualcosa di magico li causa. Ti chiedono aiuto.",
+      type: "indagine",
+      approaches: [
+        { label: "Analizzare il campo onirico", stat: "wis", dc: 11,
+          successText: "Mediti e entri nello spazio tra sogno e veglia. Trovi e dissolvi la fonte.",
+          partialText: "Individui la fonte ma riesci solo a indebolirla. Gli incubi diminuiscono.",
+          failText: "Il campo onirico ti travolge. Esci confuso senza risolverlo." },
+        { label: "Studiare i segni magici", stat: "int", dc: 13,
+          successText: "I pattern magici ti conducono a un artefatto nascosto nel pozzo del villaggio.",
+          partialText: "Trovi l'artefatto ma non riesci a distruggerlo completamente.",
+          failText: "I segni sono troppo oscuri per la tua comprensione attuale." }
+      ],
+      rewards: { xp: 65, goldMin: 12, goldMax: 25, fameXp: 5, itemChance: 0.1, itemTier: 1, ingredientChance: 0.4, ingredientTierMax: 1 }
+    },
+    {
+      id: 208, tier: 1, minFame: 0, classMission: 'mago',
+      name: "Tradurre il Manoscritto",
+      desc: "Un antico testo è stato trovato nelle catacombe. Nessuno lo capisce. Serve una mente arcana.",
+      type: "analisi",
+      approaches: [
+        { label: "Decifrare l'antico alfabeto", stat: "int", dc: 12,
+          successText: "Il testo rivela la posizione di un deposito segreto. La città è grata.",
+          partialText: "Traduci parzialmente. Abbastanza da capire i punti salienti.",
+          failText: "Il linguaggio è troppo arcaico anche per te." }
+      ],
+      rewards: { xp: 60, goldMin: 10, goldMax: 22, fameXp: 5, itemChance: 0.1, itemTier: 1, ingredientChance: 0.4, ingredientTierMax: 1 }
+    },
+    {
+      id: 209, tier: 1, minFame: 0, classMission: 'mago',
+      name: "La Fontana Avvelenata",
+      desc: "La fontana del villaggio è stata contaminata da magia oscura. L'acqua fa ammalare chi la beve.",
+      type: "purificazione",
+      approaches: [
+        { label: "Rituali di purificazione", stat: "int", dc: 11,
+          successText: "Il tuo incantesimo di purificazione dissolve la contaminazione. L'acqua torna limpida.",
+          partialText: "La purifichi parzialmente. Meglio di prima, ma richiederà altri trattamenti.",
+          failText: "La contaminazione è radicata. Non riesci a rimuoverla." },
+        { label: "Meditare sulla fonte del male", stat: "wis", dc: 13,
+          successText: "Percependo l'oscurità, la indirizzi altrove. La fontana è salva.",
+          partialText: "Indebolisci la magia ma non la elimini del tutto.",
+          failText: "L'oscurità è troppo profonda per essere percepita." }
+      ],
+      rewards: { xp: 65, goldMin: 12, goldMax: 26, fameXp: 5, itemChance: 0.1, itemTier: 1, ingredientChance: 0.5, ingredientTierMax: 1 }
+    },
+    {
+      id: 210, tier: 1, minFame: 0, classMission: 'mago',
+      name: "Il Messaggero Incantato",
+      desc: "Una lettera sigillata con rune magiche deve essere consegnata. Il sigillo non deve essere spezzato.",
+      type: "consegna",
+      approaches: [
+        { label: "Presentarsi con autorità arcana", stat: "cha", dc: 11,
+          successText: "Il tuo portamento da mago apre ogni porta. La lettera è consegnata intatta.",
+          partialText: "Qualche difficoltà, ma la lettera arriva a destinazione.",
+          failText: "Vieni bloccato da guardie sospettose. La lettera non parte." },
+        { label: "Trovare la via più sicura", stat: "dex", dc: 12,
+          successText: "Ti muovi attraverso i vicoli secondari. La consegna è perfetta.",
+          partialText: "Qualche deviazione necessaria, ma ci arrivi.",
+          failText: "La via è bloccata. Non riesci a consegnare." }
+      ],
+      rewards: { xp: 55, goldMin: 10, goldMax: 20, fameXp: 5, itemChance: 0.05, itemTier: 1, ingredientChance: 0.4, ingredientTierMax: 1 }
+    },
+
+    /* ═══════════════  MAGO — TIER 2 (50+ fama) ═══════════════ */
+    {
+      id: 211, tier: 2, minFame: 50, classMission: 'mago',
+      name: "Il Dungeon dell'Anatema",
+      desc: "Un dungeon maledetto da un antico anatema. I mostri al suo interno non possono morire davvero.",
+      type: "esplorazione",
+      approaches: [
+        { label: "Spezzare la maledizione", stat: "int", dc: 14,
+          successText: "Trovi il nucleo dell'anatema e lo dissolvi. Il dungeon ritrova pace.",
+          partialText: "Indebolisci l'anatema abbastanza da attraversare il dungeon e recuperare ciò che serve.",
+          failText: "L'anatema è oltre le tue capacità attuali." },
+        { label: "Combattere con la forza bruta", stat: "str", dc: 16,
+          successText: "Se non puoi ucciderli, basta che non si rialzino in tempo. Passi tra le macerie.",
+          partialText: "Ci vuole molto sforzo fisico. Esci con qualche ferita ma vittorioso.",
+          failText: "I mostri non si fermano. Sei costretto a ritiراrti." }
+      ],
+      rewards: { xp: 120, goldMin: 30, goldMax: 70, fameXp: 12, itemChance: 0.3, itemTier: 2, ingredientChance: 0.5, ingredientTierMax: 2 }
+    },
+    {
+      id: 212, tier: 2, minFame: 50, classMission: 'mago',
+      name: "La Setta dell'Ombra",
+      desc: "Una setta di seguaci della magia oscura si è infiltrata nella città. Devi scoprire i loro piani.",
+      type: "infiltrazione",
+      approaches: [
+        { label: "Infiltrarti come simpatizzante", stat: "cha", dc: 14,
+          successText: "Fingi di condividere le loro credenze. Scopri i piani e li riporti alle autorità.",
+          partialText: "Ti infiltri parzialmente ma destano sospetti. Ottieni informazioni frammentarie.",
+          failText: "Ti smascherano. Fuggi a stento." },
+        { label: "Decifrare i loro simboli", stat: "int", dc: 16,
+          successText: "I codici della setta sono sofisticati ma non per te. Sveli tutto.",
+          partialText: "Decifri parte del codice. Abbastanza per un avvertimento.",
+          failText: "Il loro sistema crittografico supera la tua comprensione." }
+      ],
+      rewards: { xp: 130, goldMin: 35, goldMax: 80, fameXp: 13, itemChance: 0.3, itemTier: 2, ingredientChance: 0.5, ingredientTierMax: 2 }
+    },
+    {
+      id: 213, tier: 2, minFame: 50, classMission: 'mago',
+      name: "Il Costrutto Ribelle",
+      desc: "Un golem di pietra creato per proteggere la città è impazzito e attacca i cittadini.",
+      type: "neutralizzazione",
+      approaches: [
+        { label: "Disattivare il core magico", stat: "int", dc: 14,
+          successText: "Individui la pietra di controllo. Un incantesimo preciso lo ferma.",
+          partialText: "Riesci a rallentarlo ma non a fermarlo del tutto. Le guardie finiscono il lavoro.",
+          failText: "Il core è protetto. Non riesci ad accedervi." },
+        { label: "Abbatterlo fisicamente", stat: "str", dc: 16,
+          successText: "Fratturi le giunture vitali. Il golem crolla in pezzi innocui.",
+          partialText: "Lo danneggi seriamente. Non può più attaccare, ma è ancora in piedi.",
+          failText: "È troppo resistente. Ti schivi appena in tempo." }
+      ],
+      rewards: { xp: 125, goldMin: 32, goldMax: 75, fameXp: 12, itemChance: 0.3, itemTier: 2, ingredientChance: 0.5, ingredientTierMax: 2 }
+    },
+    {
+      id: 214, tier: 2, minFame: 50, classMission: 'mago',
+      name: "L'Alchimista Folle",
+      desc: "Un alchimista ha perso la ragione dopo un esperimento fallito. I suoi esperimenti minacciano il quartiere.",
+      type: "neutralizzazione",
+      approaches: [
+        { label: "Ragionare con lui", stat: "int", dc: 13,
+          successText: "Parli la sua lingua. Lo porti piano piano alla realtà. Accetta di fermarsi.",
+          partialText: "Lo calmi abbastanza da fermarlo temporaneamente.",
+          failText: "La sua mente è troppo frantumata. Non risponde alla logica." },
+        { label: "Intuire dove si trova la coscienza", stat: "wis", dc: 15,
+          successText: "Percepire il suo dolore ti permette di trovare la via giusta. Guarisce.",
+          partialText: "Senti la sua angoscia. Lo calmi parzialmente.",
+          failText: "La follia è troppo profonda per essere percepita." }
+      ],
+      rewards: { xp: 115, goldMin: 28, goldMax: 65, fameXp: 11, itemChance: 0.3, itemTier: 2, ingredientChance: 0.5, ingredientTierMax: 2 }
+    },
+    {
+      id: 215, tier: 2, minFame: 50, classMission: 'mago',
+      name: "La Rete dell'Aragnide",
+      desc: "Un covo di ragni magici ha infestato la cantina di un nobile. Producono veleno arcano.",
+      type: "eliminazione",
+      approaches: [
+        { label: "Bruciare la tana con la magia del fuoco", stat: "int", dc: 14,
+          successText: "Le fiamme arcane puliscono ogni angolo. La cantina è sicura.",
+          partialText: "Elimini la maggior parte ma alcuni fuggono dalle fessure.",
+          failText: "I ragni si dissolvono nel buio prima che le fiamme li raggiungano." },
+        { label: "Muoversi silenziosamente ed eliminarli", stat: "dex", dc: 16,
+          successText: "Ti muovi nell'ombra come loro. Li elimini uno a uno senza farli allarmare.",
+          partialText: "Ne elimini la metà prima che l'allarme scatti.",
+          failText: "Sei troppo lento. I ragni ti circondano e fuggi." }
+      ],
+      rewards: { xp: 120, goldMin: 30, goldMax: 70, fameXp: 12, itemChance: 0.3, itemTier: 2, ingredientChance: 0.5, ingredientTierMax: 2 }
+    },
+    {
+      id: 216, tier: 2, minFame: 50, classMission: 'mago',
+      name: "Il Cristallo delle Visioni",
+      desc: "Una sfera di cristallo rubata mostra visioni del futuro. Va recuperata prima che cada in mani sbagliate.",
+      type: "recupero",
+      approaches: [
+        { label: "Usare la sfera per trovarsi", stat: "int", dc: 13,
+          successText: "Usi la sfera stessa per localizzarla. Un paradosso risolto magistralmente.",
+          partialText: "Ottieni un'immagine parziale. Abbastanza per orientarti.",
+          failText: "Le visioni sono troppo caotiche per essere interpretate." },
+        { label: "Intuire dove si nasconde il ladro", stat: "wis", dc: 15,
+          successText: "Il tuo intuito ti porta direttamente al ladro. La sfera è recuperata.",
+          partialText: "Quasi giusto: trovi il nascondiglio ma il ladro è già partito. La sfera c'è.",
+          failText: "La tua percezione ti tradisce. Il ladro scompare." }
+      ],
+      rewards: { xp: 125, goldMin: 32, goldMax: 75, fameXp: 12, itemChance: 0.3, itemTier: 2, ingredientChance: 0.5, ingredientTierMax: 2 }
+    },
+    {
+      id: 217, tier: 2, minFame: 50, classMission: 'mago',
+      name: "Il Contratto Demoniaco",
+      desc: "Un mercante ha firmato un contratto demoniaco per ricchezze. Ora vuole uscirne. Non è semplice.",
+      type: "liberazione",
+      approaches: [
+        { label: "Trovare la clausola di uscita", stat: "wis", dc: 14,
+          successText: "Ogni contratto demoniaco ha una via d'uscita nascosta. La trovi e la sfrutti.",
+          partialText: "Trovi una clausola parziale. Il mercante è liberato ma a un costo.",
+          failText: "Il contratto è ermetico. Nessuna via di fuga evidente." },
+        { label: "Riscrivere il contratto con la magia", stat: "int", dc: 16,
+          successText: "Con abilità arcana riformuli i termini. Il demonio è vincolato a rispettarli.",
+          partialText: "Modifichi parzialmente il contratto. Le condizioni migliorano.",
+          failText: "Il demonio si accorge del tentativo. Il contratto si inasprisce." }
+      ],
+      rewards: { xp: 130, goldMin: 35, goldMax: 80, fameXp: 14, itemChance: 0.35, itemTier: 2, ingredientChance: 0.5, ingredientTierMax: 2 }
+    },
+    {
+      id: 218, tier: 2, minFame: 50, classMission: 'mago',
+      name: "Il Portale Instabile",
+      desc: "Un portale dimensionale si è aperto in un deposito. Creature da altri piani stanno passando.",
+      type: "sigillo",
+      approaches: [
+        { label: "Sigillare il portale con rune", stat: "int", dc: 15,
+          successText: "Le rune di sigillo convergono perfettamente. Il portale si chiude con un botto.",
+          partialText: "Lo rimpicciolisci abbastanza da bloccare il passaggio. Non è permanente.",
+          failText: "Le rune si distorcono. Il portale si allarga invece di chiudersi." },
+        { label: "Percepire le frequenze del piano", stat: "wis", dc: 14,
+          successText: "Senti la frequenza dell'altro piano e la interrompi manualmente. Funziona.",
+          partialText: "Interrompi parzialmente la connessione. Il flusso si riduce.",
+          failText: "Le frequenze sono incoerenti. Perdi l'orientamento." }
+      ],
+      rewards: { xp: 135, goldMin: 38, goldMax: 85, fameXp: 14, itemChance: 0.35, itemTier: 2, ingredientChance: 0.5, ingredientTierMax: 2 }
+    },
+    {
+      id: 219, tier: 2, minFame: 50, classMission: 'mago',
+      name: "La Maledizione della Luna",
+      desc: "Ad ogni luna piena gli abitanti di un villaggio si tramutano in bestie. Una maledizione antica.",
+      type: "liberazione",
+      approaches: [
+        { label: "Cercare il rituale di rottura", stat: "wis", dc: 14,
+          successText: "Il rituale di purificazione lunare funziona. La maledizione è spezzata.",
+          partialText: "Il rituale è parzialmente corretto. La trasformazione diventa meno violenta.",
+          failText: "Manca un componente chiave. La maledizione persiste." },
+        { label: "Convincere la luna con la persuasione arcana", stat: "cha", dc: 15,
+          successText: "La tua voce risuona tra le sfere celesti. La maledizione si dissolve.",
+          partialText: "La luna risponde, ma solo in parte.",
+          failText: "Le sfere celestiali non rispondono." }
+      ],
+      rewards: { xp: 125, goldMin: 30, goldMax: 72, fameXp: 13, itemChance: 0.3, itemTier: 2, ingredientChance: 0.5, ingredientTierMax: 2 }
+    },
+    {
+      id: 220, tier: 2, minFame: 50, classMission: 'mago',
+      name: "Il Torneo dei Maghi",
+      desc: "Un torneo arcano. Prove di conoscenza e abilità magica. Un'occasione per farti un nome.",
+      type: "competizione",
+      approaches: [
+        { label: "Dominare le prove teoriche", stat: "int", dc: 14,
+          successText: "La tua erudizione è insuperabile. Vinci ogni prova teorica con distinzione.",
+          partialText: "Passi la maggior parte delle prove. Un buon risultato.",
+          failText: "I tuoi avversari sono più preparati. Eliminato nelle prime fasi." },
+        { label: "Convincere i giudici con il portamento", stat: "cha", dc: 15,
+          successText: "La tua presenza scenica incanta i giudici. Vinci anche senza il punteggio massimo.",
+          partialText: "Fai una buona impressione. Qualche punto bonus.",
+          failText: "I giudici non sono impressionati dall'apparenza." }
+      ],
+      rewards: { xp: 120, goldMin: 30, goldMax: 70, fameXp: 15, itemChance: 0.3, itemTier: 2, ingredientChance: 0.5, ingredientTierMax: 2 }
+    },
+
+    /* ═══════════════  MAGO — TIER 3 (150+ fama) ═══════════════ */
+    {
+      id: 221, tier: 3, minFame: 150, classMission: 'mago',
+      name: "Il Necromantico",
+      desc: "Un negromante sta costruendo un esercito di non-morti. Va fermato prima che sia troppo tardi.",
+      type: "eliminazione",
+      approaches: [
+        { label: "Smontare i suoi rituali di legame", stat: "int", dc: 16,
+          successText: "Senza i rituali, i non-morti crollano. Il negromante è impotente e si arrende.",
+          partialText: "Interrompi parte dei rituali. L'esercito si dimezza.",
+          failText: "I rituali sono troppo complessi. Il negromante ride della tua impotenza." },
+        { label: "Affrontarlo fisicamente", stat: "str", dc: 17,
+          successText: "La sua magia è potente ma lui è fragile. Lo disarmi e lo catturi.",
+          partialText: "Lo ferisci abbastanza da farlo fuggire. L'esercito si disperде.",
+          failText: "I non-morti ti bloccano. Fuggi a stento con la vita." }
+      ],
+      rewards: { xp: 200, goldMin: 80, goldMax: 180, fameXp: 25, itemChance: 0.5, itemTier: 3, ingredientChance: 0.6, ingredientTierMax: 3 }
+    },
+    {
+      id: 222, tier: 3, minFame: 150, classMission: 'mago',
+      name: "Il Sigillo Dimenticato",
+      desc: "Un antico sigillo protettivo si sta sgretolando. Se cade, qualcosa di terribile verrà liberato.",
+      type: "ripristino",
+      approaches: [
+        { label: "Ridisegnare le rune originali", stat: "int", dc: 16,
+          successText: "Studi i frammenti sopravvissuti e ricrei il sigillo originale. Tiene.",
+          partialText: "Il sigillo regge, ma è indebolito. Durerà ancora qualche anno.",
+          failText: "I frammenti non bastano per ricostruire il sigillo." },
+        { label: "Meditare sull'essenza del sigillo", stat: "wis", dc: 17,
+          successText: "Senti il sigillo come un essere vivente. Lo nutri con la tua energia. Si rafforza.",
+          partialText: "Lo stabilizzi, ma non lo ripristini completamente.",
+          failText: "L'essenza è troppo antica per essere percepita." }
+      ],
+      rewards: { xp: 210, goldMin: 85, goldMax: 190, fameXp: 26, itemChance: 0.5, itemTier: 3, ingredientChance: 0.6, ingredientTierMax: 3 }
+    },
+    {
+      id: 223, tier: 3, minFame: 150, classMission: 'mago',
+      name: "La Profezia",
+      desc: "Una profezia frammentata parla di una catastrofe imminente. Qualcuno vuole che rimanga seppellita.",
+      type: "indagine",
+      approaches: [
+        { label: "Ricostruire la profezia completa", stat: "wis", dc: 16,
+          successText: "I frammenti si uniscono nella tua mente. La profezia è rivelata e la catastrofe evitata.",
+          partialText: "Ottieni frammenti sufficienti per dare un avvertimento parziale.",
+          failText: "I frammenti sono troppo corrotti. La verità rimane nascosta." },
+        { label: "Trovare chi vuole seppellirla", stat: "int", dc: 17,
+          successText: "Seguendo le tracce del depistaggio, trovi il colpevole e la profezia completa.",
+          partialText: "Trovi alcune prove ma non abbastanza per smascherare il colpevole.",
+          failText: "Ogni pista porta a un vicolo cieco." }
+      ],
+      rewards: { xp: 220, goldMin: 90, goldMax: 200, fameXp: 28, itemChance: 0.5, itemTier: 3, ingredientChance: 0.6, ingredientTierMax: 3 }
+    },
+    {
+      id: 224, tier: 3, minFame: 150, classMission: 'mago',
+      name: "Il Piano Eterio",
+      desc: "Un artefatto di valore inestimabile è bloccato nel piano etereo. Solo un mago può recuperarlo.",
+      type: "recupero",
+      approaches: [
+        { label: "Navigare il piano etereo", stat: "int", dc: 17,
+          successText: "La tua mente è la mappa. Navighi il piano etereo come un veterano e recuperi l'artefatto.",
+          partialText: "Ti orienti con difficoltà. Recuperi l'artefatto ma esci stremato.",
+          failText: "Il piano etereo ti disorienta completamente. Esci senza nulla." },
+        { label: "Sentire la risonanza dell'artefatto", stat: "wis", dc: 16,
+          successText: "L'artefatto ti chiama. Segui la risonanza e lo trovi quasi subito.",
+          partialText: "Senti l'artefatto ma stai per perderti. Escی appena in tempo con esso.",
+          failText: "La risonanza svanisce prima che tu possa seguirla." }
+      ],
+      rewards: { xp: 230, goldMin: 95, goldMax: 210, fameXp: 30, itemChance: 0.55, itemTier: 3, ingredientChance: 0.6, ingredientTierMax: 3 }
+    },
+    {
+      id: 225, tier: 3, minFame: 150, classMission: 'mago',
+      name: "Il Dracolich",
+      desc: "Un drago antico si è trasformato in dracolich. Il suo risveglio cambierebbe i destini del mondo.",
+      type: "impedimento",
+      approaches: [
+        { label: "Interrompere il rituale del risveglio", stat: "int", dc: 17,
+          successText: "Individui il punto critico del rituale e lo interrompi nel momento giusto. Il dracolich non risorge.",
+          partialText: "Ritardi il risveglio. Le autorità hanno tempo per prepararsi.",
+          failText: "Il rituale è già a uno stadio troppo avanzato." },
+        { label: "Distruggere la phylactery", stat: "str", dc: 18,
+          successText: "Trovi e distruggi il contenitore dell'anima. Il dracolich è sconfitto definitivamente.",
+          partialText: "La danneggi ma non la distruggi. Il dracolich è indebolito.",
+          failText: "La phylactery è troppo resistente per le tue forze." }
+      ],
+      rewards: { xp: 280, goldMin: 120, goldMax: 280, fameXp: 40, itemChance: 0.6, itemTier: 3, ingredientChance: 0.7, ingredientTierMax: 4 }
+    },
+    {
+      id: 226, tier: 3, minFame: 150, classMission: 'mago',
+      name: "La Biblioteca Proibita",
+      desc: "Una biblioteca con tomi vietati è custodita da sigilli magici. Dentro c'è qualcosa di importante.",
+      type: "infiltrazione",
+      approaches: [
+        { label: "Disattivare i sigilli dall'interno", stat: "int", dc: 16,
+          successText: "Analizzi ogni sigillo come un puzzle. Li disattivi tutti senza attivare allarmi.",
+          partialText: "Disattivi la maggior parte. Un allarme suona ma riesci a fuggire con i tomi.",
+          failText: "I sigilli si riattivano uno a cascata. Sei bloccato fuori." },
+        { label: "Sgattaiolare tra le maglie dei sigilli", stat: "dex", dc: 17,
+          successText: "I sigilli hanno punti ciechi. Li individui e ti insinui tra essi.",
+          partialText: "Quasi perfetto. Qualche sigillo ti sfiora ma non si attiva.",
+          failText: "I sigilli sono troppo densi. Non c'è spazio tra di essi." }
+      ],
+      rewards: { xp: 215, goldMin: 88, goldMax: 195, fameXp: 27, itemChance: 0.5, itemTier: 3, ingredientChance: 0.6, ingredientTierMax: 3 }
+    },
+    {
+      id: 227, tier: 3, minFame: 150, classMission: 'mago',
+      name: "Il Conclave dei Lich",
+      desc: "I lich del continente si riuniscono una volta per millennio. Sei l'unico che può infiltrarsi.",
+      type: "spionaggio",
+      approaches: [
+        { label: "Fingersi un lich appena risorto", stat: "cha", dc: 16,
+          successText: "La tua performance è impeccabile. Ottieni informazioni inestimabili dal conclave.",
+          partialText: "Ti riconoscono quasi subito ma ottieni frammenti di informazione prima di fuggire.",
+          failText: "Un lich più anziano ti smascbera immediatamente." },
+        { label: "Decifrare le loro comunicazioni segrete", stat: "int", dc: 18,
+          successText: "Il loro codice è brillante ma tu sei brillante di più. Sai tutto.",
+          partialText: "Decifri il 60% delle comunicazioni. Abbastanza per uno scopo.",
+          failText: "Il codice è al di là di ogni comprensione umana." }
+      ],
+      rewards: { xp: 260, goldMin: 110, goldMax: 250, fameXp: 38, itemChance: 0.55, itemTier: 3, ingredientChance: 0.65, ingredientTierMax: 4 }
+    },
+    {
+      id: 228, tier: 3, minFame: 150, classMission: 'mago',
+      name: "La Pietra Filosofale",
+      desc: "Un frammento della leggendaria pietra filosofale è stato localizzato. La sua potenza è inimmaginabile.",
+      type: "recupero",
+      approaches: [
+        { label: "Tracciare la sua risonanza unica", stat: "int", dc: 17,
+          successText: "La pietra risuona in modo unico. La segui fino alla sua posizione. È tua.",
+          partialText: "Trovi la posizione approssimativa. Scavare richiede tempo, ma hai il frammento.",
+          failText: "La risonanza è disturbata. Non riesci a localizzarla." },
+        { label: "Meditare sulla sua essenza universale", stat: "wis", dc: 16,
+          successText: "La pietra filosofale è l'essenza di tutto. La senti e la trovi.",
+          partialText: "La senti ma la tua mente non regge l'intensità. Ne recuperi un frammento.",
+          failText: "L'intensità della pietra sopraffà la tua mente." }
+      ],
+      rewards: { xp: 250, goldMin: 100, goldMax: 230, fameXp: 35, itemChance: 0.55, itemTier: 3, ingredientChance: 0.65, ingredientTierMax: 4 }
+    },
+    {
+      id: 229, tier: 3, minFame: 150, classMission: 'mago',
+      name: "Il Rivale Immortale",
+      desc: "Un mago immortale ha giurato di distruggerti. Il confronto finale è inevitabile.",
+      type: "duello",
+      approaches: [
+        { label: "Trovare il suo punto debole arcano", stat: "int", dc: 17,
+          successText: "Ogni immortale ha un limite. Lo trovi e lo sfrutti. Vittoria.",
+          partialText: "Trovi il limite ma non abbastanza. La battaglia termina in parità.",
+          failText: "Non c'è limite evidente. Il rivale sembra davvero invincibile." },
+        { label: "Percepire la fonte della sua immortalità", stat: "wis", dc: 17,
+          successText: "La senti: un oggetto nascosto sotto il mantello. Lo togli e lui cade.",
+          partialText: "Hai un'intuizione ma non riesci ad agire in tempo.",
+          failText: "La sua aura magica è troppo densa. Non percepisci nulla." }
+      ],
+      rewards: { xp: 270, goldMin: 115, goldMax: 260, fameXp: 40, itemChance: 0.6, itemTier: 3, ingredientChance: 0.65, ingredientTierMax: 4 }
+    },
+    {
+      id: 230, tier: 3, minFame: 150, classMission: 'mago',
+      name: "L'Apocalisse Arcana",
+      desc: "Le linee di potere si stanno convergendo. Se non fai nulla, un'esplosione magica cancellerà la regione.",
+      type: "prevenzione",
+      approaches: [
+        { label: "Riequilibrare le linee di potere", stat: "int", dc: 18,
+          successText: "Con precisione millimetrica ribilanci le linee. L'apocalisse non avviene. Sei leggenda.",
+          partialText: "Attenui la convergenza. L'esplosione è un terzo di quella prevista. Danni limitati.",
+          failText: "La convergenza è già troppo avanzata. Puoi solo evacuare." },
+        { label: "Assorbire l'eccesso di potere", stat: "wis", dc: 17,
+          successText: "Usi te stesso come conduttore. L'energia ti attraversa e si disperde. Sopravvivi a malapena.",
+          partialText: "Assorbi parte dell'energia. La catastrofe si ridimensiona.",
+          failText: "L'energia è troppa. Il tuo corpo non regge. Fuggi." }
+      ],
+      rewards: { xp: 400, goldMin: 300, goldMax: 600, fameXp: 55, itemChance: 0.65, itemTier: 3, ingredientChance: 0.7, ingredientTierMax: 4 }
     }
   ],
 
@@ -1000,3 +1507,171 @@ const DB = {
     { min: 2500, title: "Il Fantasma",  tier: 4 }
   ]
 };
+
+/* ── INGREDIENTI (50 items, IDs 1001-1050) ───────────── */
+const INGREDIENTS = [
+  // TIER 1 — Comuni (1001-1010)
+  { id: 1001, name: 'Erba di Campo',              quality: 1, icon: '🌿', desc: 'Un\'erba comune che cresce ovunque. Base di molte preparazioni.' },
+  { id: 1002, name: 'Fungo Grigio',               quality: 1, icon: '🍄', desc: 'Fungo dal sapore acre. Utile come addormentante blando.' },
+  { id: 1003, name: 'Radice di Quercia',           quality: 1, icon: '🪵', desc: 'Radice robusta dalle proprietà rigeneranti.' },
+  { id: 1004, name: 'Petali di Rosa Selvatica',   quality: 1, icon: '🌸', desc: 'Delicati petali con lieve potere calmante.' },
+  { id: 1005, name: 'Argilla Morbida',             quality: 1, icon: '🏺', desc: 'Argilla ricca di minerali. Base per impacchi e unguenti.' },
+  { id: 1006, name: 'Cenere di Legno',             quality: 1, icon: '🪣', desc: 'Residuo di legno bruciato. Purifica e neutralizza.' },
+  { id: 1007, name: 'Cristallo di Sale',           quality: 1, icon: '🧂', desc: 'Sale puro estratto da sorgenti antiche. Stabilizzante.' },
+  { id: 1008, name: 'Foglia di Betulla',           quality: 1, icon: '🍃', desc: 'Foglia leggera con proprietà diuretiche e purificanti.' },
+  { id: 1009, name: 'Acqua di Sorgente',           quality: 1, icon: '💧', desc: 'Acqua pura non contaminata. Solvente universale.' },
+  { id: 1010, name: 'Sabbia del Fiume',            quality: 1, icon: '⏳', desc: 'Sabbia fine dalle rive del fiume. Abrasivo naturale.' },
+  // TIER 2 — Non Comuni (1011-1020)
+  { id: 1011, name: 'Cristallo di Ghiaccio',      quality: 2, icon: '🧊', desc: 'Cristallo formatosi in luoghi di gelo eterno. Preserva.' },
+  { id: 1012, name: 'Polvere di Luna',             quality: 2, icon: '🌙', desc: 'Residuo argentato dei raggi lunari. Potenzia incantesimi.' },
+  { id: 1013, name: 'Resina di Pino Antico',      quality: 2, icon: '🌲', desc: 'Resina raccolta da alberi centenari. Altamente concentrata.' },
+  { id: 1014, name: 'Sangue di Rospo',             quality: 2, icon: '🐸', desc: 'Sangue tossico ma con proprietà curative se diluito.' },
+  { id: 1015, name: 'Fiore di Notte',              quality: 2, icon: '🌑', desc: 'Fiore che sboccia solo al buio. Potere soporifico.' },
+  { id: 1016, name: 'Lumaca Argentata',            quality: 2, icon: '🐌', desc: 'La bava di questa lumaca ha proprietà lubrificanti e magiche.' },
+  { id: 1017, name: 'Muschio di Pietra',           quality: 2, icon: '🪨', desc: 'Muschio che cresce su pietre millenarie. Assorbe energia.' },
+  { id: 1018, name: 'Uovo di Draghetto',           quality: 2, icon: '🥚', desc: 'Guscio di uovo di draghetto. Concentrato di energia draconica.' },
+  { id: 1019, name: 'Coda di Lucertola Magica',   quality: 2, icon: '🦎', desc: 'Si rigenera. Simbolo di rinnovamento e velocità.' },
+  { id: 1020, name: 'Radice di Mandragora',       quality: 2, icon: '🫚', desc: 'Radice antropomorfa dal potere straordinario. Pericolosa da raccogliere.' },
+  // TIER 3 — Rari (1021-1030)
+  { id: 1021, name: 'Penna di Fenice',             quality: 3, icon: '🔥', desc: 'Piuma di una fenice. Brucia di fuoco immortale.' },
+  { id: 1022, name: 'Polvere di Stella',           quality: 3, icon: '✨', desc: 'Polvere raccolta da meteoriti. Risuona con la magia celeste.' },
+  { id: 1023, name: 'Occhio di Basilisco',         quality: 3, icon: '👁️', desc: 'Occhio essiccato di basilisco. Ancora uno sguardo pietrificante inerte.' },
+  { id: 1024, name: 'Cuore di Golem',              quality: 3, icon: '⚙️', desc: 'Nucleo di un golem spento. Cristallizza le energie arcanе.' },
+  { id: 1025, name: 'Seta di Ragno Fantasma',     quality: 3, icon: '🕸️', desc: 'Filo invisibile tessuto da ragni spettrali. Connette piani.' },
+  { id: 1026, name: 'Corno di Unicorno',           quality: 3, icon: '🦄', desc: 'Frammento di corno di unicorno. Purezza assoluta.' },
+  { id: 1027, name: 'Lacrima di Sirena',           quality: 3, icon: '🧜', desc: 'Lacrima salata di sirena. Evoca emozioni profonde.' },
+  { id: 1028, name: 'Cristallo di Tempo',          quality: 3, icon: '⌛', desc: 'Cristallo che rallenta la percezione del tempo.' },
+  { id: 1029, name: 'Ossidiana Viva',              quality: 3, icon: '🖤', desc: 'Ossidiana che pulsa come se avesse un cuore. Assorbe mana.' },
+  { id: 1030, name: 'Miele di Api Infernali',      quality: 3, icon: '🍯', desc: 'Miele bruciante prodotto da api dei piani infernali.' },
+  // TIER 4 — Epici (1031-1040)
+  { id: 1031, name: 'Essenza di Drago',            quality: 4, icon: '🐉', desc: 'Essenza estratta dal sangue di un drago antico. Potere immenso.' },
+  { id: 1032, name: 'Polvere di Lich',             quality: 4, icon: '💀', desc: 'Polvere ricavata dalle ossa di un lich. Necrotica ma potentissima.' },
+  { id: 1033, name: 'Cristallo dell\'Anima',       quality: 4, icon: '💎', desc: 'Cristallo che ha assorbito un\'anima intera. Carico di vita.' },
+  { id: 1034, name: 'Sangue di Demone',            quality: 4, icon: '😈', desc: 'Sangue fumante di un demone. Corrompente e potenziante.' },
+  { id: 1035, name: 'Cuore di Tempesta',           quality: 4, icon: '⛈️', desc: 'Sfera di plasma raccolta dall\'occhio di un uragano magico.' },
+  { id: 1036, name: 'Occhio dell\'Abisso',         quality: 4, icon: '🌀', desc: 'Un vortice solidificato. Guarda dentro e vedi l\'infinito.' },
+  { id: 1037, name: 'Capello di Strega Immortale', quality: 4, icon: '🧙', desc: 'Un solo capello di una strega che non è mai morta.' },
+  { id: 1038, name: 'Lacrima dell\'Angelo',        quality: 4, icon: '👼', desc: 'Lacrima purissima di un angelo caduto. Celestiale e terrena.' },
+  { id: 1039, name: 'Meteorite Arcano',            quality: 4, icon: '☄️', desc: 'Frammento di un meteorite intriso di magia cosmica.' },
+  { id: 1040, name: 'Soffio di Drago Antico',      quality: 4, icon: '💨', desc: 'Soffio condensato dell\'ultimo respiro di un drago antico.' },
+  // TIER 5 — Leggendari (1041-1050)
+  { id: 1041, name: 'Lacrima di Dio',              quality: 5, icon: '🌟', desc: 'Una lacrima versata da una divinità. Contiene la creazione.' },
+  { id: 1042, name: 'Scaglia Primordiale',         quality: 5, icon: '🐍', desc: 'Scaglia del serpente primordiale. Esiste dall\'inizio dei tempi.' },
+  { id: 1043, name: 'Polvere della Creazione',     quality: 5, icon: '✳️', desc: 'Polvere rimasta dall\'atto della creazione dell\'universo.' },
+  { id: 1044, name: 'Frammento del Tempo',         quality: 5, icon: '⏱️', desc: 'Un pezzo di tempo solidificato. Distorce la realtà intorno a sé.' },
+  { id: 1045, name: 'Soffio del Vuoto',            quality: 5, icon: '🌑', desc: 'Aria proveniente dal nulla assoluto tra i piani.' },
+  { id: 1046, name: 'Prima Fiamma',                quality: 5, icon: '🕯️', desc: 'La fiamma originale che ha portato la luce al mondo.' },
+  { id: 1047, name: 'Cristallo dell\'Infinito',    quality: 5, icon: '♾️', desc: 'Un cristallo che non ha inizio né fine. Trascende la magia.' },
+  { id: 1048, name: 'Sangue della Luna Rossa',     quality: 5, icon: '🩸', desc: 'Sangue che scorre solo durante un\'eclissi lunare totale.' },
+  { id: 1049, name: 'Cuore del Cosmo',             quality: 5, icon: '🌌', desc: 'Nucleo pulsante del cosmo. Ogni battito è un\'era.' },
+  { id: 1050, name: 'Lacrima del Mondo',           quality: 5, icon: '🌍', desc: 'Il pianeta stesso ha pianto. Questa è quella lacrima.' },
+];
+
+/* ── RICETTE POZIONI (25 ricette, IDs p001-p025) ─────── */
+const POTION_RECIPES = [
+  // Qualità 1
+  { id: 'p001', name: 'Pozione di Guarigione',              quality: 1, icon: '🧪',
+    ingredients: [1003, 1004, 1009],
+    desc: 'La classica pozione rossa. Chiude ferite e ridona vigore.',
+    reward: { xp: 40, gold: 25 }, clientGold: 60 },
+  { id: 'p002', name: 'Filtro del Sonno',                   quality: 1, icon: '😴',
+    ingredients: [1002, 1012, 1015],
+    desc: 'Induce un sonno profondo e ristoratore. O qualcos\'altro.',
+    reward: { xp: 40, gold: 20 }, clientGold: 50 },
+  { id: 'p003', name: 'Elisir di Lucidità',                 quality: 1, icon: '🧠',
+    ingredients: [1001, 1007, 1009],
+    desc: 'Schiarisce la mente e migliora la concentrazione per ore.',
+    reward: { xp: 35, gold: 20 }, clientGold: 45 },
+  { id: 'p004', name: 'Tonico Rinforzante',                 quality: 1, icon: '💪',
+    ingredients: [1005, 1014, 1018],
+    desc: 'Rinforza temporaneamente muscoli e resistenza fisica.',
+    reward: { xp: 40, gold: 22 }, clientGold: 55 },
+  // Qualità 2
+  { id: 'p005', name: 'Pozione di Velocità',                quality: 2, icon: '⚡',
+    ingredients: [1001, 1011, 1019],
+    desc: 'I riflessi accelerano oltre il normale. Ogni cosa sembra lenta.',
+    reward: { xp: 70, gold: 45 }, clientGold: 110 },
+  { id: 'p006', name: 'Unguento dell\'Ombra',               quality: 2, icon: '🌒',
+    ingredients: [1006, 1015, 1017],
+    desc: 'Applicato sulla pelle, rende più difficile essere visti al buio.',
+    reward: { xp: 65, gold: 40 }, clientGold: 100 },
+  { id: 'p007', name: 'Pozione di Resistenza',              quality: 2, icon: '🛡️',
+    ingredients: [1013, 1017, 1020],
+    desc: 'La pelle diventa dura come corteccia. Riduce i danni fisici.',
+    reward: { xp: 75, gold: 50 }, clientGold: 120 },
+  { id: 'p008', name: 'Filtro Amoroso',                     quality: 2, icon: '💕',
+    ingredients: [1004, 1012, 1016],
+    desc: 'Un profumo incantato. Chi lo inhala prova simpatia intensa.',
+    reward: { xp: 60, gold: 45 }, clientGold: 115 },
+  { id: 'p009', name: 'Tonico della Saggezza',              quality: 2, icon: '🦉',
+    ingredients: [1008, 1012, 1020],
+    desc: 'Apre la mente a percepzioni sottili. Aumenta l\'intuizione.',
+    reward: { xp: 80, gold: 55 }, clientGold: 130 },
+  // Qualità 3
+  { id: 'p010', name: 'Pozione di Invisibilità',            quality: 3, icon: '👻',
+    ingredients: [1012, 1017, 1025],
+    desc: 'Il corpo diventa trasparente alla luce per breve tempo.',
+    reward: { xp: 120, gold: 90 }, clientGold: 220 },
+  { id: 'p011', name: 'Elisir di Volo',                     quality: 3, icon: '🦅',
+    ingredients: [1021, 1022, 1028],
+    desc: 'Le braccia si trasformano in ali di vento. Voli per un\'ora.',
+    reward: { xp: 130, gold: 100 }, clientGold: 250 },
+  { id: 'p012', name: 'Pozione di Forza Bestiale',          quality: 3, icon: '🐻',
+    ingredients: [1018, 1029, 1031],
+    desc: 'La forza di un orso in un corpo umano. Usa con cautela.',
+    reward: { xp: 140, gold: 110 }, clientGold: 270 },
+  { id: 'p013', name: 'Filtro della Verità',                quality: 3, icon: '🔍',
+    ingredients: [1023, 1026, 1028],
+    desc: 'Chi lo beve non può mentire per un\'ora. Usato in tribunali.',
+    reward: { xp: 125, gold: 95 }, clientGold: 240 },
+  { id: 'p014', name: 'Unguento Anti-Veleno',               quality: 3, icon: '💚',
+    ingredients: [1014, 1025, 1030],
+    desc: 'Neutralizza quasi ogni veleno conosciuto. Vita salva.',
+    reward: { xp: 115, gold: 85 }, clientGold: 210 },
+  { id: 'p015', name: 'Pozione del Tempo',                  quality: 3, icon: '⌛',
+    ingredients: [1011, 1022, 1028],
+    desc: 'Il tempo rallenta intorno a te. Dieci minuti sembrano un\'ora.',
+    reward: { xp: 150, gold: 120 }, clientGold: 300 },
+  // Qualità 4
+  { id: 'p016', name: 'Elisir dell\'Immortalità Temporanea', quality: 4, icon: '⚜️',
+    ingredients: [1026, 1031, 1038],
+    desc: 'Per un\'ora sei invulnerabile. Ma il corpo paga il prezzo dopo.',
+    reward: { xp: 220, gold: 180 }, clientGold: 450 },
+  { id: 'p017', name: 'Pozione del Caos',                   quality: 4, icon: '🌀',
+    ingredients: [1034, 1036, 1039],
+    desc: 'Effetti imprevedibili e devastanti. Nessuno sa cosa farà.',
+    reward: { xp: 200, gold: 160 }, clientGold: 400 },
+  { id: 'p018', name: 'Distillato di Lich',                 quality: 4, icon: '💀',
+    ingredients: [1032, 1033, 1034],
+    desc: 'L\'essenza della non-morte. Sospende il processo biologico.',
+    reward: { xp: 230, gold: 190 }, clientGold: 480 },
+  { id: 'p019', name: 'Elisir della Tempesta',              quality: 4, icon: '⛈️',
+    ingredients: [1021, 1035, 1039],
+    desc: 'Il corpo diventa conduttore di fulmini. Pericoloso e magnifico.',
+    reward: { xp: 210, gold: 170 }, clientGold: 420 },
+  { id: 'p020', name: 'Filtro della Dominazione',           quality: 4, icon: '👑',
+    ingredients: [1033, 1034, 1037],
+    desc: 'La mente di chi lo beve cede al volere di chi lo ha creato.',
+    reward: { xp: 250, gold: 200 }, clientGold: 500 },
+  { id: 'p021', name: 'Pozione dell\'Abisso',               quality: 4, icon: '🌑',
+    ingredients: [1029, 1036, 1040],
+    desc: 'Apre un collegamento temporaneo con i piani infernali.',
+    reward: { xp: 240, gold: 195 }, clientGold: 490 },
+  // Qualità 5
+  { id: 'p022', name: 'Elisir della Creazione',             quality: 5, icon: '✳️',
+    ingredients: [1041, 1043, 1047],
+    desc: 'Chi lo beve può creare qualcosa dal nulla per un istante.',
+    reward: { xp: 400, gold: 350 }, clientGold: 900 },
+  { id: 'p023', name: 'Distillato dell\'Eternità',          quality: 5, icon: '♾️',
+    ingredients: [1044, 1047, 1050],
+    desc: 'Il tempo smette di scorrere intorno al bevitore. Per sempre.',
+    reward: { xp: 450, gold: 400 }, clientGold: 1000 },
+  { id: 'p024', name: 'Pozione del Vuoto Cosmico',          quality: 5, icon: '🌌',
+    ingredients: [1045, 1046, 1049],
+    desc: 'Apre una finestra sul nulla assoluto. La realtà vacilla.',
+    reward: { xp: 480, gold: 430 }, clientGold: 1100 },
+  { id: 'p025', name: 'Lacrimagio — Quintessenza',          quality: 5, icon: '🌟',
+    ingredients: [1041, 1048, 1050],
+    desc: 'La pozione ultima. Condensa la sofferenza e la speranza del mondo.',
+    reward: { xp: 500, gold: 500 }, clientGold: 1300 },
+];

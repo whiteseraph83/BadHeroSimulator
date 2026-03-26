@@ -51,15 +51,19 @@ const UI = {
     // Oro
     document.getElementById('char-gold').textContent = c.gold;
 
-    // Taglia
-    const wanted    = c.wanted || 0;
-    const wl        = Game.getWantedLevel();
-    const wantedPct = Math.min(100, wanted / 300 * 100);
-    document.getElementById('wanted-label').textContent        = `${wl.icon} ${wl.label}`;
-    document.getElementById('wanted-bar-fill').style.width     = wantedPct + '%';
-    document.getElementById('wanted-bar-fill').style.background = wl.color;
-    document.getElementById('wanted-points').textContent       = `${wanted} pt`;
-    document.getElementById('wanted-display').style.opacity    = wanted === 0 ? '0.4' : '1';
+    // Taglia (nascosta per il Mago)
+    const isMago = Game.getClasse().id === 'mago';
+    document.getElementById('wanted-display').classList.toggle('d-none', isMago);
+    if (!isMago) {
+      const wanted    = c.wanted || 0;
+      const wl        = Game.getWantedLevel();
+      const wantedPct = Math.min(100, wanted / 300 * 100);
+      document.getElementById('wanted-label').textContent         = `${wl.icon} ${wl.label}`;
+      document.getElementById('wanted-bar-fill').style.width      = wantedPct + '%';
+      document.getElementById('wanted-bar-fill').style.background = wl.color;
+      document.getElementById('wanted-points').textContent        = `${wanted} pt`;
+      document.getElementById('wanted-display').style.opacity     = wanted === 0 ? '0.4' : '1';
+    }
   },
 
   /* ─── Boost attivi ─────────────────────────────────────── */
@@ -108,6 +112,136 @@ const UI = {
     const badge     = document.getElementById('pickpocket-badge');
     badge.textContent = remaining;
     btn.disabled = remaining <= 0 || Game.state.gameOver;
+  },
+
+  /* ─── Studio btn (solo Mago) ─────────────────────────────── */
+  renderStudyBtn() {
+    const btn   = document.getElementById('btn-study');
+    const badge = document.getElementById('study-badge');
+    if (!btn) return;
+    const remaining = Game.studiesRemaining();
+    badge.textContent = remaining;
+    btn.disabled = remaining <= 0 || Game.state.gameOver;
+  },
+
+  /* ─── Tab Pozioni (solo Mago) ──────────────────────────────── */
+  renderPozioniTab() {
+    const ingInv    = Game.state.ingredientInventory || [];
+    const potInv    = Game.state.potionInventory     || [];
+    const requests  = Game.state.potionRequests      || [];
+
+    // Badge contatori
+    document.getElementById('ingredient-count').textContent = ingInv.length;
+    document.getElementById('potion-count').textContent     = potInv.length;
+
+    // Ingredienti raggruppati per ID
+    this._renderIngredientInventory(ingInv);
+    this._renderPotionInventory(potInv);
+    this._renderPotionRequests(requests);
+  },
+
+  _renderIngredientInventory(ingInv) {
+    const el = document.getElementById('ingredient-inventory');
+    if (!el) return;
+    if (ingInv.length === 0) {
+      el.innerHTML = '<p class="text-muted small fst-italic">Nessun ingrediente.</p>';
+      return;
+    }
+    // Raggruppa per ID
+    const counts = {};
+    ingInv.forEach(id => { counts[id] = (counts[id] || 0) + 1; });
+    const uniqueIds = Object.keys(counts).map(Number).sort((a, b) => {
+      const ia = INGREDIENTS.find(x => x.id === a);
+      const ib = INGREDIENTS.find(x => x.id === b);
+      return (ia?.quality || 0) - (ib?.quality || 0);
+    });
+    el.innerHTML = uniqueIds.map(id => {
+      const ing = INGREDIENTS.find(x => x.id === id);
+      if (!ing) return '';
+      const qty = counts[id];
+      const qCls = QUALITY[ing.quality]?.cls || '';
+      const selected = (App._craftSelected || []).filter(x => x === id).length;
+      const isSelected = selected > 0;
+      return `<div class="ingredient-card ${isSelected ? 'selected' : ''}" data-ing-id="${id}" title="${ing.desc}">
+        <span>${ing.icon}</span>
+        <span class="${qCls}" style="flex:1">${ing.name}</span>
+        <span class="ingredient-qty">×${qty}</span>
+      </div>`;
+    }).join('');
+  },
+
+  _renderPotionInventory(potInv) {
+    const el = document.getElementById('potion-inventory');
+    if (!el) return;
+    if (potInv.length === 0) {
+      el.innerHTML = '<p class="text-muted small fst-italic">Nessuna pozione.</p>';
+      return;
+    }
+    const counts = {};
+    potInv.forEach(id => { counts[id] = (counts[id] || 0) + 1; });
+    el.innerHTML = Object.keys(counts).map(id => {
+      const recipe = POTION_RECIPES.find(r => r.id === id);
+      if (!recipe) return '';
+      const qCls = QUALITY[recipe.quality]?.cls || '';
+      return `<div class="potion-card">
+        <span>${recipe.icon}</span>
+        <span class="${qCls}" style="flex:1">${recipe.name}</span>
+        <span class="ingredient-qty">×${counts[id]}</span>
+      </div>`;
+    }).join('');
+  },
+
+  _renderPotionRequests(requests) {
+    const el = document.getElementById('potion-requests');
+    if (!el) return;
+    if (requests.length === 0) {
+      el.innerHTML = '<p class="text-muted small fst-italic">Nessuna richiesta oggi.</p>';
+      return;
+    }
+    el.innerHTML = requests.map(req => {
+      const recipe = POTION_RECIPES.find(r => r.id === req.recipeId);
+      if (!recipe) return '';
+      const potInv = Game.state.potionInventory || [];
+      const hasPotion = potInv.includes(req.recipeId);
+      const qCls = QUALITY[recipe.quality]?.cls || '';
+      return `<div class="potion-request-card mb-2">
+        <div class="d-flex align-items-center gap-2 mb-1">
+          <span class="fw-bold text-gold">${req.clientName}</span>
+          <span class="text-muted small">vuole</span>
+          <span>${recipe.icon} <span class="${qCls}">${recipe.name}</span></span>
+        </div>
+        <div class="d-flex justify-content-between align-items-center">
+          <div class="small text-muted">
+            💰 ${req.reward.gold} mo &nbsp; ⭐ ${req.reward.fame} fama &nbsp; 📚 ${req.reward.xp} PE
+          </div>
+          <button class="btn btn-sm ${hasPotion ? 'btn-gold' : 'btn-outline-secondary'}"
+            ${hasPotion ? '' : 'disabled'}
+            data-request-id="${req.id}">
+            <i class="bi bi-box-arrow-right"></i> Consegna
+          </button>
+        </div>
+      </div>`;
+    }).join('');
+  },
+
+  renderCraftSlots() {
+    const el = document.getElementById('craft-ingredient-slots');
+    if (!el) return;
+    const selected = App._craftSelected || [];
+    const MAX = 3;
+    let html = selected.map((id, i) => {
+      const ing = INGREDIENTS.find(x => x.id === id);
+      return `<div class="craft-slot filled" data-slot-index="${i}" title="Clicca per rimuovere">
+        ${ing ? ing.icon : '?'} <span class="small">${ing ? ing.name : '?'}</span>
+        <span class="craft-slot-remove">×</span>
+      </div>`;
+    }).join('');
+    for (let i = selected.length; i < MAX; i++) {
+      html += `<div class="craft-slot empty"><span class="text-muted small">Slot ${i+1}</span></div>`;
+    }
+    el.innerHTML = html;
+    const btn = document.getElementById('btn-craft-potion');
+    if (btn) btn.disabled = selected.length !== MAX;
   },
 
   /* ─── Guild tax info ────────────────────────────────────── */
@@ -796,6 +930,7 @@ const UI = {
   /* ─── Missione Taglia ───────────────────────────────────── */
   renderWantedMission() {
     const section = document.getElementById('wanted-mission-section');
+    if (Game.getClasse().id === 'mago') { section.classList.add('d-none'); return; }
     if (!section || !Game.state) return;
     const pending   = Game.state.wantedMissionPending;
     const completed = Game.state.wantedMissionCompleted;
@@ -933,6 +1068,9 @@ const UI = {
     this.updateClassConditionalUI();
     this.renderCharacter();
     this.renderPickpocketBtn();
+    this.renderStudyBtn();
+    this.renderPozioniTab();
+    this.renderCraftSlots();
     this.renderGuildTaxInfo();
     this.renderActiveBoosts();
     this.renderWantedMission();
@@ -955,6 +1093,12 @@ const UI = {
 
     // Tab Dadi (Ladro e Guerriero)
     document.getElementById('tab-dice-nav').classList.toggle('d-none', !cls.hasDiceGame);
+
+    // Studio (solo Mago)
+    document.getElementById('study-wrapper').classList.toggle('d-none', !cls.hasStudy);
+
+    // Tab Pozioni (solo Mago)
+    document.getElementById('tab-pozioni-nav').classList.toggle('d-none', !cls.hasPotioniTab);
 
     // Classe sotto il nome
     document.getElementById('char-class').textContent = cls.name;
@@ -1022,6 +1166,46 @@ const UI = {
       furto: '🗝️', infiltrazione: '👤', spionaggio: '🔍',
       inganno: '🃏', eliminazione: '🗡️', sabotaggio: '💣', recupero: '📦'
     }[type] || '📋';
+  },
+
+  /* ─── Modal Studio (memory game) ───────────────────────── */
+  openStudyModal() {
+    // Resetta HUD
+    document.getElementById('memory-timer').textContent  = '90';
+    document.getElementById('memory-errors').textContent = '0';
+    document.getElementById('memory-pairs').textContent  = '0';
+    document.getElementById('memory-grid').innerHTML     = '';
+    document.getElementById('memory-result').classList.add('d-none');
+    const modal = new bootstrap.Modal(document.getElementById('modal-studia'));
+    modal.show();
+  },
+
+  showMemoryResult(win, timeLeft, errors, ingredients) {
+    const resultEl = document.getElementById('memory-result');
+    const titleEl  = document.getElementById('memory-result-title');
+    const rewardEl = document.getElementById('memory-result-rewards');
+    const ingEl    = document.getElementById('memory-result-ingredients');
+    resultEl.classList.remove('d-none');
+    if (win) {
+      let tier;
+      if (timeLeft > 30 && errors <= 1)       tier = '🌟 Eccellente';
+      else if (timeLeft > 10 && errors <= 3)  tier = '✅ Buono';
+      else                                    tier = '⚠️ Sufficiente';
+      titleEl.innerHTML = `<span class="text-gold">${tier}</span>`;
+      const result = Game.applyStudyReward(timeLeft, errors);
+      rewardEl.textContent = `+${result.xp} PE   +${result.gold} mo`;
+      if (result.ingredients && result.ingredients.length > 0) {
+        ingEl.innerHTML = 'Ingredienti: ' + result.ingredients.map(i => `${i.icon} ${i.name}`).join(', ');
+      } else {
+        ingEl.textContent = '';
+      }
+      this.refresh();
+      if (result.levelUpResult) App._triggerLevelUp(result.levelUpResult);
+    } else {
+      titleEl.innerHTML = '<span class="text-danger">Fallimento!</span>';
+      rewardEl.textContent = 'Nessuna ricompensa.';
+      ingEl.textContent = '';
+    }
   },
 
   /* ─── Modal confronto ───────────────────────────────────── */

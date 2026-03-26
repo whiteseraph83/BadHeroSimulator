@@ -18,6 +18,17 @@ const App = {
   _diceBet:             0,
   _diceResult:          null,
   _diceAnimInterval:    null,
+  // Memory game
+  _memoryCards:         [],
+  _memoryFlipped:       [],
+  _memoryErrors:        0,
+  _memoryPairs:         0,
+  _memoryTimerInterval: null,
+  _memoryTimeLeft:      60,
+  _memoryLockBoard:     false,
+  _memoryMaxErrors:     5,
+  // Crafting
+  _craftSelected:       [],
 
   /* ─── Bootstrap ───────────────────────────────────────── */
   init() {
@@ -173,6 +184,100 @@ const App = {
       }
       UI.openPickpocketGame();
       this._startPickpocketGame(start.speed);
+    });
+
+    // Studia — apre memory game
+    document.getElementById('btn-study').addEventListener('click', () => {
+      if (!Game.state || Game.state.gameOver) return;
+      const result = Game.startStudy();
+      if (!result.ok) { UI.toast(result.reason || 'Nessuno studio disponibile oggi.'); return; }
+      UI.refresh();
+      UI.openStudyModal();
+      this._startMemoryGame();
+    });
+
+    // Chiusura modal studia — ferma timer
+    document.getElementById('modal-studia').addEventListener('hidden.bs.modal', () => {
+      if (this._memoryTimerInterval) {
+        clearInterval(this._memoryTimerInterval);
+        this._memoryTimerInterval = null;
+      }
+      UI.refresh();
+    });
+
+    // Pulsante chiudi memory result
+    document.getElementById('btn-close-memory').addEventListener('click', () => {
+      // Modal si chiude da data-bs-dismiss
+    });
+
+    // Crafting: mescola
+    document.getElementById('btn-craft-potion').addEventListener('click', () => {
+      if (!Game.state || Game.state.gameOver) return;
+      const result = Game.craftPotion(this._craftSelected);
+      if (result.ok) {
+        UI.toast(`✅ ${result.recipe.name} creata! +${result.recipe.reward.xp} PE`, 3000);
+      } else if (result.saved) {
+        UI.toast(`🧠 ${result.reason}`, 4000);
+        // Ingredienti salvati: non svuotiamo la selezione
+        UI.refresh();
+        return;
+      } else {
+        UI.toast(`💥 ${result.reason}`, 4000);
+      }
+      this._craftSelected = [];
+      UI.refresh();
+      if (result.ok && result.levelUpResult) this._triggerLevelUp(result.levelUpResult);
+    });
+
+    // Crafting: svuota slot
+    document.getElementById('btn-clear-craft').addEventListener('click', () => {
+      this._craftSelected = [];
+      UI.renderCraftSlots();
+      UI.renderPozioniTab();
+    });
+
+    // Crafting: click su slot rimuove ingrediente
+    document.getElementById('craft-ingredient-slots').addEventListener('click', (e) => {
+      const slot = e.target.closest('.craft-slot.filled');
+      if (!slot) return;
+      const idx = parseInt(slot.dataset.slotIndex);
+      if (!isNaN(idx)) {
+        this._craftSelected.splice(idx, 1);
+        UI.renderCraftSlots();
+        UI.renderPozioniTab();
+      }
+    });
+
+    // Ingredienti: click aggiunge al craft
+    document.getElementById('ingredient-inventory').addEventListener('click', (e) => {
+      const card = e.target.closest('.ingredient-card');
+      if (!card) return;
+      const id = parseInt(card.dataset.ingId);
+      if (isNaN(id)) return;
+      if (this._craftSelected.length >= 3) { UI.toast('Slot pieno. Rimuovi un ingrediente prima.'); return; }
+      // Controlla che non sia già selezionato più volte di quante ne abbia
+      const ingInv = Game.state.ingredientInventory || [];
+      const countInInv  = ingInv.filter(x => x === id).length;
+      const countSelected = this._craftSelected.filter(x => x === id).length;
+      if (countSelected >= countInInv) { UI.toast('Non hai altri di questo ingrediente.'); return; }
+      this._craftSelected.push(id);
+      UI.renderCraftSlots();
+      UI.renderPozioniTab();
+    });
+
+    // Richieste pozioni: consegna
+    document.getElementById('potion-requests').addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-request-id]');
+      if (!btn) return;
+      const reqId = btn.dataset.requestId;
+      const result = Game.completePotionRequest(reqId);
+      if (result.ok) {
+        UI.toast(`✅ Consegnata! +${result.reward.gold} mo, +${result.reward.fame} fama`);
+        UI.refresh();
+        if (result.levelUpResult) this._triggerLevelUp(result.levelUpResult);
+      } else {
+        UI.toast(result.reason);
+      }
     });
 
     // Rilancio borseggio
@@ -730,7 +835,133 @@ const App = {
       UI.toast('Impossibile vendere.');
     }
     UI.refresh();
-  }
+  },
+
+  /* ─── Helper level up ─────────────────────────────────── */
+  _triggerLevelUp(levelUpResult) {
+    if (!levelUpResult) return;
+    setTimeout(() => {
+      UI.showLevelUpModal(levelUpResult.newLevel, (choices) => {
+        Game.applyLevelUp(choices);
+        UI.refresh();
+      });
+    }, 400);
+  },
+
+  /* ─── Memory Game ─────────────────────────────────────── */
+  _startMemoryGame() {
+    const SYMBOLS = ['Ψ','Ω','Φ','Δ','Λ','Θ','Ξ','Π','∞','⊕','☿','♄'];
+    // 6 coppie = 12 carte (griglia 4×3) — difficoltà ridotta
+    const shuffledSymbols = [...SYMBOLS].sort(() => Math.random() - 0.5).slice(0, 6);
+    const cards = [...shuffledSymbols, ...shuffledSymbols]
+      .sort(() => Math.random() - 0.5)
+      .map((symbol, i) => ({ id: i, symbol, flipped: false, matched: false }));
+
+    this._memoryCards     = cards;
+    this._memoryFlipped   = [];
+    this._memoryErrors    = 0;
+    this._memoryPairs     = 0;
+    this._memoryTimeLeft  = 90;   // 90 secondi
+    this._memoryMaxErrors = 8;    // 8 errori massimi
+    this._memoryLockBoard = false;
+
+    this._renderMemoryGrid();
+
+    // Avvia timer
+    if (this._memoryTimerInterval) clearInterval(this._memoryTimerInterval);
+    this._memoryTimerInterval = setInterval(() => {
+      this._memoryTimeLeft--;
+      const timerEl = document.getElementById('memory-timer');
+      if (timerEl) timerEl.textContent = this._memoryTimeLeft;
+      if (this._memoryTimeLeft <= 0) {
+        clearInterval(this._memoryTimerInterval);
+        this._memoryTimerInterval = null;
+        this._memoryLockBoard = true;
+        UI.showMemoryResult(false, 0, this._memoryErrors, []);
+      }
+    }, 1000);
+  },
+
+  _renderMemoryGrid() {
+    const grid = document.getElementById('memory-grid');
+    if (!grid) return;
+    grid.innerHTML = this._memoryCards.map(card => `
+      <div class="memory-card ${card.matched ? 'matched' : (card.flipped ? 'flipped' : '')}"
+           data-card-id="${card.id}">
+        <span class="card-back">✦</span>
+        <span class="card-front">${card.symbol}</span>
+      </div>
+    `).join('');
+
+    grid.querySelectorAll('.memory-card').forEach(el => {
+      el.addEventListener('click', () => this._onMemoryCardClick(parseInt(el.dataset.cardId)));
+    });
+  },
+
+  _onMemoryCardClick(cardId) {
+    if (this._memoryLockBoard) return;
+    const card = this._memoryCards[cardId];
+    if (!card || card.matched || card.flipped) return;
+    if (this._memoryFlipped.includes(cardId)) return;
+
+    card.flipped = true;
+    this._memoryFlipped.push(cardId);
+    this._renderMemoryGrid();
+
+    if (this._memoryFlipped.length === 2) {
+      this._memoryLockBoard = true;
+      const [id1, id2] = this._memoryFlipped;
+      const c1 = this._memoryCards[id1];
+      const c2 = this._memoryCards[id2];
+
+      if (c1.symbol === c2.symbol) {
+        // Match
+        c1.matched = c2.matched = true;
+        this._memoryFlipped = [];
+        this._memoryPairs++;
+        this._memoryLockBoard = false;
+        const pairsEl = document.getElementById('memory-pairs');
+        if (pairsEl) pairsEl.textContent = this._memoryPairs;
+        this._renderMemoryGrid();
+
+        // Reward per coppia trovata
+        const pairReward = Game.applyPairReward();
+        if (pairReward.ingredient) {
+          UI.toast(`✨ +${pairReward.xp} PE  ${pairReward.ingredient.icon} ${pairReward.ingredient.name}`, 2000);
+        } else {
+          UI.toast(`✨ +${pairReward.xp} PE`, 1500);
+        }
+        if (pairReward.levelUpResult) this._triggerLevelUp(pairReward.levelUpResult);
+
+        if (this._memoryPairs === 6) {
+          // Vince!
+          clearInterval(this._memoryTimerInterval);
+          this._memoryTimerInterval = null;
+          UI.showMemoryResult(true, this._memoryTimeLeft, this._memoryErrors, []);
+        }
+      } else {
+        // Mismatch
+        this._memoryErrors++;
+        const errEl = document.getElementById('memory-errors');
+        if (errEl) errEl.textContent = this._memoryErrors;
+
+        setTimeout(() => {
+          c1.flipped = c2.flipped = false;
+          this._memoryFlipped = [];
+          this._memoryLockBoard = false;
+          this._renderMemoryGrid();
+
+          if (this._memoryErrors >= this._memoryMaxErrors) {
+            clearInterval(this._memoryTimerInterval);
+            this._memoryTimerInterval = null;
+            this._memoryLockBoard = true;
+            UI.showMemoryResult(false, this._memoryTimeLeft, this._memoryErrors, []);
+          }
+        }, 800);
+      }
+    }
+  },
+
 };
 
 /* ─── Avvio ─────────────────────────────────────────────── */

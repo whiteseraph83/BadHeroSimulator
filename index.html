@@ -134,6 +134,14 @@
             </button>
           </div>
 
+          <!-- Studia button (solo Mago) -->
+          <div class="mb-2 d-none" id="study-wrapper">
+            <button class="btn btn-study w-100" id="btn-study">
+              <i class="bi bi-book"></i> Studia
+              <span class="badge bg-dark ms-1" id="study-badge">2</span>
+            </button>
+          </div>
+
           <!-- Guild tax info -->
           <div class="tax-info" id="guild-tax-info">
             <div class="d-flex justify-content-between align-items-center">
@@ -189,6 +197,11 @@
         <li class="nav-item d-none" id="tab-dice-nav">
           <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-dice">
             <i class="bi bi-dice-5"></i> Gioca a Dadi
+          </button>
+        </li>
+        <li class="nav-item d-none" id="tab-pozioni-nav">
+          <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-pozioni">
+            <i class="bi bi-flask"></i> Pozioni
           </button>
         </li>
         <li class="nav-item">
@@ -343,6 +356,63 @@
 
             </div>
           </div>
+        </div>
+
+        <!-- TAB: POZIONI (solo Mago) -->
+        <div class="tab-pane fade" id="tab-pozioni">
+
+          <!-- Laboratorio -->
+          <div class="card-dark mb-3">
+            <div class="card-dark-header"><i class="bi bi-mortarboard"></i> Laboratorio Alchemico</div>
+            <div class="card-dark-body">
+              <p class="text-muted small mb-2">Seleziona 3 ingredienti dall'inventario per creare una pozione.</p>
+              <div id="craft-ingredient-slots" class="d-flex gap-2 flex-wrap mb-3"></div>
+              <div class="text-center mb-2">
+                <button class="btn btn-gold" id="btn-craft-potion" disabled>
+                  <i class="bi bi-flask-fill"></i> Mescola
+                </button>
+                <button class="btn btn-sm btn-outline-secondary ms-2" id="btn-clear-craft">
+                  <i class="bi bi-x-circle"></i> Svuota
+                </button>
+              </div>
+              <div id="craft-result" class="d-none text-center py-2 rounded"></div>
+            </div>
+          </div>
+
+          <!-- Ingredienti + Pozioni -->
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <div class="card-dark h-100">
+                <div class="card-dark-header">
+                  <i class="bi bi-bag-fill"></i> Ingredienti
+                  <span class="badge bg-secondary ms-1" id="ingredient-count">0</span>
+                </div>
+                <div class="card-dark-body" id="ingredient-inventory">
+                  <p class="text-muted small fst-italic">Nessun ingrediente.</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="card-dark h-100">
+                <div class="card-dark-header">
+                  <i class="bi bi-flask"></i> Pozioni Create
+                  <span class="badge bg-secondary ms-1" id="potion-count">0</span>
+                </div>
+                <div class="card-dark-body" id="potion-inventory">
+                  <p class="text-muted small fst-italic">Nessuna pozione.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Richieste Clienti -->
+          <div class="card-dark">
+            <div class="card-dark-header"><i class="bi bi-people-fill"></i> Richieste Clienti</div>
+            <div class="card-dark-body" id="potion-requests">
+              <p class="text-muted small fst-italic">Nessuna richiesta oggi.</p>
+            </div>
+          </div>
+
         </div>
 
         <!-- TAB: DIARIO -->
@@ -701,6 +771,31 @@
   </div>
 </div>
 
+
+<!-- ===== MODAL: STUDIA (Memory Game) ===== -->
+<div class="modal fade" id="modal-studia" tabindex="-1" data-bs-backdrop="static">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content modal-dark">
+      <div class="modal-header border-gold">
+        <h5 class="modal-title text-gold"><i class="bi bi-book"></i> Studio Arcano</h5>
+      </div>
+      <div class="modal-body">
+        <div class="d-flex justify-content-between align-items-center mb-3 px-1">
+          <div class="memory-hud-item">⏱️ <span id="memory-timer" class="fw-bold">90</span>s</div>
+          <div class="memory-hud-item">❌ Errori: <span id="memory-errors" class="fw-bold">0</span>/8</div>
+          <div class="memory-hud-item">✅ Coppie: <span id="memory-pairs" class="fw-bold">0</span>/6</div>
+        </div>
+        <div class="memory-grid" id="memory-grid"></div>
+        <div id="memory-result" class="d-none text-center py-3 mt-3">
+          <div id="memory-result-title" class="fs-4 fw-bold mb-2"></div>
+          <div id="memory-result-rewards" class="mb-2 text-muted"></div>
+          <div id="memory-result-ingredients" class="mb-3"></div>
+          <button class="btn btn-gold" data-bs-dismiss="modal" id="btn-close-memory">Chiudi</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- Toast notifications -->
 <div class="toast-container position-fixed bottom-0 end-0 p-3">
