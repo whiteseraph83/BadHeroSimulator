@@ -634,8 +634,8 @@ const Game = {
     // Applica ricompense
     const char = this.state.character;
 
-    // Aumenta taglia sul fallimento (non per Mago e Druido)
-    if (!isSuccess && !isPartial && char.classe !== 'mago' && char.classe !== 'druido') {
+    // Aumenta Taglia (Ladro) o Visibilità (altre classi) sul fallimento
+    if (!isSuccess && !isPartial) {
       char.wanted = (char.wanted || 0) + (check.result === 'nat1' ? 20 : 12);
     }
     char.xp   += rewards.xp;
@@ -1119,17 +1119,18 @@ const Game = {
     return this.state.completedToday.length < this.missionsCompletableToday();
   },
 
-  /* ─── Sistema Taglia (Wanted) ───────────────────────────── */
+  /* ─── Sistema Taglia / Visibilità ───────────────────────── */
   getWantedLevel() {
     const w = this.state.character.wanted || 0;
-    let current = WANTED_LEVELS[0];
-    for (const wl of WANTED_LEVELS) { if (w >= wl.min) current = wl; }
+    const levels = this.getClasse().id === 'ladro' ? WANTED_LEVELS : VISIBILITY_LEVELS;
+    let current = levels[0];
+    for (const wl of levels) { if (w >= wl.min) current = wl; }
     return current;
   },
 
   _checkWantedTrigger() {
-    const clsId = this.getClasse().id;
-    if (clsId === 'mago' || clsId === 'druido') return false;
+    // Cacciatore di Taglie: solo per il Ladro
+    if (this.getClasse().id !== 'ladro') return false;
     const w = this.state.character.wanted || 0;
     if (w < 15) return false;
     const chance = Math.min(0.85, (w - 15) / 200);
@@ -1177,10 +1178,11 @@ const Game = {
 
   /* ─── Attacco Ladro ─────────────────────────────────────── */
   _checkThiefTrigger() {
+    // L'attacco ladro è guidato dalla Visibilità del personaggio
     if (this.getClasse().id === 'ladro') return false;
-    const fame = this.state.character.fame || 0;
-    if (fame < 20) return false;
-    const chance = Math.min(0.70, fame / 400);
+    const vis = this.state.character.wanted || 0;
+    if (vis < 15) return false;
+    const chance = Math.min(0.75, vis / 200);
     return Math.random() < chance;
   },
 

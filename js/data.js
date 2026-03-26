@@ -31,13 +31,22 @@ const DICE_NPC_NAMES = [
   'Taverniere Brog', 'Maga Sylvara', 'Contrabbandiere Fen',
 ];
 
-/* ── LIVELLI TAGLIA ──────────────────────────────────────── */
+/* ── LIVELLI TAGLIA (solo Ladro) ─────────────────────────── */
 const WANTED_LEVELS = [
   { min: 0,   label: 'Pulito',          color: '#52b788', icon: '😊' },
   { min: 15,  label: 'Sospettato',      color: '#e9c46a', icon: '👀' },
   { min: 40,  label: 'Ricercato',       color: '#f4a261', icon: '⚠️' },
   { min: 80,  label: 'Molto Ricercato', color: '#e76f51', icon: '🚨' },
   { min: 150, label: 'Taglia Alta',     color: '#c0392b', icon: '💀' },
+];
+
+/* ── LIVELLI VISIBILITÀ (tutte le classi tranne Ladro) ───── */
+const VISIBILITY_LEVELS = [
+  { min: 0,   label: 'Anonimo',          color: '#6c757d', icon: '🌫️' },
+  { min: 15,  label: 'Noto',             color: '#52b788', icon: '👁️' },
+  { min: 50,  label: 'Riconoscibile',    color: '#e9c46a', icon: '🔍' },
+  { min: 100, label: 'In Vista',         color: '#f4a261', icon: '🎯' },
+  { min: 200, label: 'Bersaglio Primario', color: '#c0392b', icon: '🩸' },
 ];
 
 const THIEF_NARRATIVES = [

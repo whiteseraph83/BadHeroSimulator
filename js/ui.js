@@ -51,19 +51,18 @@ const UI = {
     // Oro
     document.getElementById('char-gold').textContent = c.gold;
 
-    // Taglia (nascosta per il Mago)
-    const isMago = Game.getClasse().id === 'mago';
-    document.getElementById('wanted-display').classList.toggle('d-none', isMago);
-    if (!isMago) {
-      const wanted    = c.wanted || 0;
-      const wl        = Game.getWantedLevel();
-      const wantedPct = Math.min(100, wanted / 300 * 100);
-      document.getElementById('wanted-label').textContent         = `${wl.icon} ${wl.label}`;
-      document.getElementById('wanted-bar-fill').style.width      = wantedPct + '%';
-      document.getElementById('wanted-bar-fill').style.background = wl.color;
-      document.getElementById('wanted-points').textContent        = `${wanted} pt`;
-      document.getElementById('wanted-display').style.opacity     = wanted === 0 ? '0.4' : '1';
-    }
+    // Taglia (Ladro) / Visibilità (altre classi)
+    const isLadro   = Game.getClasse().id === 'ladro';
+    const wanted    = c.wanted || 0;
+    const wl        = Game.getWantedLevel();
+    const maxPts    = isLadro ? 300 : 200;
+    const wantedPct = Math.min(100, wanted / maxPts * 100);
+    document.getElementById('wanted-type-label').textContent         = isLadro ? 'Taglia' : 'Visibilità';
+    document.getElementById('wanted-label').textContent              = `${wl.icon} ${wl.label}`;
+    document.getElementById('wanted-bar-fill').style.width           = wantedPct + '%';
+    document.getElementById('wanted-bar-fill').style.background      = wl.color;
+    document.getElementById('wanted-points').textContent             = `${wanted} pt`;
+    document.getElementById('wanted-display').style.opacity          = wanted === 0 ? '0.4' : '1';
   },
 
   /* ─── Boost attivi ─────────────────────────────────────── */
@@ -1143,7 +1142,10 @@ const UI = {
     const completed = Game.state.thiefAttackCompleted;
     section.classList.toggle('d-none', !pending || completed);
     if (pending && !completed) {
-      document.getElementById('thief-narrative-text').textContent = Game.getThiefNarrative();
+      const vis = Game.state.character.wanted || 0;
+      const vl  = Game.getWantedLevel();
+      document.getElementById('thief-narrative-text').textContent =
+        `${Game.getThiefNarrative()} [Visibilità: ${vl.icon} ${vl.label} — ${vis} pt]`;
       // Riabilita bottoni e nasconde risultato
       document.querySelectorAll('#thief-approaches button').forEach(b => b.disabled = false);
       document.getElementById('thief-result').classList.add('d-none');
@@ -1152,9 +1154,8 @@ const UI = {
 
   renderWantedMission() {
     const section = document.getElementById('wanted-mission-section');
-    const clsId = Game.getClasse().id;
-    if (clsId === 'mago' || clsId === 'druido') { section.classList.add('d-none'); return; }
     if (!section || !Game.state) return;
+    if (Game.getClasse().id !== 'ladro') { section.classList.add('d-none'); return; }
     const pending   = Game.state.wantedMissionPending;
     const completed = Game.state.wantedMissionCompleted;
     section.classList.toggle('d-none', !pending || completed);
