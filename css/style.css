@@ -1272,7 +1272,7 @@ body {
 
 /* Avatar */
 [data-theme="light"] .rogue-avatar { background: var(--bg-card2); border-color: var(--border-col); filter: drop-shadow(0 0 6px rgba(122,90,0,.2)); }
-[data-theme="light"] .level-badge { border-color: var(--bg-card); }
+[data-theme="light"] .level-badge { border-color: var(--bg-card); color: #f5e9d0; }
 
 /* Char name */
 [data-theme="light"] .char-name { color: var(--gold); }
