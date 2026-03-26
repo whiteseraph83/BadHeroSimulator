@@ -1383,6 +1383,12 @@ body {
 
 /* Mission rewards */
 [data-theme="light"] .mission-rewards { background: var(--bg-card2); border-color: var(--border-col); }
+[data-theme="light"] .reward-row { color: var(--text-light) !important; }
+
+/* Studio — risultati (PE, mo, ingredienti, ricette scoperte) */
+[data-theme="light"] #memory-result-rewards    { color: var(--text-light) !important; }
+[data-theme="light"] #memory-result-ingredients { color: var(--text-light) !important; }
+[data-theme="light"] #memory-result-ingredients .text-gold { color: var(--gold-dark) !important; font-weight: 700; }
 
 /* Level up */
 [data-theme="light"] .btn-stat-up { background: var(--bg-card2); border-color: var(--border-col); color: var(--text-light); }
