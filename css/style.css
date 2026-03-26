@@ -1509,6 +1509,8 @@ body {
 [data-theme="light"] .toast { background: var(--bg-card) !important; color: var(--text-light); }
 
 /* Bootstrap overrides per tema chiaro */
+[data-theme="light"] .badge.bg-gold { color: #f5e9d0 !important; }
+[data-theme="light"] .bg-gold       { color: #f5e9d0 !important; }
 [data-theme="light"] .text-warning { color: var(--gold) !important; }
 [data-theme="light"] .text-gold { color: var(--gold) !important; }
 [data-theme="light"] .text-info { color: #1a5a90 !important; }
