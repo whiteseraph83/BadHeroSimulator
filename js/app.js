@@ -431,6 +431,41 @@ const App = {
       UI.refresh();
     });
 
+    // Attacco Ladro — approcci con dado
+    document.getElementById('thief-approaches').addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-thief-stat]');
+      if (!btn || btn.disabled) return;
+      if (!Game.state || Game.state.gameOver) return;
+
+      const stat = btn.dataset.thiefStat;
+      const dc   = parseInt(btn.dataset.thiefDc);
+      const result = Game.resolveThiefAttack(stat, dc);
+
+      // Disabilita tutti i bottoni
+      document.querySelectorAll('#thief-approaches button').forEach(b => b.disabled = true);
+
+      // Mostra risultato inline
+      const resEl = document.getElementById('thief-result');
+      resEl.classList.remove('d-none');
+      const statLabel = { str:'FOR', dex:'DES', wis:'SAG', int:'INT', cha:'CAR', con:'COS' };
+      const rollInfo  = `(${result.check.roll}+${result.check.bonus}=${result.check.total} vs DC ${result.check.dc} ${statLabel[stat]})`;
+      if (result.ok) {
+        const partial = result.partial;
+        resEl.className = 'small rounded p-2 mt-2 bg-success bg-opacity-10 border border-success text-success';
+        let txt = partial
+          ? `⚠️ ${rollInfo} — Il ladro fugge parzialmente. +${result.xp} PE, +${result.fame} fama`
+          : `✅ ${rollInfo} — Il ladro è sconfitto! +${result.xp} PE, +${result.fame} fama`;
+        if (result.goldGained) txt += `, +${result.goldGained} mo`;
+        resEl.textContent = txt;
+      } else {
+        resEl.className = 'small rounded p-2 mt-2 bg-danger bg-opacity-10 border border-danger text-danger';
+        resEl.textContent = `❌ ${rollInfo} — Il ladro ti ha derubato. -${result.goldLost} mo`;
+      }
+
+      UI.refresh();
+      if (result.levelUpResult) this._triggerLevelUp(result.levelUpResult);
+    });
+
     // Chiusura modal taglia — ferma animazione + refresh
     document.getElementById('modal-wanted').addEventListener('hidden.bs.modal', () => {
       this._cancelWantedGame();

@@ -37,6 +37,8 @@ const Game = {
           if (!this.state.spellRequests)                      this.state.spellRequests = [];
           if (!this.state.knownRecipes)                       this.state.knownRecipes = [];
           if (!this.state.knownSpells)                        this.state.knownSpells = [];
+          if (this.state.thiefAttackPending === undefined)    this.state.thiefAttackPending = false;
+          if (this.state.thiefAttackCompleted === undefined)  this.state.thiefAttackCompleted = false;
           return true;
         }
       } catch (e) {
@@ -77,6 +79,8 @@ const Game = {
       rerollsUsed: 0,
       wantedMissionPending: false,
       wantedMissionCompleted: false,
+      thiefAttackPending: false,
+      thiefAttackCompleted: false,
       activeBoosts: [],
       diceRerollsUsed: 0,
       ingredientInventory: [],
@@ -1026,6 +1030,7 @@ const Game = {
     this.state.diceRerollsUsed        = 0;
     this.state.studyUsed              = 0;
     this.state.wantedMissionCompleted = false;
+    this.state.thiefAttackCompleted   = false;
 
     // Decrementa boost attivi
     this.state.activeBoosts = (this.state.activeBoosts || [])
@@ -1041,8 +1046,11 @@ const Game = {
     // Controlla se scatta missione taglia
     this.state.wantedMissionPending = this._checkWantedTrigger();
 
+    // Controlla se scatta attacco ladro
+    this.state.thiefAttackPending = this._checkThiefTrigger();
+
     this.save();
-    return { taxResult, gameOver: false, wantedTriggered: this.state.wantedMissionPending };
+    return { taxResult, gameOver: false, wantedTriggered: this.state.wantedMissionPending, thiefTriggered: this.state.thiefAttackPending };
   },
 
   /* ─── Progressione ─────────────────────────────────────── */
@@ -1129,7 +1137,9 @@ const Game = {
   },
 
   canAdvanceDay() {
-    return !this.state.wantedMissionPending || this.state.wantedMissionCompleted;
+    const wantedOk = !this.state.wantedMissionPending || this.state.wantedMissionCompleted;
+    const thiefOk  = !this.state.thiefAttackPending   || this.state.thiefAttackCompleted;
+    return wantedOk && thiefOk;
   },
 
   getWantedNarrative() {
@@ -1163,6 +1173,57 @@ const Game = {
     if (char.log.length > 500) char.log.pop();
     this.save();
     return { goldLost };
+  },
+
+  /* ─── Attacco Ladro ─────────────────────────────────────── */
+  _checkThiefTrigger() {
+    if (this.getClasse().id === 'ladro') return false;
+    const fame = this.state.character.fame || 0;
+    if (fame < 20) return false;
+    const chance = Math.min(0.70, fame / 400);
+    return Math.random() < chance;
+  },
+
+  getThiefNarrative() {
+    return THIEF_NARRATIVES[Math.floor(Math.random() * THIEF_NARRATIVES.length)];
+  },
+
+  resolveThiefAttack(approachStat, dc) {
+    const char  = this.state.character;
+    const check = this.resolveCheck(approachStat, dc);
+    const isSuccess = check.result === 'nat20' || check.result === 'success';
+    const isPartial = check.result === 'partial';
+
+    let result;
+    if (isSuccess || isPartial) {
+      // Ladro sconfitto/in fuga
+      const xp   = 60 + char.level * 15;
+      const fame = isSuccess ? 12 + char.level * 3 : 5;
+      const goldGained = isSuccess ? 10 + Math.floor(Math.random() * 20 * char.level) : 0;
+      char.xp   += xp;
+      char.fame += fame;
+      char.gold += goldGained;
+      const text = isSuccess
+        ? `Attacco ladro respinto! ${check.result === 'nat20' ? 'CRITICO — ' : ''}+${xp} PE, +${fame} fama${goldGained ? `, +${goldGained} mo rubati al ladro` : ''}`
+        : `Attacco parzialmente respinto. +${xp} PE, +${fame} fama`;
+      char.log.unshift({ day: char.day, text, type: 'success' });
+      result = { ok: true, partial: isPartial, xp, fame, goldGained, check };
+    } else {
+      // Derubato
+      const goldLost = Math.max(10, Math.min(Math.floor(char.gold * 0.20), 200));
+      char.gold = Math.max(0, char.gold - goldLost);
+      const text = check.result === 'nat1'
+        ? `CRITICO! Il ladro ti deruба e ti ferisce. -${goldLost} mo`
+        : `Il ladro è riuscito a derubarti. -${goldLost} mo`;
+      char.log.unshift({ day: char.day, text, type: 'fail' });
+      result = { ok: false, goldLost, check };
+    }
+
+    if (char.log.length > 500) char.log.pop();
+    this.state.thiefAttackCompleted = true;
+    const levelUpResult = this.checkLevelUp();
+    this.save();
+    return { ...result, levelUpResult };
   },
 
   /* ─── Sfide giornaliere ─────────────────────────────────── */

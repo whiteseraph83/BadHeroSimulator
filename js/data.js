@@ -40,6 +40,15 @@ const WANTED_LEVELS = [
   { min: 150, label: 'Taglia Alta',     color: '#c0392b', icon: '💀' },
 ];
 
+const THIEF_NARRATIVES = [
+  "Una figura incappucciata ti segue da ore. Troppa attenzione per essere un caso.",
+  "Mentre percorri il vicolo, senti mani esperte frugare nella tua borsa. Ladri.",
+  "Un mendicante ti distrae con una storia strappalacrime. I suoi complici sono già al lavoro.",
+  "La tua fama ti precede — e attira brutte compagnie. Stanotte qualcuno ha deciso di alleggerire il peso del tuo borsellino.",
+  "Il barista ti guarda storto. Troppi sconosciuti hanno chiesto di te. Uno di loro è ancora qui fuori.",
+  "Passi leggeri sul tetto. Qualcuno sa dove dormi, dove tieni i soldi, quanto vali.",
+];
+
 const WANTED_NARRATIVES = [
   "Un sicario si para davanti a te nel vicolo buio. Nessun testimone, nessuna via di fuga.",
   "Il cacciatore di taglie ti ha finalmente trovato. Occhi freddi, spada sguainata.",

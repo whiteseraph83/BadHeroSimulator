@@ -221,6 +221,36 @@
         <!-- TAB: MISSIONI -->
         <div class="tab-pane fade show active" id="tab-missions">
 
+          <!-- Attacco Ladro (condizionale, tutte classi tranne Ladro) -->
+          <div id="thief-attack-section" class="d-none mb-3">
+            <div class="thief-attack-card">
+              <div class="d-flex align-items-start gap-2 mb-2">
+                <span style="font-size:1.6rem;line-height:1;">🗝️</span>
+                <div>
+                  <div class="thief-attack-title">LADRO</div>
+                  <div class="small text-muted fst-italic" id="thief-narrative-text">Una figura incappucciata ti segue.</div>
+                </div>
+              </div>
+              <div class="small text-warning mb-3"><i class="bi bi-lock-fill"></i> Affronta o subisci il furto prima di avanzare al giorno successivo</div>
+              <div class="d-flex gap-2 mb-3 flex-wrap">
+                <span class="badge bg-success">Vittoria: PE + Fama + oro del ladro</span>
+                <span class="badge bg-danger">Sconfitta: Perdi fino al 20% dell'oro</span>
+              </div>
+              <div id="thief-approaches" class="d-flex gap-2 flex-wrap mb-2">
+                <button class="btn btn-sm btn-outline-warning flex-fill" data-thief-stat="str" data-thief-dc="12">
+                  <i class="bi bi-shield-fill"></i> Difenditi <span class="text-muted small">(FOR)</span>
+                </button>
+                <button class="btn btn-sm btn-outline-warning flex-fill" data-thief-stat="dex" data-thief-dc="12">
+                  <i class="bi bi-lightning-fill"></i> Tendi un'imboscata <span class="text-muted small">(DES)</span>
+                </button>
+                <button class="btn btn-sm btn-outline-warning flex-fill" data-thief-stat="wis" data-thief-dc="13">
+                  <i class="bi bi-eye-fill"></i> Anticipane le mosse <span class="text-muted small">(SAG)</span>
+                </button>
+              </div>
+              <div id="thief-result" class="d-none small rounded p-2 mt-2"></div>
+            </div>
+          </div>
+
           <!-- Missione Taglia (condizionale) -->
           <div id="wanted-mission-section" class="d-none mb-3">
             <div class="wanted-mission-card">

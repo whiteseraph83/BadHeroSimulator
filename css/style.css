@@ -1167,6 +1167,24 @@ body {
   border-color: rgba(201,168,76,.3);
 }
 
+/* Sezione attacco ladro */
+.thief-attack-card {
+  background: rgba(255,200,0,.04);
+  border: 1px solid rgba(255,200,0,.35);
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+.thief-attack-title {
+  font-family: 'Cinzel', serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #e9c46a;
+  letter-spacing: 2px;
+}
+#thief-approaches .btn {
+  min-width: 120px;
+}
+
 /* Bottone Incanta (Mago) */
 .btn-spell {
   background: linear-gradient(135deg, #1a1a4e 0%, #0d0d2e 100%);

@@ -1134,9 +1134,26 @@ const UI = {
 
   /* ─── Refresh completo ─────────────────────────────────── */
   /* ─── Missione Taglia ───────────────────────────────────── */
+  renderThiefAttack() {
+    const section = document.getElementById('thief-attack-section');
+    if (!section || !Game.state) return;
+    const clsId = Game.getClasse().id;
+    if (clsId === 'ladro') { section.classList.add('d-none'); return; }
+    const pending   = Game.state.thiefAttackPending;
+    const completed = Game.state.thiefAttackCompleted;
+    section.classList.toggle('d-none', !pending || completed);
+    if (pending && !completed) {
+      document.getElementById('thief-narrative-text').textContent = Game.getThiefNarrative();
+      // Riabilita bottoni e nasconde risultato
+      document.querySelectorAll('#thief-approaches button').forEach(b => b.disabled = false);
+      document.getElementById('thief-result').classList.add('d-none');
+    }
+  },
+
   renderWantedMission() {
     const section = document.getElementById('wanted-mission-section');
-    if (Game.getClasse().id === 'mago') { section.classList.add('d-none'); return; }
+    const clsId = Game.getClasse().id;
+    if (clsId === 'mago' || clsId === 'druido') { section.classList.add('d-none'); return; }
     if (!section || !Game.state) return;
     const pending   = Game.state.wantedMissionPending;
     const completed = Game.state.wantedMissionCompleted;
@@ -1281,6 +1298,7 @@ const UI = {
     this.renderSpellCraftSlots();
     this.renderGuildTaxInfo();
     this.renderActiveBoosts();
+    this.renderThiefAttack();
     this.renderWantedMission();
     this.renderMissions();
     this.renderMarket();
