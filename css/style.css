@@ -1166,3 +1166,39 @@ body {
 .potion-request-card:hover {
   border-color: rgba(201,168,76,.3);
 }
+
+/* Bottone Incanta (Mago) */
+.btn-spell {
+  background: linear-gradient(135deg, #1a1a4e 0%, #0d0d2e 100%);
+  color: #90caf9;
+  border: 1px solid rgba(144,202,249,.4);
+  font-weight: 600;
+  letter-spacing: .5px;
+  transition: all .2s;
+}
+.btn-spell:hover:not(:disabled) {
+  background: linear-gradient(135deg, #252570 0%, #181840 100%);
+  border-color: #90caf9;
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(144,202,249,.3);
+}
+.btn-spell:disabled { opacity: .4; cursor: not-allowed; }
+
+/* Recipe card (grimorio / ricettario) */
+.recipe-card {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  background: rgba(255,255,255,.03);
+  border: 1px solid transparent;
+  transition: border-color .15s, background .15s;
+  font-size: .85rem;
+  margin-bottom: 4px;
+}
+.recipe-card:hover {
+  border-color: rgba(201,168,76,.4);
+  background: rgba(201,168,76,.05);
+}

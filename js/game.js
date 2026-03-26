@@ -32,6 +32,11 @@ const Game = {
           if (!this.state.potionInventory)                    this.state.potionInventory = [];
           if (!this.state.potionRequests)                     this.state.potionRequests = [];
           if (this.state.studyUsed === undefined)              this.state.studyUsed = 0;
+          if (!this.state.componentInventory)                 this.state.componentInventory = [];
+          if (!this.state.spellInventory)                     this.state.spellInventory = [];
+          if (!this.state.spellRequests)                      this.state.spellRequests = [];
+          if (!this.state.knownRecipes)                       this.state.knownRecipes = [];
+          if (!this.state.knownSpells)                        this.state.knownSpells = [];
           return true;
         }
       } catch (e) {
@@ -77,6 +82,11 @@ const Game = {
       ingredientInventory: [],
       potionInventory: [],
       potionRequests: [],
+      componentInventory: [],
+      spellInventory: [],
+      spellRequests: [],
+      knownRecipes: [],
+      knownSpells: [],
       studyUsed: 0,
       gameOver: false
     };
@@ -84,6 +94,7 @@ const Game = {
     this.generateMarketItems();
     this.generateDailyChallenges();
     if (cls.hasPotioniTab) this.generatePotionRequests();
+    if (cls.hasSpellTab)   this.generateSpellRequests();
     this.save();
   },
 
@@ -257,16 +268,27 @@ const Game = {
 
   applyPairReward() {
     const char = this.state.character;
+    const cls  = this.getClasse();
     const xp = 15;
     char.xp += xp;
     let ingredient = null;
     if (Math.random() < 0.35) {
-      if (!this.state.ingredientInventory) this.state.ingredientInventory = [];
-      const pool = INGREDIENTS.filter(ing => ing.quality === 1);
-      if (pool.length) {
-        const ing = pool[Math.floor(Math.random() * pool.length)];
-        this.state.ingredientInventory.push(ing.id);
-        ingredient = ing;
+      if (cls.hasSpellTab) {
+        if (!this.state.componentInventory) this.state.componentInventory = [];
+        const pool = SPELL_COMPONENTS.filter(c => c.quality === 1);
+        if (pool.length) {
+          const comp = pool[Math.floor(Math.random() * pool.length)];
+          this.state.componentInventory.push(comp.id);
+          ingredient = comp;
+        }
+      } else {
+        if (!this.state.ingredientInventory) this.state.ingredientInventory = [];
+        const pool = INGREDIENTS.filter(ing => ing.quality === 1);
+        if (pool.length) {
+          const ing = pool[Math.floor(Math.random() * pool.length)];
+          this.state.ingredientInventory.push(ing.id);
+          ingredient = ing;
+        }
       }
     }
     const levelUpResult = this.checkLevelUp();
@@ -275,28 +297,67 @@ const Game = {
   },
 
   applyStudyReward(timeLeft, errors) {
-    let xp, gold, ingredientCount, ingredientTierMax;
+    let xp, gold, itemCount, itemTierMax;
     // Soglie calibrate per timer 90s e 8 errori max
-    if (timeLeft > 55 && errors <= 2)      { xp = 180; gold = 60; ingredientCount = 2; ingredientTierMax = 2; }
-    else if (timeLeft > 25 && errors <= 5) { xp = 100; gold = 30; ingredientCount = 1; ingredientTierMax = 2; }
-    else                                   { xp = 50;  gold = 10; ingredientCount = 1; ingredientTierMax = 1; }
+    if (timeLeft > 55 && errors <= 2)      { xp = 180; gold = 60; itemCount = 2; itemTierMax = 2; }
+    else if (timeLeft > 25 && errors <= 5) { xp = 100; gold = 30; itemCount = 1; itemTierMax = 2; }
+    else                                   { xp = 50;  gold = 10; itemCount = 1; itemTierMax = 1; }
     const char = this.state.character;
+    const cls  = this.getClasse();
     char.xp   += xp;
     char.gold += gold;
     const awarded = [];
-    if (!this.state.ingredientInventory) this.state.ingredientInventory = [];
-    for (let i = 0; i < ingredientCount; i++) {
-      const pool = INGREDIENTS.filter(ing => ing.quality <= ingredientTierMax);
-      const ing  = pool[Math.floor(Math.random() * pool.length)];
-      this.state.ingredientInventory.push(ing.id);
-      awarded.push(ing);
+    const isMago = cls.hasSpellTab;
+
+    if (isMago) {
+      if (!this.state.componentInventory) this.state.componentInventory = [];
+      for (let i = 0; i < itemCount; i++) {
+        const pool = SPELL_COMPONENTS.filter(c => c.quality <= itemTierMax);
+        const comp = pool[Math.floor(Math.random() * pool.length)];
+        this.state.componentInventory.push(comp.id);
+        awarded.push(comp);
+      }
+    } else {
+      if (!this.state.ingredientInventory) this.state.ingredientInventory = [];
+      for (let i = 0; i < itemCount; i++) {
+        const pool = INGREDIENTS.filter(ing => ing.quality <= itemTierMax);
+        const ing  = pool[Math.floor(Math.random() * pool.length)];
+        this.state.ingredientInventory.push(ing.id);
+        awarded.push(ing);
+      }
     }
+
+    // 40% possibilità di sbloccare una ricetta
+    let unlockedRecipe = null;
+    if (Math.random() < 0.40) {
+      if (isMago) {
+        if (!this.state.knownSpells) this.state.knownSpells = [];
+        const unknown = SPELL_RECIPES.filter(r => !this.state.knownSpells.includes(r.id));
+        if (unknown.length) {
+          // Peso verso qualità basse
+          const weighted = unknown.flatMap(r => Array(Math.max(1, 6 - r.quality)).fill(r));
+          const pick = weighted[Math.floor(Math.random() * weighted.length)];
+          this.state.knownSpells.push(pick.id);
+          unlockedRecipe = pick;
+        }
+      } else {
+        if (!this.state.knownRecipes) this.state.knownRecipes = [];
+        const unknown = POTION_RECIPES.filter(r => !this.state.knownRecipes.includes(r.id));
+        if (unknown.length) {
+          const weighted = unknown.flatMap(r => Array(Math.max(1, 6 - r.quality)).fill(r));
+          const pick = weighted[Math.floor(Math.random() * weighted.length)];
+          this.state.knownRecipes.push(pick.id);
+          unlockedRecipe = pick;
+        }
+      }
+    }
+
     const logEntry = { day: char.day, text: `Studio completato — +${xp} PE, +${gold} mo`, type: 'success' };
     char.log.unshift(logEntry); if (char.log.length > 500) char.log.pop();
     const completedChallenges = this.checkChallenges('passive');
     const levelUpResult = this.checkLevelUp();
     this.save();
-    return { ok: true, xp, gold, ingredients: awarded, completedChallenges, levelUpResult };
+    return { ok: true, xp, gold, ingredients: awarded, unlockedRecipe, completedChallenges, levelUpResult };
   },
 
   /* ─── Alchimia (solo Mago) ──────────────────────────── */
@@ -377,6 +438,94 @@ const Game = {
     char.fame += req.reward.fame;
     char.xp   += req.reward.xp;
     const logEntry = { day: char.day, text: `Richiesta completata: ${req.clientName} (+${req.reward.gold} mo)`, type: 'success' };
+    char.log.unshift(logEntry); if (char.log.length > 500) char.log.pop();
+    const completedChallenges = this.checkChallenges('passive');
+    const levelUpResult = this.checkLevelUp();
+    this.save();
+    return { ok: true, reward: req.reward, completedChallenges, levelUpResult };
+  },
+
+  /* ─── Incantesimi (solo Mago) ──────────────────────────── */
+  craftSpell(selectedComponentIds) {
+    if (!this.state.componentInventory) this.state.componentInventory = [];
+    const inv = [...this.state.componentInventory];
+    for (const id of selectedComponentIds) {
+      const idx = inv.indexOf(id);
+      if (idx === -1) return { ok: false, reason: 'Componente mancante.' };
+      inv.splice(idx, 1);
+    }
+    const sorted = [...selectedComponentIds].sort((a, b) => a - b);
+    const recipe = SPELL_RECIPES.find(r => {
+      const rs = [...r.components].sort((a, b) => a - b);
+      return rs.length === sorted.length && rs.every((v, i) => v === sorted[i]);
+    });
+    const char = this.state.character;
+    if (recipe) {
+      this.state.componentInventory = inv;
+      if (!this.state.spellInventory) this.state.spellInventory = [];
+      this.state.spellInventory.push(recipe.id);
+      char.xp   += recipe.reward.xp;
+      char.gold += recipe.reward.gold;
+      // Sblocca la ricetta se non già conosciuta
+      if (!this.state.knownSpells) this.state.knownSpells = [];
+      if (!this.state.knownSpells.includes(recipe.id)) {
+        this.state.knownSpells.push(recipe.id);
+      }
+      const logEntry = { day: char.day, text: `Incantesimo preparato: ${recipe.name} (+${recipe.reward.xp} PE)`, type: 'success' };
+      char.log.unshift(logEntry); if (char.log.length > 500) char.log.pop();
+      const completedChallenges = this.checkChallenges('passive');
+      const levelUpResult = this.checkLevelUp();
+      this.save();
+      return { ok: true, recipe, completedChallenges, levelUpResult };
+    } else {
+      // Prova di Intelligenza DC 13: successo = componenti restituiti
+      const check = this.resolveCheck('int', 13);
+      const saved = check.result === 'nat20' || check.result === 'success';
+      if (saved) {
+        char.xp += 10;
+        this.save();
+        return { ok: false, saved: true, check, reason: `Prova INT ${check.result === 'nat20' ? 'critica' : 'superata'} (${check.roll}+${check.bonus}=${check.total} vs DC 13) — componenti recuperate. +10 PE.` };
+      } else {
+        this.state.componentInventory = inv;
+        char.xp += 15;
+        this.save();
+        return { ok: false, saved: false, check, reason: `Prova INT fallita (${check.roll}+${check.bonus}=${check.total} vs DC 13) — componenti perdute. +15 PE per la sperimentazione.` };
+      }
+    }
+  },
+
+  generateSpellRequests() {
+    const char = this.state.character;
+    const count = 2 + Math.floor(char.level / 2);
+    const CLIENT_NAMES = [
+      'Capitano Drath', 'Inquisitore Kael', 'Nobile Vorn', 'Assassina Lyra',
+      'Mercenario Brug', 'Strega Isolde', 'Alchimista Fenix', 'Lord Shadowmere',
+      'Ladra Zara', 'Cultista Eryn'
+    ];
+    const shuffled = [...SPELL_RECIPES].sort(() => Math.random() - 0.5);
+    this.state.spellRequests = shuffled.slice(0, count).map((r, i) => ({
+      id: `sreq_${Date.now()}_${i}`,
+      recipeId: r.id,
+      clientName: CLIENT_NAMES[i % CLIENT_NAMES.length],
+      reward: { gold: r.clientGold, fame: Math.ceil(r.quality * 2), xp: Math.ceil(r.reward.xp * 0.5) }
+    }));
+    this.save();
+  },
+
+  completeSpellRequest(requestId) {
+    if (!this.state.spellRequests) return { ok: false, reason: 'Nessuna richiesta.' };
+    const req = this.state.spellRequests.find(r => r.id === requestId);
+    if (!req) return { ok: false, reason: 'Richiesta non trovata.' };
+    if (!this.state.spellInventory) this.state.spellInventory = [];
+    const idx = this.state.spellInventory.indexOf(req.recipeId);
+    if (idx === -1) return { ok: false, reason: 'Incantesimo non nell\'inventario.' };
+    this.state.spellInventory.splice(idx, 1);
+    this.state.spellRequests = this.state.spellRequests.filter(r => r.id !== requestId);
+    const char = this.state.character;
+    char.gold += req.reward.gold;
+    char.fame += req.reward.fame;
+    char.xp   += req.reward.xp;
+    const logEntry = { day: char.day, text: `Incantesimo consegnato: ${req.clientName} (+${req.reward.gold} mo)`, type: 'success' };
     char.log.unshift(logEntry); if (char.log.length > 500) char.log.pop();
     const completedChallenges = this.checkChallenges('passive');
     const levelUpResult = this.checkLevelUp();
@@ -481,8 +630,8 @@ const Game = {
     // Applica ricompense
     const char = this.state.character;
 
-    // Aumenta taglia sul fallimento (non per il Mago)
-    if (!isSuccess && !isPartial && char.classe !== 'mago') {
+    // Aumenta taglia sul fallimento (non per Mago e Druido)
+    if (!isSuccess && !isPartial && char.classe !== 'mago' && char.classe !== 'druido') {
       char.wanted = (char.wanted || 0) + (check.result === 'nat1' ? 20 : 12);
     }
     char.xp   += rewards.xp;
@@ -493,14 +642,22 @@ const Game = {
       char.inventory.push(rewards.item.id);
     }
 
-    // Reward ingrediente per Mago
-    if (char.classe === 'mago' && isSuccess && mission.rewards.ingredientChance) {
-      if (Math.random() < mission.rewards.ingredientChance) {
-        const tierMax = mission.rewards.ingredientTierMax || 1;
+    // Reward componente/ingrediente per Mago e Druido su successo
+    if (isSuccess && mission.rewards.ingredientTierMax) {
+      const tierMax = mission.rewards.ingredientTierMax || 1;
+      if (char.classe === 'mago') {
+        if (!this.state.componentInventory) this.state.componentInventory = [];
+        const pool = SPELL_COMPONENTS.filter(c => c.quality <= tierMax);
+        if (pool.length) {
+          const comp = pool[Math.floor(Math.random() * pool.length)];
+          this.state.componentInventory.push(comp.id);
+          rewards.ingredient = comp;
+        }
+      } else if (char.classe === 'druido') {
+        if (!this.state.ingredientInventory) this.state.ingredientInventory = [];
         const pool = INGREDIENTS.filter(ing => ing.quality <= tierMax);
         if (pool.length) {
           const ing = pool[Math.floor(Math.random() * pool.length)];
-          if (!this.state.ingredientInventory) this.state.ingredientInventory = [];
           this.state.ingredientInventory.push(ing.id);
           rewards.ingredient = ing;
         }
@@ -879,6 +1036,7 @@ const Game = {
     this.generateMarketItems();
     this.refreshDailyChallenges();
     if (this.getClasse().hasPotioniTab) this.generatePotionRequests();
+    if (this.getClasse().hasSpellTab)   this.generateSpellRequests();
 
     // Controlla se scatta missione taglia
     this.state.wantedMissionPending = this._checkWantedTrigger();
@@ -962,7 +1120,8 @@ const Game = {
   },
 
   _checkWantedTrigger() {
-    if (this.getClasse().id === 'mago') return false;
+    const clsId = this.getClasse().id;
+    if (clsId === 'mago' || clsId === 'druido') return false;
     const w = this.state.character.wanted || 0;
     if (w < 15) return false;
     const chance = Math.min(0.85, (w - 15) / 200);

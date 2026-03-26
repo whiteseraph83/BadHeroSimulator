@@ -26,9 +26,14 @@ const App = {
   _memoryTimerInterval: null,
   _memoryTimeLeft:      60,
   _memoryLockBoard:     false,
-  _memoryMaxErrors:     5,
-  // Crafting
+  _memoryMaxErrors:     8,
+  // Crafting pozioni (Druido)
   _craftSelected:       [],
+  // Crafting incantesimi (Mago)
+  _spellCraftSelected:  [],
+  // Recipe modal
+  _modalRecipeId:       null,
+  _modalRecipeType:     null,
 
   /* ─── Bootstrap ───────────────────────────────────────── */
   init() {
@@ -277,6 +282,131 @@ const App = {
         if (result.levelUpResult) this._triggerLevelUp(result.levelUpResult);
       } else {
         UI.toast(result.reason);
+      }
+    });
+
+    // ── Incantesimi (Mago) ──────────────────────────────────
+
+    // Craft incantesimo: incanta
+    document.getElementById('btn-craft-spell').addEventListener('click', () => {
+      if (!Game.state || Game.state.gameOver) return;
+      const result = Game.craftSpell(this._spellCraftSelected);
+      if (result.ok) {
+        UI.toast(`✨ ${result.recipe.name} preparato! +${result.recipe.reward.xp} PE`, 3000);
+      } else if (result.saved) {
+        UI.toast(`🧠 ${result.reason}`, 4000);
+        UI.refresh();
+        return;
+      } else {
+        UI.toast(`💥 ${result.reason}`, 4000);
+      }
+      this._spellCraftSelected = [];
+      UI.refresh();
+      if (result.ok && result.levelUpResult) this._triggerLevelUp(result.levelUpResult);
+    });
+
+    // Craft incantesimo: svuota slot
+    document.getElementById('btn-clear-spell').addEventListener('click', () => {
+      this._spellCraftSelected = [];
+      UI.renderSpellCraftSlots();
+      UI.renderIncantesimiTab();
+    });
+
+    // Craft incantesimo: click slot rimuove componente
+    document.getElementById('craft-spell-slots').addEventListener('click', (e) => {
+      const slot = e.target.closest('.craft-slot.filled');
+      if (!slot) return;
+      const idx = parseInt(slot.dataset.spellSlotIndex);
+      if (!isNaN(idx)) {
+        this._spellCraftSelected.splice(idx, 1);
+        UI.renderSpellCraftSlots();
+        UI.renderIncantesimiTab();
+      }
+    });
+
+    // Componenti: click aggiunge al craft
+    document.getElementById('component-inventory').addEventListener('click', (e) => {
+      const card = e.target.closest('.ingredient-card');
+      if (!card) return;
+      const id = parseInt(card.dataset.compId);
+      if (isNaN(id)) return;
+      if (this._spellCraftSelected.length >= 3) { UI.toast('Slot pieno. Rimuovi una componente prima.'); return; }
+      const compInv = Game.state.componentInventory || [];
+      const countInInv   = compInv.filter(x => x === id).length;
+      const countSelected = this._spellCraftSelected.filter(x => x === id).length;
+      if (countSelected >= countInInv) { UI.toast('Non hai altre di questa componente.'); return; }
+      this._spellCraftSelected.push(id);
+      UI.renderSpellCraftSlots();
+      UI.renderIncantesimiTab();
+    });
+
+    // Richieste incantesimi: consegna
+    document.getElementById('spell-requests').addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-spell-request-id]');
+      if (!btn) return;
+      const reqId = btn.dataset.spellRequestId;
+      const result = Game.completeSpellRequest(reqId);
+      if (result.ok) {
+        UI.toast(`✅ Consegnato! +${result.reward.gold} mo, +${result.reward.fame} fama`);
+        UI.refresh();
+        if (result.levelUpResult) this._triggerLevelUp(result.levelUpResult);
+      } else {
+        UI.toast(result.reason);
+      }
+    });
+
+    // Grimorio / Ricettario: click su ricetta apre modale dettaglio
+    document.getElementById('known-spells-list').addEventListener('click', (e) => {
+      const card = e.target.closest('.recipe-card');
+      if (!card) return;
+      UI.openRecipeModal(card.dataset.recipeId, card.dataset.recipeType || 'spell');
+    });
+
+    document.getElementById('known-recipes-list').addEventListener('click', (e) => {
+      const card = e.target.closest('.recipe-card');
+      if (!card) return;
+      UI.openRecipeModal(card.dataset.recipeId, card.dataset.recipeType || 'potion');
+    });
+
+    // Modale ricetta: bottone Prepara
+    document.getElementById('btn-recipe-prepare').addEventListener('click', () => {
+      const recipeId = document.getElementById('btn-recipe-prepare').dataset.recipeId;
+      const type     = document.getElementById('btn-recipe-prepare').dataset.recipeType;
+      if (type === 'spell') {
+        const recipe = SPELL_RECIPES.find(r => r.id === recipeId);
+        if (!recipe) return;
+        this._spellCraftSelected = [];
+        const compInv = [...(Game.state.componentInventory || [])];
+        for (const compId of recipe.components) {
+          const idx = compInv.indexOf(compId);
+          if (idx !== -1) {
+            this._spellCraftSelected.push(compId);
+            compInv.splice(idx, 1);
+          }
+        }
+        bootstrap.Modal.getInstance(document.getElementById('modal-recipe'))?.hide();
+        // Naviga al tab incantesimi
+        const tab = document.querySelector('[data-bs-target="#tab-incantesimi"]');
+        if (tab) new bootstrap.Tab(tab).show();
+        UI.renderSpellCraftSlots();
+        UI.renderIncantesimiTab();
+      } else {
+        const recipe = POTION_RECIPES.find(r => r.id === recipeId);
+        if (!recipe) return;
+        this._craftSelected = [];
+        const ingInv = [...(Game.state.ingredientInventory || [])];
+        for (const ingId of recipe.ingredients) {
+          const idx = ingInv.indexOf(ingId);
+          if (idx !== -1) {
+            this._craftSelected.push(ingId);
+            ingInv.splice(idx, 1);
+          }
+        }
+        bootstrap.Modal.getInstance(document.getElementById('modal-recipe'))?.hide();
+        const tab = document.querySelector('[data-bs-target="#tab-pozioni"]');
+        if (tab) new bootstrap.Tab(tab).show();
+        UI.renderCraftSlots();
+        UI.renderPozioniTab();
       }
     });
 

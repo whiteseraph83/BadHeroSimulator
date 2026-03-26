@@ -114,7 +114,7 @@ const UI = {
     btn.disabled = remaining <= 0 || Game.state.gameOver;
   },
 
-  /* ─── Studio btn (solo Mago) ─────────────────────────────── */
+  /* ─── Studio btn (Mago e Druido) ────────────────────────── */
   renderStudyBtn() {
     const btn   = document.getElementById('btn-study');
     const badge = document.getElementById('study-badge');
@@ -124,7 +124,7 @@ const UI = {
     btn.disabled = remaining <= 0 || Game.state.gameOver;
   },
 
-  /* ─── Tab Pozioni (solo Mago) ──────────────────────────────── */
+  /* ─── Tab Pozioni (solo Druido) ────────────────────────────── */
   renderPozioniTab() {
     const ingInv    = Game.state.ingredientInventory || [];
     const potInv    = Game.state.potionInventory     || [];
@@ -241,7 +241,213 @@ const UI = {
     }
     el.innerHTML = html;
     const btn = document.getElementById('btn-craft-potion');
-    if (btn) btn.disabled = selected.length !== MAX;
+    if (btn) btn.disabled = selected.length < 2 || selected.length > MAX;
+  },
+
+  /* ─── Tab Pozioni comment update ───────────────────────── */
+
+  /* ─── Tab Incantesimi (solo Mago) ───────────────────────── */
+  renderIncantesimiTab() {
+    const compInv   = Game.state.componentInventory || [];
+    const spellInv  = Game.state.spellInventory     || [];
+    const requests  = Game.state.spellRequests      || [];
+    const known     = Game.state.knownSpells        || [];
+
+    const countEl = document.getElementById('component-count');
+    const spellCountEl = document.getElementById('spell-count');
+    const knownCountEl = document.getElementById('known-spells-count');
+    if (countEl)      countEl.textContent     = compInv.length;
+    if (spellCountEl) spellCountEl.textContent = spellInv.length;
+    if (knownCountEl) knownCountEl.textContent  = known.length;
+
+    this._renderComponentInventory(compInv);
+    this._renderSpellInventory(spellInv);
+    this._renderSpellRequests(requests);
+    this._renderKnownSpells(known);
+
+    // Anche aggiorna il Ricettario del Druido se visibile
+    const knownRecipes = Game.state.knownRecipes || [];
+    const krCountEl = document.getElementById('known-recipes-count');
+    if (krCountEl) krCountEl.textContent = knownRecipes.length;
+    this._renderKnownRecipes(knownRecipes);
+  },
+
+  _renderComponentInventory(compInv) {
+    const el = document.getElementById('component-inventory');
+    if (!el) return;
+    if (compInv.length === 0) {
+      el.innerHTML = '<p class="text-muted small fst-italic">Nessuna componente.</p>';
+      return;
+    }
+    const counts = {};
+    compInv.forEach(id => { counts[id] = (counts[id] || 0) + 1; });
+    const uniqueIds = Object.keys(counts).map(Number).sort((a, b) => {
+      const ca = SPELL_COMPONENTS.find(x => x.id === a);
+      const cb = SPELL_COMPONENTS.find(x => x.id === b);
+      return (ca?.quality || 0) - (cb?.quality || 0);
+    });
+    el.innerHTML = uniqueIds.map(id => {
+      const comp = SPELL_COMPONENTS.find(x => x.id === id);
+      if (!comp) return '';
+      const qty = counts[id];
+      const qCls = QUALITY[comp.quality]?.cls || '';
+      const selected = (App._spellCraftSelected || []).filter(x => x === id).length;
+      const isSelected = selected > 0;
+      return `<div class="ingredient-card ${isSelected ? 'selected' : ''}" data-comp-id="${id}" title="${comp.desc}">
+        <span>${comp.icon}</span>
+        <span class="${qCls}" style="flex:1">${comp.name}</span>
+        <span class="ingredient-qty">×${qty}</span>
+      </div>`;
+    }).join('');
+  },
+
+  _renderSpellInventory(spellInv) {
+    const el = document.getElementById('spell-inventory');
+    if (!el) return;
+    if (spellInv.length === 0) {
+      el.innerHTML = '<p class="text-muted small fst-italic">Nessun incantesimo.</p>';
+      return;
+    }
+    const counts = {};
+    spellInv.forEach(id => { counts[id] = (counts[id] || 0) + 1; });
+    el.innerHTML = Object.keys(counts).map(id => {
+      const recipe = SPELL_RECIPES.find(r => r.id === id);
+      if (!recipe) return '';
+      const qCls = QUALITY[recipe.quality]?.cls || '';
+      return `<div class="potion-card">
+        <span>${recipe.icon}</span>
+        <span class="${qCls}" style="flex:1">${recipe.name}</span>
+        <span class="ingredient-qty">×${counts[id]}</span>
+      </div>`;
+    }).join('');
+  },
+
+  _renderSpellRequests(requests) {
+    const el = document.getElementById('spell-requests');
+    if (!el) return;
+    if (requests.length === 0) {
+      el.innerHTML = '<p class="text-muted small fst-italic">Nessuna richiesta oggi.</p>';
+      return;
+    }
+    el.innerHTML = requests.map(req => {
+      const recipe = SPELL_RECIPES.find(r => r.id === req.recipeId);
+      if (!recipe) return '';
+      const spellInv = Game.state.spellInventory || [];
+      const hasSpell = spellInv.includes(req.recipeId);
+      const qCls = QUALITY[recipe.quality]?.cls || '';
+      return `<div class="potion-request-card mb-2">
+        <div class="d-flex align-items-center gap-2 mb-1">
+          <span class="fw-bold text-gold">${req.clientName}</span>
+          <span class="text-muted small">vuole</span>
+          <span>${recipe.icon} <span class="${qCls}">${recipe.name}</span></span>
+        </div>
+        <div class="d-flex justify-content-between align-items-center">
+          <div class="small text-muted">
+            💰 ${req.reward.gold} mo &nbsp; ⭐ ${req.reward.fame} fama &nbsp; 📚 ${req.reward.xp} PE
+          </div>
+          <button class="btn btn-sm ${hasSpell ? 'btn-gold' : 'btn-outline-secondary'}"
+            ${hasSpell ? '' : 'disabled'}
+            data-spell-request-id="${req.id}">
+            <i class="bi bi-box-arrow-right"></i> Consegna
+          </button>
+        </div>
+      </div>`;
+    }).join('');
+  },
+
+  _renderKnownSpells(known) {
+    const el = document.getElementById('known-spells-list');
+    if (!el) return;
+    if (known.length === 0) {
+      el.innerHTML = '<p class="text-muted small fst-italic">Nessun incantesimo conosciuto. Studia per scoprirli!</p>';
+      return;
+    }
+    el.innerHTML = known.map(id => {
+      const r = SPELL_RECIPES.find(x => x.id === id);
+      if (!r) return '';
+      const qCls = QUALITY[r.quality]?.cls || '';
+      return `<div class="recipe-card" data-recipe-id="${r.id}" data-recipe-type="spell">
+        <span>${r.icon}</span>
+        <span class="${qCls}" style="flex:1">${r.name}</span>
+        <span class="badge" style="background:${QUALITY[r.quality]?.color || '#999'};color:#000;font-size:.65rem">Q${r.quality}</span>
+      </div>`;
+    }).join('');
+  },
+
+  _renderKnownRecipes(known) {
+    const el = document.getElementById('known-recipes-list');
+    if (!el) return;
+    if (known.length === 0) {
+      el.innerHTML = '<p class="text-muted small fst-italic">Nessuna ricetta conosciuta. Studia per scoprirle!</p>';
+      return;
+    }
+    el.innerHTML = known.map(id => {
+      const r = POTION_RECIPES.find(x => x.id === id);
+      if (!r) return '';
+      const qCls = QUALITY[r.quality]?.cls || '';
+      return `<div class="recipe-card" data-recipe-id="${r.id}" data-recipe-type="potion">
+        <span>${r.icon}</span>
+        <span class="${qCls}" style="flex:1">${r.name}</span>
+        <span class="badge" style="background:${QUALITY[r.quality]?.color || '#999'};color:#000;font-size:.65rem">Q${r.quality}</span>
+      </div>`;
+    }).join('');
+  },
+
+  renderSpellCraftSlots() {
+    const el = document.getElementById('craft-spell-slots');
+    if (!el) return;
+    const selected = App._spellCraftSelected || [];
+    const MAX = 3;
+    let html = selected.map((id, i) => {
+      const comp = SPELL_COMPONENTS.find(x => x.id === id);
+      return `<div class="craft-slot filled" data-spell-slot-index="${i}" title="Clicca per rimuovere">
+        ${comp ? comp.icon : '?'} <span class="small">${comp ? comp.name : '?'}</span>
+        <span class="craft-slot-remove">×</span>
+      </div>`;
+    }).join('');
+    for (let i = selected.length; i < MAX; i++) {
+      html += `<div class="craft-slot empty"><span class="text-muted small">Slot ${i+1}</span></div>`;
+    }
+    el.innerHTML = html;
+    const btn = document.getElementById('btn-craft-spell');
+    if (btn) btn.disabled = selected.length < 2 || selected.length > MAX;
+  },
+
+  openRecipeModal(recipeId, type) {
+    const r = type === 'spell'
+      ? SPELL_RECIPES.find(x => x.id === recipeId)
+      : POTION_RECIPES.find(x => x.id === recipeId);
+    if (!r) return;
+    const isSpell = type === 'spell';
+    document.getElementById('modal-recipe-title').textContent = r.name;
+    document.getElementById('modal-recipe-icon').textContent  = r.icon;
+    document.getElementById('modal-recipe-desc').textContent  = r.desc;
+    const qData = QUALITY[r.quality];
+    const qBadge = document.getElementById('modal-recipe-quality');
+    qBadge.textContent = qData?.name || '';
+    qBadge.style.background = qData?.color || '#999';
+    qBadge.style.color = '#000';
+    const items = isSpell ? r.components : r.ingredients;
+    const itemData = isSpell ? SPELL_COMPONENTS : INGREDIENTS;
+    const inv = isSpell ? (Game.state.componentInventory || []) : (Game.state.ingredientInventory || []);
+    document.getElementById('modal-recipe-ingredients').innerHTML = items.map(id => {
+      const item = itemData.find(x => x.id === id);
+      if (!item) return '';
+      const has = inv.filter(x => x === id).length;
+      const qCls = QUALITY[item.quality]?.cls || '';
+      return `<div class="d-flex align-items-center gap-2 mb-1">
+        <span>${item.icon}</span>
+        <span class="${qCls}" style="flex:1">${item.name}</span>
+        <span class="small ${has > 0 ? 'text-success' : 'text-danger'}">${has > 0 ? '✓ disponibile' : '✗ manca'}</span>
+      </div>`;
+    }).join('');
+    document.getElementById('modal-recipe-reward').textContent = `Ricompensa: +${r.reward.xp} PE, +${r.reward.gold} mo`;
+    // Salva tipo sul bottone Prepara
+    const prepBtn = document.getElementById('btn-recipe-prepare');
+    prepBtn.dataset.recipeId   = recipeId;
+    prepBtn.dataset.recipeType = type;
+    const modal = new bootstrap.Modal(document.getElementById('modal-recipe'));
+    modal.show();
   },
 
   /* ─── Guild tax info ────────────────────────────────────── */
@@ -1070,7 +1276,9 @@ const UI = {
     this.renderPickpocketBtn();
     this.renderStudyBtn();
     this.renderPozioniTab();
+    this.renderIncantesimiTab();
     this.renderCraftSlots();
+    this.renderSpellCraftSlots();
     this.renderGuildTaxInfo();
     this.renderActiveBoosts();
     this.renderWantedMission();
@@ -1094,11 +1302,14 @@ const UI = {
     // Tab Dadi (Ladro e Guerriero)
     document.getElementById('tab-dice-nav').classList.toggle('d-none', !cls.hasDiceGame);
 
-    // Studio (solo Mago)
+    // Studio (Mago e Druido)
     document.getElementById('study-wrapper').classList.toggle('d-none', !cls.hasStudy);
 
-    // Tab Pozioni (solo Mago)
+    // Tab Pozioni (solo Druido)
     document.getElementById('tab-pozioni-nav').classList.toggle('d-none', !cls.hasPotioniTab);
+
+    // Tab Incantesimi (solo Mago)
+    document.getElementById('tab-incantesimi-nav').classList.toggle('d-none', !cls.hasSpellTab);
 
     // Classe sotto il nome
     document.getElementById('char-class').textContent = cls.name;
@@ -1185,6 +1396,7 @@ const UI = {
     const titleEl  = document.getElementById('memory-result-title');
     const rewardEl = document.getElementById('memory-result-rewards');
     const ingEl    = document.getElementById('memory-result-ingredients');
+    const isMago   = Game.getClasse().hasSpellTab;
     resultEl.classList.remove('d-none');
     if (win) {
       let tier;
@@ -1194,11 +1406,16 @@ const UI = {
       titleEl.innerHTML = `<span class="text-gold">${tier}</span>`;
       const result = Game.applyStudyReward(timeLeft, errors);
       rewardEl.textContent = `+${result.xp} PE   +${result.gold} mo`;
+      let ingHtml = '';
       if (result.ingredients && result.ingredients.length > 0) {
-        ingEl.innerHTML = 'Ingredienti: ' + result.ingredients.map(i => `${i.icon} ${i.name}`).join(', ');
-      } else {
-        ingEl.textContent = '';
+        const label = isMago ? 'Componenti' : 'Ingredienti';
+        ingHtml += label + ': ' + result.ingredients.map(i => `${i.icon} ${i.name}`).join(', ');
       }
+      if (result.unlockedRecipe) {
+        const label = isMago ? '📖 Incantesimo scoperto' : '📖 Ricetta scoperta';
+        ingHtml += (ingHtml ? '<br>' : '') + `<span class="text-gold">${label}: ${result.unlockedRecipe.icon} ${result.unlockedRecipe.name}</span>`;
+      }
+      ingEl.innerHTML = ingHtml;
       this.refresh();
       if (result.levelUpResult) App._triggerLevelUp(result.levelUpResult);
     } else {

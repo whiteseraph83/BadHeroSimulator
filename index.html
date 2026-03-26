@@ -134,7 +134,7 @@
             </button>
           </div>
 
-          <!-- Studia button (solo Mago) -->
+          <!-- Studia button (Mago e Druido) -->
           <div class="mb-2 d-none" id="study-wrapper">
             <button class="btn btn-study w-100" id="btn-study">
               <i class="bi bi-book"></i> Studia
@@ -202,6 +202,11 @@
         <li class="nav-item d-none" id="tab-pozioni-nav">
           <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-pozioni">
             <i class="bi bi-flask"></i> Pozioni
+          </button>
+        </li>
+        <li class="nav-item d-none" id="tab-incantesimi-nav">
+          <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-incantesimi">
+            <i class="bi bi-stars"></i> Incantesimi
           </button>
         </li>
         <li class="nav-item">
@@ -405,10 +410,87 @@
             </div>
           </div>
 
+          <!-- Ricettario (ricette conosciute) -->
+          <div class="card-dark mb-3">
+            <div class="card-dark-header"><i class="bi bi-book-half"></i> Ricettario
+              <span class="badge bg-secondary ms-1" id="known-recipes-count">0</span>
+            </div>
+            <div class="card-dark-body" id="known-recipes-list">
+              <p class="text-muted small fst-italic">Nessuna ricetta conosciuta. Studia per scoprirle!</p>
+            </div>
+          </div>
+
           <!-- Richieste Clienti -->
           <div class="card-dark">
             <div class="card-dark-header"><i class="bi bi-people-fill"></i> Richieste Clienti</div>
             <div class="card-dark-body" id="potion-requests">
+              <p class="text-muted small fst-italic">Nessuna richiesta oggi.</p>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- TAB: INCANTESIMI (solo Mago) -->
+        <div class="tab-pane fade" id="tab-incantesimi">
+
+          <!-- Laboratorio Arcano -->
+          <div class="card-dark mb-3">
+            <div class="card-dark-header"><i class="bi bi-magic"></i> Laboratorio Arcano</div>
+            <div class="card-dark-body">
+              <p class="text-muted small mb-2">Seleziona 2–3 componenti dall'inventario per preparare un incantesimo.</p>
+              <div id="craft-spell-slots" class="d-flex gap-2 flex-wrap mb-3"></div>
+              <div class="text-center mb-2">
+                <button class="btn btn-spell" id="btn-craft-spell" disabled>
+                  <i class="bi bi-stars"></i> Incanta
+                </button>
+                <button class="btn btn-sm btn-outline-secondary ms-2" id="btn-clear-spell">
+                  <i class="bi bi-x-circle"></i> Svuota
+                </button>
+              </div>
+              <div id="craft-spell-result" class="d-none text-center py-2 rounded"></div>
+            </div>
+          </div>
+
+          <!-- Componenti + Incantesimi -->
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <div class="card-dark h-100">
+                <div class="card-dark-header">
+                  <i class="bi bi-collection-fill"></i> Componenti
+                  <span class="badge bg-secondary ms-1" id="component-count">0</span>
+                </div>
+                <div class="card-dark-body" id="component-inventory">
+                  <p class="text-muted small fst-italic">Nessuna componente.</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="card-dark h-100">
+                <div class="card-dark-header">
+                  <i class="bi bi-stars"></i> Incantesimi Preparati
+                  <span class="badge bg-secondary ms-1" id="spell-count">0</span>
+                </div>
+                <div class="card-dark-body" id="spell-inventory">
+                  <p class="text-muted small fst-italic">Nessun incantesimo.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Ricettario (incantesimi conosciuti) -->
+          <div class="card-dark mb-3">
+            <div class="card-dark-header"><i class="bi bi-book-half"></i> Grimorio
+              <span class="badge bg-secondary ms-1" id="known-spells-count">0</span>
+            </div>
+            <div class="card-dark-body" id="known-spells-list">
+              <p class="text-muted small fst-italic">Nessun incantesimo conosciuto. Studia per scoprirli!</p>
+            </div>
+          </div>
+
+          <!-- Richieste Clienti -->
+          <div class="card-dark">
+            <div class="card-dark-header"><i class="bi bi-people-fill"></i> Richieste Clienti</div>
+            <div class="card-dark-body" id="spell-requests">
               <p class="text-muted small fst-italic">Nessuna richiesta oggi.</p>
             </div>
           </div>
@@ -792,6 +874,36 @@
           <div id="memory-result-ingredients" class="mb-3"></div>
           <button class="btn btn-gold" data-bs-dismiss="modal" id="btn-close-memory">Chiudi</button>
         </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL: DETTAGLIO RICETTA/INCANTESIMO ===== -->
+<div class="modal fade" id="modal-recipe" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content modal-dark">
+      <div class="modal-header border-gold">
+        <h5 class="modal-title text-gold" id="modal-recipe-title">Ricetta</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <span style="font-size:2rem" id="modal-recipe-icon"></span>
+          <span class="badge" id="modal-recipe-quality"></span>
+        </div>
+        <p class="text-muted small mb-3" id="modal-recipe-desc"></p>
+        <div class="mb-3">
+          <div class="small text-gold mb-1"><i class="bi bi-collection"></i> Ingredienti/Componenti necessari:</div>
+          <div id="modal-recipe-ingredients"></div>
+        </div>
+        <div class="small text-muted mb-3" id="modal-recipe-reward"></div>
+      </div>
+      <div class="modal-footer border-0">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Chiudi</button>
+        <button type="button" class="btn btn-gold" id="btn-recipe-prepare">
+          <i class="bi bi-flask-fill"></i> Prepara
+        </button>
       </div>
     </div>
   </div>
