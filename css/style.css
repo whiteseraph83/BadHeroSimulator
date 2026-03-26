@@ -1220,3 +1220,303 @@ body {
   border-color: rgba(201,168,76,.4);
   background: rgba(201,168,76,.05);
 }
+
+/* ═══════════════════════════════════════════════════════════
+   TEMA CHIARO  (html[data-theme="light"])
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── Pulsante toggle tema ── */
+#btn-theme-toggle {
+  font-size: 1.1rem;
+  line-height: 1;
+  padding: 3px 9px;
+  border-radius: 20px;
+}
+
+/* ── Variabili colore ── */
+[data-theme="light"] {
+  --bg-deep:    #f4e9d6;
+  --bg-card:    #fdf6ea;
+  --bg-card2:   #ede0c8;
+  --border-col: #c8a870;
+  --gold:       #7a5a00;
+  --gold-light: #a07800;
+  --gold-dark:  #5a4200;
+  --green:      #1e5c3c;
+  --green-light:#2e8a55;
+  --text-light: #2c1a08;
+  --text-muted: #7a5a3c;
+  --danger:     #b03020;
+  --success:    #1a6030;
+  --partial:    #b05010;
+}
+
+[data-theme="light"] body {
+  background-color: var(--bg-deep);
+  color: var(--text-light);
+}
+[data-theme="light"] .text-muted { color: var(--text-muted) !important; }
+
+/* Scrollbar */
+[data-theme="light"] ::-webkit-scrollbar-track { background: var(--bg-deep); }
+[data-theme="light"] ::-webkit-scrollbar-thumb { background: var(--border-col); }
+
+/* Navbar */
+[data-theme="light"] .navbar { background: var(--bg-card) !important; }
+[data-theme="light"] .navbar-brand { color: var(--gold) !important; }
+[data-theme="light"] .border-gold { border-color: var(--border-col) !important; }
+
+/* Card dark */
+[data-theme="light"] .card-dark { background: var(--bg-card); border-color: var(--border-col); }
+[data-theme="light"] .card-dark-header { background: var(--bg-card2); border-bottom-color: var(--border-col); }
+
+/* Avatar */
+[data-theme="light"] .rogue-avatar { background: var(--bg-card2); border-color: var(--border-col); filter: drop-shadow(0 0 6px rgba(122,90,0,.2)); }
+[data-theme="light"] .level-badge { border-color: var(--bg-card); }
+
+/* Char name */
+[data-theme="light"] .char-name { color: var(--gold); }
+
+/* Stats grid */
+[data-theme="light"] .stat-box { background: var(--bg-card2); border-color: var(--border-col); }
+[data-theme="light"] .stat-label { color: var(--gold); }
+[data-theme="light"] .stat-value { color: var(--text-light); }
+[data-theme="light"] .stat-mod { color: var(--text-muted); }
+
+/* Progress bars */
+[data-theme="light"] .xp-bar, [data-theme="light"] .fame-bar {
+  background: var(--bg-card2); border-color: var(--border-col);
+}
+[data-theme="light"] .xp-bar .progress-bar {
+  background: linear-gradient(90deg, var(--gold-dark), var(--gold)) !important;
+}
+[data-theme="light"] .fame-bar .progress-bar {
+  background: linear-gradient(90deg, var(--green), var(--green-light)) !important;
+}
+
+/* Gold display */
+[data-theme="light"] .gold-display { background: var(--bg-card2); border-color: var(--border-col); color: var(--gold); }
+
+/* Proficiency row */
+[data-theme="light"] .proficiency-row { background: var(--bg-card2); border-color: var(--border-col); }
+[data-theme="light"] .prof-badge { color: var(--green-light); background: rgba(30,92,60,.1); border-color: var(--green); }
+[data-theme="light"] .prof-icon { color: var(--green-light); }
+
+/* Nav tabs */
+[data-theme="light"] .nav-tabs.nav-dark { border-bottom-color: var(--border-col); }
+[data-theme="light"] .nav-tabs.nav-dark .nav-link { color: var(--text-muted); }
+[data-theme="light"] .nav-tabs.nav-dark .nav-link:hover { color: var(--gold); border-color: var(--border-col) var(--border-col) transparent; background: rgba(122,90,0,.05); }
+[data-theme="light"] .nav-tabs.nav-dark .nav-link.active { color: var(--gold); background: var(--bg-card); border-color: var(--border-col) var(--border-col) var(--bg-card); }
+
+/* Mission cards */
+[data-theme="light"] .mission-card { background: var(--bg-card2); border-color: var(--border-col); }
+[data-theme="light"] .mission-card::before { background: var(--border-col); }
+[data-theme="light"] .mission-card:hover { border-color: var(--gold-dark); box-shadow: 0 0 14px rgba(122,90,0,.1); }
+[data-theme="light"] .mission-card:hover::before { background: var(--gold); }
+[data-theme="light"] .mission-title { color: var(--gold); }
+[data-theme="light"] .mission-desc { color: var(--text-muted); }
+[data-theme="light"] .tag-xp   { background: rgba(122,90,0,.1);   color: var(--gold);        border-color: var(--gold-dark); }
+[data-theme="light"] .tag-gold { background: rgba(160,120,0,.1);  color: #7a5800;            border-color: #7a5800; }
+[data-theme="light"] .tag-fame { background: rgba(46,138,85,.1);  color: var(--green-light); border-color: var(--green); }
+[data-theme="light"] .tag-item { background: rgba(50,60,160,.1);  color: #3040a0;            border-color: #3040a0; }
+[data-theme="light"] .tag-dc   { background: rgba(100,80,60,.1);  color: var(--text-muted);  border-color: var(--border-col); }
+[data-theme="light"] .star-row { color: var(--border-col); }
+[data-theme="light"] .star-row .filled { color: var(--gold); }
+
+/* Quality badges */
+[data-theme="light"] .q-comune      { background: rgba(100,115,125,.12); color: #4a6070; border-color: #4a6070; }
+[data-theme="light"] .q-noncomune   { background: rgba(26,120,60,.12);   color: #1a6035; border-color: #1a6035; }
+[data-theme="light"] .q-raro        { background: rgba(25,90,160,.12);   color: #1a508a; border-color: #1a508a; }
+[data-theme="light"] .q-epico       { background: rgba(110,35,155,.12);  color: #6820a0; border-color: #6820a0; }
+[data-theme="light"] .q-leggendario { background: rgba(170,70,15,.12);   color: #a04010; border-color: #a04010; }
+
+/* Item cards */
+[data-theme="light"] .item-card { background: var(--bg-card2); border-color: var(--border-col); }
+[data-theme="light"] .item-card:hover { border-color: var(--gold-dark); box-shadow: 0 0 10px rgba(122,90,0,.1); }
+[data-theme="light"] .item-card-header { border-bottom-color: var(--border-col); }
+[data-theme="light"] .item-card-name { color: var(--text-light); }
+[data-theme="light"] .item-price { color: var(--gold); }
+[data-theme="light"] .item-stat-pill { background: rgba(26,96,48,.1); color: var(--success); border-color: rgba(26,96,48,.3); }
+[data-theme="light"] .item-ability-pill { background: rgba(26,80,160,.1); color: #1a50a0; border-color: rgba(26,80,160,.3); }
+[data-theme="light"] .item-modal-section { background: var(--bg-card2); border-color: var(--border-col); }
+
+/* Equipment slots */
+[data-theme="light"] .equip-slot-card { background: var(--bg-card2); border-color: var(--border-col); }
+[data-theme="light"] .equip-slot-card.has-item:hover { background: rgba(122,90,0,.06); }
+
+/* Log */
+[data-theme="light"] .log-entry { border-bottom-color: var(--border-col); }
+[data-theme="light"] .log-day { color: var(--gold); }
+[data-theme="light"] .log-text { color: var(--text-light); }
+
+/* Modal */
+[data-theme="light"] .modal-dark { background: var(--bg-card); border-color: var(--border-col); color: var(--text-light); }
+[data-theme="light"] .modal-dark .modal-header, [data-theme="light"] .modal-dark .modal-footer { border-color: var(--border-col); }
+[data-theme="light"] .modal-dark .btn-close { filter: none; }
+
+/* Form controls */
+[data-theme="light"] .form-control-dark { background: var(--bg-card2); border-color: var(--border-col); color: var(--text-light); }
+[data-theme="light"] .form-control-dark:focus { background: var(--bg-card2); border-color: var(--gold-dark); color: var(--text-light); box-shadow: 0 0 0 2px rgba(122,90,0,.2); }
+[data-theme="light"] .form-select-dark { background-color: var(--bg-card2); border-color: var(--border-col); color: var(--text-light); }
+[data-theme="light"] .form-select-dark:focus { background-color: var(--bg-card2); border-color: var(--gold-dark); color: var(--text-light); box-shadow: 0 0 0 2px rgba(122,90,0,.2); }
+
+/* Rolled pills + approach buttons */
+[data-theme="light"] .rolled-pill { background: var(--bg-card2); border-color: var(--border-col); color: var(--gold); }
+[data-theme="light"] .btn-approach { background: var(--bg-card2); border-color: var(--border-col); color: var(--text-light); }
+[data-theme="light"] .btn-approach:hover { border-color: var(--gold); background: rgba(122,90,0,.08); color: var(--gold); box-shadow: 0 0 10px rgba(122,90,0,.2); }
+[data-theme="light"] .approach-stat { color: var(--gold); }
+[data-theme="light"] .approach-label { color: var(--text-light); }
+[data-theme="light"] .stat-badge { background: var(--gold-dark); color: #f5e9d5; }
+
+/* Roll breakdown */
+[data-theme="light"] .roll-breakdown { background: var(--bg-card2); border-color: var(--border-col); }
+[data-theme="light"] .rb-val { color: var(--text-light); }
+[data-theme="light"] .rb-label, [data-theme="light"] .rb-plus, [data-theme="light"] .rb-eq, [data-theme="light"] .roll-breakdown .roll-vs { color: var(--text-muted); }
+[data-theme="light"] .rb-dice, [data-theme="light"] .rb-total, [data-theme="light"] .roll-breakdown .roll-num { color: var(--gold); }
+[data-theme="light"] .rb-prof { color: var(--green-light) !important; }
+[data-theme="light"] .rb-equip, [data-theme="light"] .rb-equip-note, [data-theme="light"] .roll-breakdown .roll-dc { color: #2050a0 !important; }
+
+/* Dice d20 */
+[data-theme="light"] .dice-d20 { background: linear-gradient(135deg, var(--bg-card2), #e8d0a8); border-color: var(--gold-dark); color: var(--gold); box-shadow: 0 0 16px rgba(122,90,0,.18), inset 0 0 16px rgba(255,255,255,.4); }
+[data-theme="light"] .dice-d20.nat20 { border-color: var(--gold); box-shadow: 0 0 28px rgba(160,120,0,.7); color: var(--gold); }
+[data-theme="light"] .dice-d20.nat1  { border-color: var(--danger); box-shadow: 0 0 28px rgba(176,48,32,.5); color: var(--danger); }
+
+/* Mission rewards */
+[data-theme="light"] .mission-rewards { background: var(--bg-card2); border-color: var(--border-col); }
+
+/* Level up */
+[data-theme="light"] .btn-stat-up { background: var(--bg-card2); border-color: var(--border-col); color: var(--text-light); }
+[data-theme="light"] .btn-stat-up:hover { border-color: var(--gold-dark); color: var(--gold); }
+[data-theme="light"] .btn-stat-up.picked { border-color: var(--gold); color: var(--gold); background: rgba(122,90,0,.1); }
+
+/* Tax info */
+[data-theme="light"] .tax-info { background: var(--bg-card2); border-color: var(--border-col); }
+[data-theme="light"] .tax-can-pay { color: var(--success); }
+[data-theme="light"] .tax-cannot-pay { color: var(--danger); }
+
+/* Wanted / Visibilità */
+[data-theme="light"] .wanted-display { border-top-color: rgba(0,0,0,.1); }
+[data-theme="light"] .wanted-mission-card { background: rgba(176,48,32,.07); border-color: rgba(176,48,32,.4); }
+[data-theme="light"] .wanted-mission-title { color: var(--danger); }
+[data-theme="light"] .wanted-bar { background: var(--bg-card2); border-color: rgba(176,48,32,.35); }
+[data-theme="light"] .wanted-round-dot { border-color: #aaa; color: #aaa; }
+[data-theme="light"] .wanted-round-dot.active { border-color: var(--danger); color: var(--danger); }
+
+/* Challenge cards */
+[data-theme="light"] .challenge-card { background: rgba(0,0,0,.02); border-color: rgba(122,90,0,.2); }
+[data-theme="light"] .challenge-card:hover { border-color: rgba(122,90,0,.45); }
+[data-theme="light"] .challenge-card.completed { background: rgba(46,138,85,.06); border-color: rgba(46,138,85,.3); }
+[data-theme="light"] .challenge-desc { color: #5a3a18; }
+[data-theme="light"] .challenge-rwd { color: #6a4a28; }
+
+/* Compare modal */
+[data-theme="light"] .compare-item-card { background: rgba(0,0,0,.03); border-color: rgba(0,0,0,.1); }
+[data-theme="light"] .compare-empty { color: #aaa; background: rgba(0,0,0,.02); border-color: rgba(0,0,0,.1); }
+[data-theme="light"] .compare-stats-block { border-top-color: rgba(0,0,0,.1); }
+
+/* Borseggio mini-game */
+[data-theme="light"] .pp-bar { background: var(--bg-card2); border-color: rgba(122,90,0,.3); }
+[data-theme="light"] .pp-success-zone { background: rgba(30,92,60,.2); border-color: var(--green); }
+
+/* Boost badge */
+[data-theme="light"] .boost-badge { background: rgba(46,138,85,.08); border-color: rgba(46,138,85,.3); }
+[data-theme="light"] .boost-name { color: var(--text-light); }
+[data-theme="light"] .boost-days { color: var(--text-muted); }
+
+/* Gioco dei dadi */
+[data-theme="light"] .dice-player-row { background: rgba(0,0,0,.03); border-color: rgba(0,0,0,.08); }
+[data-theme="light"] .dice-player-hero { border-color: rgba(122,90,0,.35); background: rgba(122,90,0,.06); }
+[data-theme="light"] .dice-player-name { color: var(--text-light); }
+[data-theme="light"] .dice-face { background: var(--bg-card2); border-color: rgba(0,0,0,.2); color: var(--text-light); }
+[data-theme="light"] .dice-total { color: var(--text-light); }
+[data-theme="light"] .dice-result-row { background: rgba(0,0,0,.03); border-color: rgba(0,0,0,.06); }
+[data-theme="light"] .dice-result-player { border-color: rgba(122,90,0,.35); background: rgba(122,90,0,.05); }
+[data-theme="light"] .dice-result-total { color: var(--text-light); }
+
+/* Class selection */
+[data-theme="light"] .class-card { background: rgba(0,0,0,.02); border-color: rgba(122,90,0,.25); }
+[data-theme="light"] .class-card:hover { border-color: rgba(122,90,0,.6); background: rgba(122,90,0,.05); transform: translateY(-2px); }
+[data-theme="light"] .class-card.selected { border-color: var(--gold); background: rgba(122,90,0,.1); }
+[data-theme="light"] .class-card-name { color: var(--gold); }
+[data-theme="light"] .class-card-desc { color: var(--text-muted); }
+[data-theme="light"] .class-card-profs { color: var(--green-light); }
+
+/* Memory game */
+[data-theme="light"] .memory-hud-item { background: rgba(0,0,0,.03); border-color: rgba(0,0,0,.1); }
+[data-theme="light"] .memory-card { background: var(--bg-card2); border-color: rgba(122,90,0,.25); }
+[data-theme="light"] .memory-card:not(.flipped):not(.matched):hover { border-color: rgba(122,90,0,.65); }
+[data-theme="light"] .memory-card.flipped { background: #e8d0f0; border-color: #8040c0; }
+[data-theme="light"] .memory-card.matched { background: rgba(46,138,85,.1); border-color: #2e8a55; }
+[data-theme="light"] .memory-card .card-back { color: rgba(122,90,0,.3); }
+
+/* Ingredienti & Pozioni */
+[data-theme="light"] .ingredient-card, [data-theme="light"] .potion-card { background: rgba(0,0,0,.02); }
+[data-theme="light"] .ingredient-card:hover { border-color: rgba(122,90,0,.35); background: rgba(122,90,0,.04); }
+[data-theme="light"] .ingredient-card.selected { border-color: var(--gold); background: rgba(122,90,0,.07); }
+[data-theme="light"] .ingredient-qty { color: var(--green-light); }
+
+/* Craft slots */
+[data-theme="light"] .craft-slot { border-color: rgba(122,90,0,.3); background: rgba(0,0,0,.02); color: var(--text-muted); }
+[data-theme="light"] .craft-slot.filled { border-color: #7a3aa0; background: rgba(122,58,160,.07); color: #6028a0; }
+[data-theme="light"] .craft-slot.filled:hover { background: rgba(122,58,160,.13); }
+[data-theme="light"] .craft-slot-remove { color: var(--danger); }
+
+/* Potion / spell request cards */
+[data-theme="light"] .potion-request-card { background: rgba(0,0,0,.02); border-color: rgba(122,90,0,.15); }
+[data-theme="light"] .potion-request-card:hover { border-color: rgba(122,90,0,.3); }
+
+/* Thief attack card */
+[data-theme="light"] .thief-attack-card { background: rgba(180,140,0,.05); border-color: rgba(180,130,0,.35); }
+[data-theme="light"] .thief-attack-title { color: var(--gold); }
+
+/* Recipe card */
+[data-theme="light"] .recipe-card { background: rgba(0,0,0,.02); }
+[data-theme="light"] .recipe-card:hover { border-color: rgba(122,90,0,.35); background: rgba(122,90,0,.04); }
+
+/* Btn overrides per tema chiaro */
+[data-theme="light"] .btn-pickpocket {
+  background: linear-gradient(135deg, #e8d0f4, #d0b8e8);
+  color: #4a1878; border-color: #8040c0;
+}
+[data-theme="light"] .btn-pickpocket:hover:not(:disabled) {
+  background: linear-gradient(135deg, #d8b8ec, #c0a0d8);
+  color: #3a1068; border-color: #6030a8;
+}
+[data-theme="light"] .btn-study {
+  background: linear-gradient(135deg, #ead8f8 0%, #d8c8ec 100%);
+  color: #4a2888; border-color: rgba(110,50,180,.5);
+}
+[data-theme="light"] .btn-study:hover:not(:disabled) {
+  background: linear-gradient(135deg, #daccf0 0%, #c8b8e4 100%);
+  border-color: #7030b0; color: #3a1870;
+}
+[data-theme="light"] .btn-spell {
+  background: linear-gradient(135deg, #cce4f8 0%, #b4d4f0 100%);
+  color: #1a4878; border-color: rgba(40,100,170,.4);
+}
+[data-theme="light"] .btn-spell:hover:not(:disabled) {
+  background: linear-gradient(135deg, #b8d8f0 0%, #a0c8e8 100%);
+  border-color: #1870b8; color: #103860;
+}
+
+/* Game Over modal */
+[data-theme="light"] .modal-gameover-content { background: #fff5f0 !important; box-shadow: 0 0 50px rgba(176,48,32,.3); }
+[data-theme="light"] .gameover-stats { background: rgba(176,48,32,.06); border-color: rgba(176,48,32,.25); }
+[data-theme="light"] .gameover-stat-row { border-bottom-color: rgba(176,48,32,.12); }
+[data-theme="light"] .gameover-stat-row strong { color: var(--gold); }
+
+/* Toast */
+[data-theme="light"] .toast { background: var(--bg-card) !important; color: var(--text-light); }
+
+/* Bootstrap overrides per tema chiaro */
+[data-theme="light"] .text-warning { color: var(--gold) !important; }
+[data-theme="light"] .text-gold { color: var(--gold) !important; }
+[data-theme="light"] .text-info { color: #1a5a90 !important; }
+[data-theme="light"] .text-success { color: var(--success) !important; }
+[data-theme="light"] .text-danger { color: var(--danger) !important; }
+/* Navbar Bootstrap dark override */
+[data-theme="light"] .navbar.navbar-dark .navbar-brand,
+[data-theme="light"] .navbar.navbar-dark .nav-link { color: var(--text-light); }
+/* Pulsante outline-secondary nel tema chiaro */
+[data-theme="light"] #btn-theme-toggle { border-color: var(--border-col); color: var(--gold); }
+[data-theme="light"] #btn-theme-toggle:hover { background: rgba(122,90,0,.08); border-color: var(--gold); }

@@ -37,6 +37,11 @@ const App = {
 
   /* ─── Bootstrap ───────────────────────────────────────── */
   init() {
+    // Tema (light/dark) — ripristina preferenza salvata
+    const savedTheme = localStorage.getItem('badhero_theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    this._updateThemeToggleIcon(savedTheme);
+
     const hasGame = Game.init();
     if (hasGame) {
       if (Game.state.gameOver) {
@@ -71,8 +76,22 @@ const App = {
       '<div class="col-12 text-center text-muted py-4"><i class="bi bi-lock fs-3"></i><p class="mt-2">Crea il tuo personaggio per iniziare.</p></div>';
   },
 
+  _updateThemeToggleIcon(theme) {
+    const btn = document.getElementById('btn-theme-toggle');
+    if (btn) btn.textContent = theme === 'light' ? '🌙' : '☀️';
+  },
+
   /* ─── Binding eventi ──────────────────────────────────── */
   _bindEvents() {
+
+    // Toggle tema chiaro / scuro
+    document.getElementById('btn-theme-toggle').addEventListener('click', () => {
+      const current = document.documentElement.getAttribute('data-theme') || 'dark';
+      const next = current === 'light' ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('badhero_theme', next);
+      this._updateThemeToggleIcon(next);
+    });
 
     // Creazione PG — step 0: selezione classe
     document.getElementById('class-selection-grid').addEventListener('click', (e) => {
