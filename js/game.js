@@ -5,8 +5,6 @@
 const SAVE_KEY = 'badhero_save_v2';
 const SAVE_VERSION = 2;
 
-/* ── Stat proficiency per il Ladro ── */
-const ROGUE_PROF_STATS = ['dex', 'int', 'cha'];
 
 const Game = {
 
@@ -29,6 +27,7 @@ const Game = {
           if (this.state.wantedMissionCompleted === undefined) this.state.wantedMissionCompleted = false;
           if (!this.state.activeBoosts)                        this.state.activeBoosts = [];
           if (this.state.diceRerollsUsed === undefined)        this.state.diceRerollsUsed = 0;
+          if (!this.state.character.classe)                    this.state.character.classe = 'ladro';
           return true;
         }
       } catch (e) {
@@ -38,14 +37,16 @@ const Game = {
     return false;
   },
 
-  newGame(stats) {
+  newGame(stats, name, classeId) {
+    const cls = CLASSES.find(c => c.id === classeId) || CLASSES[0];
     this.state = {
       version: SAVE_VERSION,
       character: {
-        name: 'Giblin',
+        name: name || 'Eroe',
+        classe: cls.id,
         level: 1,
         xp: 0,
-        gold: 30,
+        gold: cls.startingGold,
         fame: 10,
         wanted: 0,
         stats: { ...stats },
@@ -228,8 +229,17 @@ const Game = {
   },
 
   /* ─── Proficiency ───────────────────────────────────────── */
+  getProfStats() {
+    const cls = CLASSES.find(c => c.id === (this.state.character.classe || 'ladro'));
+    return cls ? cls.proficiencies : ['dex', 'int', 'cha'];
+  },
+
+  getClasse() {
+    return CLASSES.find(c => c.id === (this.state.character.classe || 'ladro')) || CLASSES[0];
+  },
+
   hasProficiency(statKey) {
-    return ROGUE_PROF_STATS.includes(statKey);
+    return this.getProfStats().includes(statKey);
   },
 
   totalBonus(statKey) {
@@ -734,7 +744,10 @@ const Game = {
     const RARE_W     = 3;   // peso 3× per le stat rare
     const count      = 4 + Math.floor(Math.random() * 2); // 4–5 missioni visibili
 
-    const fameOk = DB.missions.filter(m => m.minFame <= char.fame);
+    const fameOk = DB.missions.filter(m =>
+      m.minFame <= char.fame &&
+      (!m.classRestrict || m.classRestrict === char.classe)
+    );
 
     // Weighted sampling senza ripetizione
     const pool = fameOk.map(m => ({
@@ -822,6 +835,7 @@ const Game = {
     if (c.type === 'reach_fame'  && c.condition.fame  <= char.fame)  return false;
     if (c.type === 'reach_level' && c.condition.level <= char.level) return false;
     if (c.type === 'mission_tier' && c.condition.tier === 3 && char.fame < 150) return false;
+    if (c.classRestrict && c.classRestrict !== char.classe) return false;
     return true;
   },
 
@@ -1008,37 +1022,37 @@ const Game = {
     };
 
     const npcPool = [...DICE_NPC_NAMES].sort(() => Math.random() - 0.5);
-    const giblinDice = roll2d6();
+    const playerDice = roll2d6();
     const players = [
-      { name: 'Giblin',   isPlayer: true,  ...giblinDice },
+      { name: char.name,  isPlayer: true,  ...playerDice },
       { name: npcPool[0], isPlayer: false, ...roll2d6()  },
       { name: npcPool[1], isPlayer: false, ...roll2d6()  },
       { name: npcPool[2], isPlayer: false, ...roll2d6()  },
     ];
     const ranked     = [...players].sort((a, b) =>
       b.total !== a.total ? b.total - a.total : (a.isPlayer ? -1 : 1));
-    const giblinRank = ranked.findIndex(p => p.isPlayer) + 1;
+    const playerRank = ranked.findIndex(p => p.isPlayer) + 1;
 
     let goldDelta, fameDelta = 0, xp = 0, outcome;
-    if (giblinRank === 1) {
+    if (playerRank === 1) {
       goldDelta = bet * 3;
       xp        = 100 + char.level * 24 + Math.floor(bet * 0.03);
       fameDelta = 3 + Math.floor(bet / 150);
       outcome   = 'win';
-    } else if (giblinRank === 4) {
+    } else if (playerRank === 4) {
       goldDelta = -bet;
       fameDelta = -(3 + Math.floor(char.level / 2));
       outcome   = 'last';
     } else {
-      const pct = giblinRank === 2 ? 0.4 : 0.15;
+      const pct = playerRank === 2 ? 0.4 : 0.15;
       goldDelta = Math.floor(bet * pct) - bet;
-      xp        = giblinRank === 2
+      xp        = playerRank === 2
         ? 50 + char.level * 12 + Math.floor(bet * 0.015)
         : 20 + char.level * 6  + Math.floor(bet * 0.008);
-      fameDelta = giblinRank === 2 ? 1 + Math.floor(bet / 300) : 0;
+      fameDelta = playerRank === 2 ? 1 + Math.floor(bet / 300) : 0;
       outcome   = 'consolation';
     }
-    return { ok: true, ranked, giblinRank, bet, goldDelta, fameDelta, xp, outcome };
+    return { ok: true, ranked, playerRank, bet, goldDelta, fameDelta, xp, outcome };
   },
 
   /* Applica il risultato finale allo stato */
@@ -1050,7 +1064,7 @@ const Game = {
     const logText = result.outcome === 'win'
       ? `Dadi: vittoria! +${result.goldDelta} mo`
       : result.outcome === 'last' ? `Dadi: ultimo posto, -${result.bet} mo`
-      : `Dadi: ${result.giblinRank}° posto (${result.goldDelta >= 0 ? '+' : ''}${result.goldDelta} mo)`;
+      : `Dadi: ${result.playerRank}° posto (${result.goldDelta >= 0 ? '+' : ''}${result.goldDelta} mo)`;
     const logEntry = { day: char.day, text: logText,
       type: result.outcome === 'win' ? 'success' : result.outcome === 'last' ? 'fail' : 'neutral' };
     char.log.unshift(logEntry);

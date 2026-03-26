@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Sfondo circolare -->
+  <circle cx="50" cy="50" r="48" fill="#0d0d1a" stroke="#2e2e50" stroke-width="2"/>
+
+  <!-- Elmo base (più alto e ornato) -->
+  <ellipse cx="50" cy="35" rx="22" ry="21" fill="#1e2a3a"/>
+  <path d="M28 35 Q28 14 50 12 Q72 14 72 35 Z" fill="#162034"/>
+  <!-- Cresta elmo (accento argento/blu) -->
+  <path d="M50 12 Q50 4 50 0 Q52 6 54 12" fill="#2980b9" opacity="0.8"/>
+  <ellipse cx="50" cy="6" rx="3" ry="6" fill="#3498db" opacity="0.7"/>
+
+  <!-- Bordo elmo (accento azzurro-argento) -->
+  <path d="M28 35 Q28 14 50 12 Q72 14 72 35" fill="none" stroke="#85c1e9" stroke-width="1.8" opacity="0.85"/>
+
+  <!-- Visiera a T -->
+  <rect x="33" y="33" width="34" height="11" rx="2" fill="#111825"/>
+  <!-- Fessura orizzontale T -->
+  <rect x="34" y="37" width="32" height="3" rx="1" fill="#0d0d1a"/>
+  <!-- Fessura verticale T -->
+  <rect x="47" y="33" width="6" height="11" rx="1" fill="#0d0d1a"/>
+  <!-- Occhi dalla fessura -->
+  <ellipse cx="40" cy="38.5" rx="3.5" ry="1.2" fill="#85c1e9" opacity="0.9"/>
+  <ellipse cx="60" cy="38.5" rx="3.5" ry="1.2" fill="#85c1e9" opacity="0.9"/>
+
+  <!-- Paragnatidi ornate -->
+  <path d="M28 33 Q23 44 27 55 Q33 60 36 53 Q30 46 30 36 Z" fill="#1e2a3a" stroke="#85c1e9" stroke-width="0.8" opacity="0.8"/>
+  <path d="M72 33 Q77 44 73 55 Q67 60 64 53 Q70 46 70 36 Z" fill="#1e2a3a" stroke="#85c1e9" stroke-width="0.8" opacity="0.8"/>
+
+  <!-- Collo / corazza -->
+  <path d="M36 53 Q22 60 18 76 Q26 90 40 90" fill="none" stroke="#1e2a3a" stroke-width="11" stroke-linecap="round"/>
+  <path d="M64 53 Q78 60 82 76 Q74 90 60 90" fill="none" stroke="#1e2a3a" stroke-width="11" stroke-linecap="round"/>
+  <!-- Bordo corazza -->
+  <path d="M36 53 Q22 60 18 76" fill="none" stroke="#85c1e9" stroke-width="0.8" opacity="0.5"/>
+  <path d="M64 53 Q78 60 82 76" fill="none" stroke="#85c1e9" stroke-width="0.8" opacity="0.5"/>
+
+  <!-- Scudo (lato sinistro) -->
+  <path d="M20 60 L20 78 Q20 86 28 88 Q36 80 34 60 Z" fill="#1a2535" stroke="#85c1e9" stroke-width="1.2"/>
+  <!-- Croce sullo scudo -->
+  <line x1="27" y1="64" x2="27" y2="80" stroke="#85c1e9" stroke-width="1.5" opacity="0.9"/>
+  <line x1="22" y1="72" x2="32" y2="72" stroke="#85c1e9" stroke-width="1.5" opacity="0.9"/>
+
+  <!-- Spada (lato destro) -->
+  <line x1="74" y1="56" x2="80" y2="84" stroke="#c9a84c" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="70" y1="61" x2="80" y2="58" stroke="#85c1e9" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="81" cy="85" r="2" fill="#85c1e9"/>
+
+  <!-- Simbolo sacro sul petto -->
+  <circle cx="50" cy="63" r="5" fill="#162034" stroke="#85c1e9" stroke-width="1.2"/>
+  <line x1="50" y1="59" x2="50" y2="67" stroke="#85c1e9" stroke-width="1.5"/>
+  <line x1="46.5" y1="61.5" x2="53.5" y2="61.5" stroke="#85c1e9" stroke-width="1.5"/>
+  <!-- Cerchietto centrale -->
+  <circle cx="50" cy="63" r="1.5" fill="#3498db" opacity="0.8"/>
+
+  <!-- Alone -->
+  <circle cx="50" cy="50" r="47" fill="none" stroke="#85c1e9" stroke-width="0.5" opacity="0.3"/>
+</svg>

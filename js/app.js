@@ -8,6 +8,7 @@ const App = {
   _currentApproachIdx:  null,
   _createModal:         null,
   _rolledValues:        [],
+  _selectedClasseId:    'ladro',
   _ppAnimFrameId:       null,
   _ppClickHandler:      null,
   _wantedAnimFrameId:   null,
@@ -42,12 +43,13 @@ const App = {
     } else {
       this._showPlaceholder();
       this._createModal = UI.showCreateModal();
+      UI.showClassStep();
     }
     this._bindEvents();
   },
 
   _showPlaceholder() {
-    document.getElementById('char-name').textContent  = 'Giblin';
+    document.getElementById('char-name').textContent  = '—';
     document.getElementById('char-level').textContent = 'Lv.?';
     document.getElementById('missions-container').innerHTML =
       '<div class="col-12 text-center text-muted py-4"><i class="bi bi-lock fs-3"></i><p class="mt-2">Crea il tuo personaggio per iniziare.</p></div>';
@@ -56,8 +58,30 @@ const App = {
   /* ─── Binding eventi ──────────────────────────────────── */
   _bindEvents() {
 
-    // Creazione PG — step 1: lancia dadi (no name required)
+    // Creazione PG — step 0: selezione classe
+    document.getElementById('class-selection-grid').addEventListener('click', (e) => {
+      const card = e.target.closest('.class-card');
+      if (!card) return;
+      const cls = CLASSES.find(c => c.id === card.dataset.classId);
+      if (!cls) return;
+      this._selectedClasseId = cls.id;
+      UI.showIntroStep(cls);
+    });
+
+    // Creazione PG — torna alla scelta classe
+    document.getElementById('btn-back-to-class').addEventListener('click', () => {
+      UI.showClassStep();
+    });
+
+    // Creazione PG — step 1: valida nome e lancia dadi
     document.getElementById('btn-roll-intro').addEventListener('click', () => {
+      const nameVal = document.getElementById('char-name-input').value.trim();
+      const errEl   = document.getElementById('name-error');
+      if (!nameVal) {
+        errEl.classList.remove('d-none');
+        return;
+      }
+      errEl.classList.add('d-none');
       this._rolledValues = Game.rollAllStats();
       UI.showRollStep(this._rolledValues);
     });
@@ -70,11 +94,13 @@ const App = {
 
     // Creazione PG — conferma
     document.getElementById('btn-confirm-create').addEventListener('click', () => {
-      const stats = UI.getStatAssignments(this._rolledValues);
-      Game.newGame(stats);
+      const stats   = UI.getStatAssignments(this._rolledValues);
+      const name    = document.getElementById('char-name-input').value.trim() || 'Eroe';
+      const classeId = this._selectedClasseId;
+      Game.newGame(stats, name, classeId);
       bootstrap.Modal.getInstance(document.getElementById('modal-create')).hide();
       UI.refresh();
-      UI.toast('Benvenuto, Giblin! La tua avventura ha inizio.');
+      UI.toast(`Benvenuto, ${name}! La tua avventura da ${Game.getClasse().name} ha inizio.`);
     });
 
     // Passa al giorno successivo
@@ -188,7 +214,7 @@ const App = {
       this._showDicePhase();
       // Pre-render rolling phase (all "?")
       const players = [
-        { name: 'Giblin', isPlayer: true },
+        { name: Game.state.character.name, isPlayer: true },
         { name: '???', isPlayer: false }, { name: '???', isPlayer: false }, { name: '???', isPlayer: false },
       ];
       UI.renderDiceRollingPhase(bet, players);
@@ -540,13 +566,13 @@ const App = {
         this._diceAnimInterval = null;
 
         const container = document.getElementById('dice-players-container');
-        const giblin    = result.ranked.find(p => p.isPlayer);
+        const player    = result.ranked.find(p => p.isPlayer);
 
         /* Ridisegna la classifica live; il giocatore appena entrato
            riceve la classe .dice-row-new per l'animazione di ingresso */
         const renderLive = (players, newName) => {
           container.innerHTML = players.map(p => `
-            <div class="dice-player-row ${p.isPlayer ? 'dice-player-giblin' : ''} ${p.name === newName ? 'dice-row-new' : ''}">
+            <div class="dice-player-row ${p.isPlayer ? 'dice-player-hero' : ''} ${p.name === newName ? 'dice-row-new' : ''}">
               <div class="dice-player-name">${p.isPlayer ? '⚔️ ' : ''}${p.name}</div>
               <div class="dice-faces">
                 <div class="dice-face">${p.d1}</div>
@@ -556,18 +582,18 @@ const App = {
             </div>`).join('');
         };
 
-        // Giblin appare subito al 1° posto
-        let shown = [giblin];
+        // Il giocatore appare subito al 1° posto
+        let shown = [player];
         renderLive(shown, null);
 
         // Gli NPC entrano uno alla volta (dal migliore al peggiore):
-        // se un NPC supera Giblin lo spinge verso il basso
+        // se un NPC supera il giocatore lo spinge verso il basso
         const npcs = result.ranked.filter(p => !p.isPlayer);
         let idx = 0;
         const revealNext = () => {
           if (idx >= npcs.length) {
             setTimeout(() => {
-              if (result.giblinRank !== 1 && Game.diceRerollsRemaining() > 0) {
+              if (result.playerRank !== 1 && Game.diceRerollsRemaining() > 0) {
                 document.getElementById('dice-roll-btn-area').classList.add('d-none');
                 document.getElementById('dice-offer-rerolls').textContent = Game.diceRerollsRemaining();
                 document.getElementById('dice-reroll-offer').classList.remove('d-none');
@@ -579,7 +605,7 @@ const App = {
           }
           const npc = npcs[idx++];
           shown.push(npc);
-          // Riordina: totale più alto prima; a parità vince Giblin (come in game.js)
+          // Riordina: totale più alto prima; a parità vince il giocatore (come in game.js)
           shown.sort((a, b) => b.total !== a.total ? b.total - a.total : (a.isPlayer ? -1 : 1));
           renderLive(shown, npc.name);
           setTimeout(revealNext, 500);

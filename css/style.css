@@ -1,5 +1,5 @@
 /* ============================================================
-   GiblinSimulator — Dark Fantasy Theme v2
+   BadHeroSimulator — Dark Fantasy Theme v2
    ============================================================ */
 
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
@@ -938,7 +938,7 @@ body {
   border: 1px solid rgba(255,255,255,.08);
   border-radius: 8px;
 }
-.dice-player-giblin { border-color: rgba(212,175,55,.4); background: rgba(212,175,55,.07); }
+.dice-player-hero { border-color: rgba(212,175,55,.4); background: rgba(212,175,55,.07); }
 .dice-player-name   { flex: 1; font-size: .9rem; }
 
 .dice-faces { display: flex; gap: 6px; }
@@ -978,3 +978,46 @@ body {
 }
 .boost-name  { flex:1; color:#e8d5b0; }
 .boost-days  { color:#aaa; white-space:nowrap; font-weight:700; }
+
+/* ── Selezione classe (modal creazione) ──────────────────── */
+.class-card {
+  border: 1px solid rgba(201,168,76,.25);
+  border-radius: 8px;
+  padding: 14px 10px;
+  cursor: pointer;
+  background: rgba(255,255,255,.03);
+  transition: border-color .18s, background .18s, transform .15s;
+  text-align: center;
+  user-select: none;
+}
+.class-card:hover {
+  border-color: rgba(201,168,76,.6);
+  background: rgba(201,168,76,.06);
+  transform: translateY(-2px);
+}
+.class-card.selected {
+  border-color: #c9a84c;
+  background: rgba(201,168,76,.1);
+}
+.class-card img {
+  height: 64px;
+  margin-bottom: 8px;
+  filter: drop-shadow(0 0 6px rgba(201,168,76,.3));
+}
+.class-card-name {
+  color: #c9a84c;
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  font-size: .95rem;
+  margin-bottom: 4px;
+}
+.class-card-desc {
+  font-size: .75rem;
+  color: #888;
+  line-height: 1.4;
+  margin-bottom: 6px;
+}
+.class-card-profs {
+  font-size: .72rem;
+  color: #52b788;
+}

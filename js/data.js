@@ -59,7 +59,7 @@ const CHALLENGE_POOL = [
   { id: 7,  type: 'mission_tier',       desc: 'Completa una missione di Tier 2 o superiore',         icon: '⭐', condition: { tier: 2 },              reward: { xp: 100, gold: 45,  fame: 8  } },
   { id: 8,  type: 'mission_tier',       desc: 'Completa una missione di Tier 3',                     icon: '🌟', condition: { tier: 3 },              reward: { xp: 180, gold: 80,  fame: 18 } },
   { id: 9,  type: 'complete_missions',  desc: 'Completa almeno 2 missioni oggi',                     icon: '📋', condition: { count: 2 },             reward: { xp: 100, gold: 50,  fame: 8  } },
-  { id: 10, type: 'pickpocket_success', desc: 'Esegui un borseggio con successo',                    icon: '🖐️', condition: {},                       reward: { xp: 60,  gold: 30,  fame: 4  } },
+  { id: 10, type: 'pickpocket_success', desc: 'Esegui un borseggio con successo',                    icon: '🖐️', condition: {},                       reward: { xp: 60,  gold: 30,  fame: 4  }, classRestrict: 'ladro' },
   { id: 11, type: 'wear_quality',       desc: 'Indossa almeno 3 oggetti di qualsiasi rarità',        icon: '👜', condition: { quality: 1, count: 3 }, reward: { xp: 60,  gold: 20,  fame: 4  } },
   { id: 12, type: 'wear_quality',       desc: 'Indossa almeno 2 oggetti Non Comuni o superiori',     icon: '💚', condition: { quality: 2, count: 2 }, reward: { xp: 90,  gold: 40,  fame: 7  } },
   { id: 13, type: 'wear_quality',       desc: 'Indossa almeno 1 oggetto Raro o superiore',           icon: '💙', condition: { quality: 3, count: 1 }, reward: { xp: 120, gold: 55,  fame: 10 } },
@@ -73,13 +73,77 @@ const CHALLENGE_POOL = [
   { id: 21, type: 'reach_level',        desc: 'Raggiungi il livello 3',                              icon: '📈', condition: { level: 3 },             reward: { xp: 250, gold: 80,  fame: 20 } },
   { id: 22, type: 'reach_level',        desc: 'Raggiungi il livello 5',                              icon: '📈', condition: { level: 5 },             reward: { xp: 400, gold: 150, fame: 35 } },
   { id: 23, type: 'mission_nat20',      desc: 'Ottieni un 20 naturale in una prova di missione',     icon: '🎯', condition: {},                       reward: { xp: 150, gold: 60,  fame: 15 } },
-  { id: 24, type: 'buy_item',           desc: 'Acquista un oggetto dal Mercato Nero',                icon: '🛒', condition: {},                       reward: { xp: 50,  gold: 0,   fame: 5  } },
+  { id: 24, type: 'buy_item',           desc: 'Acquista un oggetto dal Mercato',                icon: '🛒', condition: {},                       reward: { xp: 50,  gold: 0,   fame: 5  } },
   { id: 25, type: 'complete_missions',  desc: 'Completa almeno 1 missione oggi',                     icon: '📋', condition: { count: 1 },             reward: { xp: 40,  gold: 15,  fame: 3  } },
   { id: 26, type: 'sell_item',          desc: 'Vendi un oggetto Comune',                             icon: '🪙', condition: { quality: 1 },           reward: { xp: 40,  gold: 20,  fame: 3  } },
   { id: 27, type: 'sell_item',          desc: 'Vendi un oggetto Non Comune',                         icon: '💚', condition: { quality: 2 },           reward: { xp: 70,  gold: 35,  fame: 6  } },
   { id: 28, type: 'sell_item',          desc: 'Vendi un oggetto Raro',                               icon: '💙', condition: { quality: 3 },           reward: { xp: 110, gold: 55,  fame: 10 } },
   { id: 29, type: 'sell_item',          desc: 'Vendi un oggetto Epico',                              icon: '💜', condition: { quality: 4 },           reward: { xp: 180, gold: 90,  fame: 18 } },
   { id: 30, type: 'sell_item',          desc: 'Vendi un oggetto Leggendario',                        icon: '🟠', condition: { quality: 5 },           reward: { xp: 300, gold: 150, fame: 30 } },
+];
+
+/* ── CLASSI PERSONAGGIO ──────────────────────────────────── */
+const CLASSES = [
+  {
+    id: 'ladro',
+    name: 'Ladro',
+    desc: 'Maestro del furto e dell\'inganno. Vive nell\'ombra, colpisce nel silenzio.',
+    proficiencies: ['dex', 'int', 'cha'],
+    avatar: 'ladro.svg',
+    hasPickpocket: true,
+    hasDiceGame: true,
+    startingGold: 30,
+  },
+  {
+    id: 'guerriero',
+    name: 'Guerriero',
+    desc: 'Combattente provato. La forza è il suo argomento, la resistenza il suo capitale.',
+    proficiencies: ['str', 'con', 'dex'],
+    avatar: 'guerriero.svg',
+    hasPickpocket: false,
+    hasDiceGame: true,
+    startingGold: 50,
+  },
+  {
+    id: 'mago',
+    name: 'Mago',
+    desc: 'Studioso dell\'arcano. La conoscenza vale più di qualsiasi spada.',
+    proficiencies: ['int', 'wis', 'cha'],
+    avatar: 'mago.svg',
+    hasPickpocket: false,
+    hasDiceGame: false,
+    startingGold: 20,
+  },
+  {
+    id: 'paladino',
+    name: 'Paladino',
+    desc: 'Campione giurato. La sua fede è la sua armatura, il suo onore la sua lama.',
+    proficiencies: ['str', 'cha', 'con'],
+    avatar: 'paladino.svg',
+    hasPickpocket: false,
+    hasDiceGame: false,
+    startingGold: 40,
+  },
+  {
+    id: 'druido',
+    name: 'Druido',
+    desc: 'Custode della natura. Legge il vento, parla con le bestie, piega il mondo selvatico.',
+    proficiencies: ['wis', 'int', 'con'],
+    avatar: 'druido.svg',
+    hasPickpocket: false,
+    hasDiceGame: false,
+    startingGold: 25,
+  },
+  {
+    id: 'chierico',
+    name: 'Chierico',
+    desc: 'Servo di una divinità. La sua devozione porta guarigione, ma anche devastazione.',
+    proficiencies: ['wis', 'cha', 'con'],
+    avatar: 'chierico.svg',
+    hasPickpocket: false,
+    hasDiceGame: false,
+    startingGold: 35,
+  },
 ];
 
 const DB = {
@@ -89,7 +153,7 @@ const DB = {
 
     /* ═══════════════  TIER 1 — Sconosciuto (0+ fama) ═══════════════ */
     {
-      id: 1, tier: 1, minFame: 0,
+      id: 1, tier: 1, minFame: 0, classRestrict: 'ladro',
       name: "Borseggio al Mercato",
       desc: "Il mercato è affollato. Un mercante grasso tiene la borsa al cinturone. È il momento giusto.",
       type: "furto",

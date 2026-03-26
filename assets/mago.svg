@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Sfondo circolare -->
+  <circle cx="50" cy="50" r="48" fill="#0d0d1a" stroke="#2e2e50" stroke-width="2"/>
+
+  <!-- Mantello (parte posteriore) -->
+  <ellipse cx="50" cy="40" rx="24" ry="28" fill="#1a1030"/>
+  <path d="M26 56 Q20 72 28 84 Q50 96 72 84 Q80 72 74 56 Z" fill="#1a1030"/>
+
+  <!-- Cappello stregone — tesa -->
+  <ellipse cx="50" cy="30" rx="26" ry="5" fill="#2d1b4e"/>
+  <ellipse cx="50" cy="30" rx="26" ry="5" fill="none" stroke="#9b59b6" stroke-width="1" opacity="0.7"/>
+
+  <!-- Cappello stregone — cono -->
+  <path d="M50 30 L35 30 L42 2 Z" fill="#2d1b4e"/>
+  <path d="M50 30 L65 30 L58 2 Z" fill="#2d1b4e"/>
+  <path d="M42 2 L50 30 L58 2 Q50 -4 42 2 Z" fill="#221340"/>
+  <!-- Bordo cappello (viola) -->
+  <path d="M35 30 L42 2 L58 2 L65 30" fill="none" stroke="#9b59b6" stroke-width="1.2" opacity="0.8"/>
+
+  <!-- Viso -->
+  <ellipse cx="50" cy="44" rx="15" ry="13" fill="#111120"/>
+
+  <!-- Occhi (azzurri brillanti) -->
+  <ellipse cx="44" cy="42" rx="3.5" ry="2.8" fill="#2980b9" opacity="0.95"/>
+  <ellipse cx="56" cy="42" rx="3.5" ry="2.8" fill="#2980b9" opacity="0.95"/>
+  <ellipse cx="44" cy="42" rx="1.5" ry="1.5" fill="#0d0d1a"/>
+  <ellipse cx="56" cy="42" rx="1.5" ry="1.5" fill="#0d0d1a"/>
+  <!-- Riflesso occhi -->
+  <circle cx="44.8" cy="41" r="0.7" fill="white" opacity="0.8"/>
+  <circle cx="56.8" cy="41" r="0.7" fill="white" opacity="0.8"/>
+
+  <!-- Barba / viso -->
+  <path d="M38 48 Q50 54 62 48 L62 51 Q50 58 38 51 Z" fill="#2d1b4e" opacity="0.7"/>
+
+  <!-- Bordo mantello (viola) -->
+  <path d="M26 38 Q50 26 74 38" fill="none" stroke="#9b59b6" stroke-width="1.2" opacity="0.6"/>
+
+  <!-- Spalle / mantello -->
+  <path d="M28 54 Q20 64 24 78 Q32 90 40 88" fill="none" stroke="#1a1030" stroke-width="8" stroke-linecap="round"/>
+  <path d="M72 54 Q80 64 76 78 Q68 90 60 88" fill="none" stroke="#1a1030" stroke-width="8" stroke-linecap="round"/>
+
+  <!-- Bastone (lato destro) -->
+  <line x1="72" y1="52" x2="78" y2="88" stroke="#5d4037" stroke-width="3" stroke-linecap="round"/>
+  <!-- Sfera magica in cima al bastone -->
+  <circle cx="72" cy="50" r="5" fill="#1a1030" stroke="#9b59b6" stroke-width="1.5"/>
+  <circle cx="72" cy="50" r="3" fill="#2c3e8e" opacity="0.9"/>
+  <circle cx="71" cy="48.5" r="1" fill="white" opacity="0.6"/>
+
+  <!-- Gemma sul petto -->
+  <circle cx="50" cy="60" r="3.5" fill="#1a1030" stroke="#9b59b6" stroke-width="1.2"/>
+  <circle cx="50" cy="60" r="2" fill="#2980b9" opacity="0.8"/>
+
+  <!-- Alone -->
+  <circle cx="50" cy="50" r="47" fill="none" stroke="#9b59b6" stroke-width="0.5" opacity="0.3"/>
+</svg>

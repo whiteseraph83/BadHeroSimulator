@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Sfondo circolare -->
+  <circle cx="50" cy="50" r="48" fill="#0d0d1a" stroke="#2e2e50" stroke-width="2"/>
+
+  <!-- Elmo base -->
+  <ellipse cx="50" cy="36" rx="22" ry="20" fill="#2a2a3e"/>
+  <!-- Calotta elmo -->
+  <path d="M28 36 Q28 16 50 14 Q72 16 72 36 Z" fill="#1e1e30"/>
+  <!-- Bordo elmo (accento ambra) -->
+  <path d="M28 36 Q28 16 50 14 Q72 16 72 36" fill="none" stroke="#e0a832" stroke-width="1.8" opacity="0.85"/>
+
+  <!-- Visiera elmo -->
+  <rect x="32" y="34" width="36" height="10" rx="2" fill="#131325"/>
+  <!-- Fessura visiera -->
+  <rect x="33" y="38" width="34" height="3" rx="1" fill="#0d0d1a"/>
+  <!-- Occhi che brillano dalla fessura -->
+  <ellipse cx="42" cy="39.5" rx="4" ry="1.5" fill="#e0a832" opacity="0.85"/>
+  <ellipse cx="58" cy="39.5" rx="4" ry="1.5" fill="#e0a832" opacity="0.85"/>
+
+  <!-- Paragnatidi (protezioni guance) -->
+  <path d="M28 34 Q24 44 28 54 Q34 58 36 52 Q30 46 32 36 Z" fill="#1e1e30" stroke="#e0a832" stroke-width="0.8" opacity="0.7"/>
+  <path d="M72 34 Q76 44 72 54 Q66 58 64 52 Q70 46 68 36 Z" fill="#1e1e30" stroke="#e0a832" stroke-width="0.8" opacity="0.7"/>
+
+  <!-- Collo e spalle -->
+  <path d="M36 52 Q24 58 20 75 Q28 88 40 88" fill="none" stroke="#1e1e30" stroke-width="10" stroke-linecap="round"/>
+  <path d="M64 52 Q76 58 80 75 Q72 88 60 88" fill="none" stroke="#1e1e30" stroke-width="10" stroke-linecap="round"/>
+
+  <!-- Spallacci (protezioni acciaio) -->
+  <ellipse cx="28" cy="63" rx="10" ry="6" fill="#2a2a3e" stroke="#e0a832" stroke-width="0.8" opacity="0.8"/>
+  <ellipse cx="72" cy="63" rx="10" ry="6" fill="#2a2a3e" stroke="#e0a832" stroke-width="0.8" opacity="0.8"/>
+
+  <!-- Spada (sul fianco destro) -->
+  <line x1="72" y1="58" x2="78" y2="82" stroke="#c9a84c" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Guardia spada -->
+  <line x1="68" y1="63" x2="78" y2="60" stroke="#e0a832" stroke-width="2" stroke-linecap="round"/>
+  <!-- Pomolo -->
+  <circle cx="79" cy="83" r="2" fill="#e0a832"/>
+
+  <!-- Emblema sul petto -->
+  <circle cx="50" cy="62" r="5" fill="#1e1e30" stroke="#e0a832" stroke-width="1.2"/>
+  <!-- Croce emblema -->
+  <line x1="50" y1="58" x2="50" y2="66" stroke="#e0a832" stroke-width="1.5"/>
+  <line x1="46" y1="62" x2="54" y2="62" stroke="#e0a832" stroke-width="1.5"/>
+
+  <!-- Alone -->
+  <circle cx="50" cy="50" r="47" fill="none" stroke="#e0a832" stroke-width="0.5" opacity="0.3"/>
+</svg>

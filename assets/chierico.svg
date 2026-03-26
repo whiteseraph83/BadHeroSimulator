@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Sfondo circolare -->
+  <circle cx="50" cy="50" r="48" fill="#0d0d1a" stroke="#2e2e50" stroke-width="2"/>
+
+  <!-- Mantello bianco-dorato (parte posteriore) -->
+  <ellipse cx="50" cy="40" rx="24" ry="27" fill="#1e1e2e"/>
+  <path d="M26 56 Q20 72 28 84 Q50 96 72 84 Q80 72 74 56 Z" fill="#1e1e2e"/>
+
+  <!-- Mitra (copricapo vescovile) — base -->
+  <path d="M34 30 Q34 14 50 12 Q66 14 66 30 Z" fill="#1e1e2e" stroke="#f0d080" stroke-width="1.2"/>
+  <!-- Mitra — doppia punta -->
+  <path d="M34 28 Q40 16 50 12 Q44 24 42 30 Z" fill="#161625" stroke="#f0d080" stroke-width="0.8"/>
+  <path d="M66 28 Q60 16 50 12 Q56 24 58 30 Z" fill="#161625" stroke="#f0d080" stroke-width="0.8"/>
+  <!-- Banda orizzontale mitra -->
+  <rect x="34" y="27" width="32" height="5" rx="2" fill="#1e1e2e" stroke="#f0d080" stroke-width="1"/>
+  <!-- Croce sulla mitra -->
+  <line x1="50" y1="14" x2="50" y2="26" stroke="#f0d080" stroke-width="1.5" opacity="0.9"/>
+  <line x1="44" y1="20" x2="56" y2="20" stroke="#f0d080" stroke-width="1.5" opacity="0.9"/>
+
+  <!-- Viso -->
+  <ellipse cx="50" cy="42" rx="14" ry="12" fill="#10101e"/>
+
+  <!-- Occhi (bianchi/dorati — santi) -->
+  <ellipse cx="44" cy="40" rx="3" ry="2.5" fill="#e8d9a0" opacity="0.9"/>
+  <ellipse cx="56" cy="40" rx="3" ry="2.5" fill="#e8d9a0" opacity="0.9"/>
+  <ellipse cx="44" cy="40" rx="1.4" ry="1.4" fill="#0d0d1a"/>
+  <ellipse cx="56" cy="40" rx="1.4" ry="1.4" fill="#0d0d1a"/>
+  <circle cx="44.8" cy="39" r="0.7" fill="white" opacity="0.8"/>
+  <circle cx="56.8" cy="39" r="0.7" fill="white" opacity="0.8"/>
+
+  <!-- Barba/viso -->
+  <path d="M38 46 Q50 52 62 46 L60 50 Q50 56 40 50 Z" fill="#161625" opacity="0.7"/>
+
+  <!-- Bordatura mantello dorata -->
+  <path d="M26 40 Q50 30 74 40" fill="none" stroke="#f0d080" stroke-width="1" opacity="0.5"/>
+
+  <!-- Spalle mantello -->
+  <path d="M28 54 Q20 64 24 78 Q32 90 40 88" fill="none" stroke="#1e1e2e" stroke-width="9" stroke-linecap="round"/>
+  <path d="M72 54 Q80 64 76 78 Q68 90 60 88" fill="none" stroke="#1e1e2e" stroke-width="9" stroke-linecap="round"/>
+  <!-- Bordi mantello dorati -->
+  <path d="M28 54 Q20 64 24 78" fill="none" stroke="#f0d080" stroke-width="0.8" opacity="0.5"/>
+  <path d="M72 54 Q80 64 76 78" fill="none" stroke="#f0d080" stroke-width="0.8" opacity="0.5"/>
+
+  <!-- Bastone/pastorale (lato sinistro) -->
+  <line x1="28" y1="58" x2="26" y2="88" stroke="#8a6e2a" stroke-width="3" stroke-linecap="round"/>
+  <!-- Ricciolo pastorale -->
+  <path d="M22 58 Q14 50 22 44 Q30 38 32 46 Q28 50 24 48" fill="none" stroke="#f0d080" stroke-width="2" stroke-linecap="round"/>
+
+  <!-- Simbolo sacro sul petto (sole/croce radiante) -->
+  <circle cx="50" cy="61" r="6" fill="#10101e" stroke="#f0d080" stroke-width="1.2"/>
+  <!-- Raggi -->
+  <line x1="50" y1="55.5" x2="50" y2="66.5" stroke="#f0d080" stroke-width="1.5" opacity="0.9"/>
+  <line x1="44.5" y1="61" x2="55.5" y2="61" stroke="#f0d080" stroke-width="1.5" opacity="0.9"/>
+  <line x1="46" y1="57" x2="54" y2="65" stroke="#f0d080" stroke-width="1" opacity="0.6"/>
+  <line x1="54" y1="57" x2="46" y2="65" stroke="#f0d080" stroke-width="1" opacity="0.6"/>
+  <!-- Cerchio centrale -->
+  <circle cx="50" cy="61" r="2.5" fill="#f0d080" opacity="0.8"/>
+
+  <!-- Alone luminoso -->
+  <circle cx="50" cy="50" r="47" fill="none" stroke="#f0d080" stroke-width="0.5" opacity="0.35"/>
+</svg>

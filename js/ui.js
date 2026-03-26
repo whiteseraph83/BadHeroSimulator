@@ -680,13 +680,15 @@ const UI = {
   /* ─── Modal creation ────────────────────────────────────── */
   showCreateModal() {
     const modal = new bootstrap.Modal(document.getElementById('modal-create'), { backdrop: 'static' });
-    document.getElementById('create-step-1').classList.remove('d-none');
+    document.getElementById('create-step-0').classList.remove('d-none');
+    document.getElementById('create-step-1').classList.add('d-none');
     document.getElementById('create-step-2').classList.add('d-none');
     modal.show();
     return modal;
   },
 
   showRollStep(rolledValues) {
+    document.getElementById('create-step-0').classList.add('d-none');
     document.getElementById('create-step-1').classList.add('d-none');
     document.getElementById('create-step-2').classList.remove('d-none');
 
@@ -928,6 +930,7 @@ const UI = {
 
   refresh() {
     if (!Game.state) return;
+    this.updateClassConditionalUI();
     this.renderCharacter();
     this.renderPickpocketBtn();
     this.renderGuildTaxInfo();
@@ -939,6 +942,70 @@ const UI = {
     this.renderInventoryGrid();
     this.renderChallenges();
     this.renderLog();
+  },
+
+  /* ─── UI condizionale per classe ────────────────────────── */
+  updateClassConditionalUI() {
+    if (!Game.state) return;
+    const cls = Game.getClasse();
+    const profAbbr = { str:'FOR', dex:'DES', con:'COS', int:'INT', wis:'SAG', cha:'CAR' };
+
+    // Pickpocket button (solo Ladro)
+    document.getElementById('pickpocket-wrapper').classList.toggle('d-none', !cls.hasPickpocket);
+
+    // Tab Dadi (Ladro e Guerriero)
+    document.getElementById('tab-dice-nav').classList.toggle('d-none', !cls.hasDiceGame);
+
+    // Classe sotto il nome
+    document.getElementById('char-class').textContent = cls.name;
+
+    // Avatar
+    const avatar = document.getElementById('char-avatar');
+    avatar.src = `assets/${cls.avatar}`;
+    avatar.alt = cls.name;
+
+    // Testo proficienze
+    document.getElementById('prof-stats-text').textContent =
+      cls.proficiencies.map(k => profAbbr[k]).join(' · ');
+  },
+
+  /* ─── Step griglia classi (modal creazione) ─────────────── */
+  showClassStep() {
+    document.getElementById('create-step-0').classList.remove('d-none');
+    document.getElementById('create-step-1').classList.add('d-none');
+    document.getElementById('create-step-2').classList.add('d-none');
+
+    const grid = document.getElementById('class-selection-grid');
+    const profAbbr = { str:'FOR', dex:'DES', con:'COS', int:'INT', wis:'SAG', cha:'CAR' };
+    grid.innerHTML = CLASSES.map(cls => `
+      <div class="col-6 col-md-4">
+        <div class="class-card" data-class-id="${cls.id}">
+          <img src="assets/${cls.avatar}" alt="${cls.name}" />
+          <div class="class-card-name">${cls.name}</div>
+          <div class="class-card-desc">${cls.desc}</div>
+          <div class="class-card-profs">
+            <i class="bi bi-patch-check-fill text-green"></i>
+            ${cls.proficiencies.map(k => profAbbr[k]).join(' · ')}
+            ${cls.hasPickpocket ? '<span class="ms-1 text-warning" title="Ha il borseggio"><i class="bi bi-hand-index-thumb"></i></span>' : ''}
+            ${cls.hasDiceGame   ? '<span class="ms-1 text-info"    title="Ha il gioco dei dadi"><i class="bi bi-dice-5"></i></span>' : ''}
+          </div>
+        </div>
+      </div>`).join('');
+  },
+
+  /* ─── Step intro classe (modal creazione) ───────────────── */
+  showIntroStep(cls) {
+    document.getElementById('create-step-0').classList.add('d-none');
+    document.getElementById('create-step-1').classList.remove('d-none');
+    document.getElementById('create-step-2').classList.add('d-none');
+
+    document.getElementById('create-class-avatar').src = `assets/${cls.avatar}`;
+    document.getElementById('create-class-avatar').alt = cls.name;
+    document.getElementById('create-class-name').textContent = cls.name;
+    document.getElementById('create-class-desc').textContent = cls.desc;
+    document.getElementById('name-error').classList.add('d-none');
+    document.getElementById('char-name-input').value = '';
+    document.getElementById('char-name-input').focus();
   },
 
   /* ─── Helpers privati ───────────────────────────────────── */
@@ -979,7 +1046,7 @@ const UI = {
     document.getElementById('compare-body').innerHTML = `
       <div class="compare-layout">
         <div class="compare-col">
-          <div class="compare-col-title text-gold">Mercato Nero</div>
+          <div class="compare-col-title text-gold">Mercato</div>
           ${this._renderComparePanel(marketItem)}
         </div>
         <div class="compare-divider text-muted"><i class="bi bi-arrow-left-right"></i></div>
@@ -1117,7 +1184,7 @@ const UI = {
   renderDiceRollingPhase(bet, players) {
     document.getElementById('dice-bet-display').textContent = `${bet} mo`;
     document.getElementById('dice-players-container').innerHTML = players.map(p => `
-      <div class="dice-player-row ${p.isPlayer ? 'dice-player-giblin' : ''}" id="dice-row-${p.name.replace(/\s/g,'_')}">
+      <div class="dice-player-row ${p.isPlayer ? 'dice-player-hero' : ''}" id="dice-row-${p.name.replace(/\s/g,'_')}">
         <div class="dice-player-name">${p.isPlayer ? '⚔️ ' : ''}${p.name}</div>
         <div class="dice-faces">
           <div class="dice-face" id="dface-${p.name.replace(/\s/g,'_')}-1">?</div>
@@ -1138,7 +1205,7 @@ const UI = {
       'Hai perso tutto e la tua reputazione ne risente.',
     ];
 
-    const gi = result.giblinRank - 1;
+    const gi = result.playerRank - 1;
     const titleEl = document.getElementById('dice-result-title');
     titleEl.textContent = `${rankIcons[gi]} ${titles[gi]}`;
     titleEl.style.color = titleColors[gi];
