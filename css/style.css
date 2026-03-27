@@ -1829,6 +1829,8 @@ body {
 .rescue-canvas {
   display: block;
   width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
   border-radius: 10px;
   border: 1px solid rgba(201,168,76,0.3);
   cursor: pointer;
