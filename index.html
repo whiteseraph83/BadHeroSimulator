@@ -85,7 +85,7 @@
           <!-- XP bar -->
           <div class="mb-2">
             <div class="d-flex justify-content-between small mb-1">
-              <span class="text-gold">Esperienza</span>
+              <span class="text-gold stat-info-trigger" data-stat-info="xp" title="Clicca per saperne di più">Esperienza <i class="bi bi-info-circle" style="font-size:.7rem;opacity:.6"></i></span>
               <span id="xp-text">0 / 300</span>
             </div>
             <div class="progress xp-bar">
@@ -96,7 +96,7 @@
           <!-- Fame bar -->
           <div class="mb-3">
             <div class="d-flex justify-content-between small mb-1">
-              <span class="text-gold">Fama</span>
+              <span class="text-gold stat-info-trigger" data-stat-info="fame" title="Clicca per saperne di più">Fama <i class="bi bi-info-circle" style="font-size:.7rem;opacity:.6"></i></span>
               <span id="fame-title">Sconosciuto</span>
             </div>
             <div class="progress fame-bar">
@@ -110,7 +110,7 @@
           <!-- Taglia / Visibilità -->
           <div id="wanted-display" class="wanted-display mb-3">
             <div class="d-flex justify-content-between align-items-center mb-1">
-              <span class="small text-muted"><i class="bi bi-eye"></i> <span id="wanted-type-label">Visibilità</span></span>
+              <span class="small text-muted stat-info-trigger" data-stat-info="wanted" title="Clicca per saperne di più" style="cursor:pointer"><i class="bi bi-eye"></i> <span id="wanted-type-label">Visibilità</span> <i class="bi bi-info-circle" style="font-size:.65rem;opacity:.6"></i></span>
               <span class="small" id="wanted-label">🌫️ Anonimo</span>
             </div>
             <div class="progress" style="height:5px;">
@@ -181,7 +181,7 @@
             <span class="hud-sep">|</span>
             <span class="text-gold small fw-semibold"><i class="bi bi-coin"></i> <span id="char-gold">0</span> mo</span>
             <span class="hud-sep">|</span>
-            <span class="small text-muted" id="day-tax-info"></span>
+            <span class="small text-muted stat-info-trigger" data-stat-info="tax" title="Clicca per saperne di più" id="day-tax-info" style="cursor:pointer"></span>
           </div>
           <button class="btn btn-sm btn-gold" id="btn-nextday">
             Avanza Giorno <i class="bi bi-arrow-right"></i>
@@ -1068,6 +1068,22 @@
           <div id="prayer-rewards" class="mission-rewards mb-2 text-start"></div>
           <button class="btn btn-sm btn-outline-gold" data-bs-dismiss="modal">Chiudi</button>
         </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL: INFO STATISTICA ===== -->
+<div class="modal fade" id="modal-stat-info" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content modal-dark">
+      <div class="modal-header border-gold pb-2">
+        <h5 class="modal-title text-gold" id="stat-info-title"></h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="stat-info-body"></div>
+      <div class="modal-footer border-0 pt-0">
+        <button class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Chiudi</button>
       </div>
     </div>
   </div>

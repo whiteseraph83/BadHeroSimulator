@@ -95,6 +95,102 @@ const App = {
     { icon: '💧', color: '#3498db', name: 'Acqua'     },
   ],
 
+  /* ─── Stat info modal builder ─────────────────────────── */
+  _buildStatInfo(stat, cls) {
+    const id = cls?.id || '';
+    const clsName = cls?.name || 'il tuo personaggio';
+
+    const row = (icon, label, text) =>
+      `<div class="d-flex gap-2 mb-2"><span style="font-size:1.2rem;min-width:1.6rem">${icon}</span><div><strong>${label}</strong><div class="text-muted small">${text}</div></div></div>`;
+
+    if (stat === 'xp') {
+      const classRows = {
+        ladro:    row('🎲', 'Ladro', 'Guadagni PE anche borseggiando, rubando al mercato e giocando ai dadi. Più rischi prendi, più cresci in fretta.'),
+        mago:     row('✨', 'Mago', 'Ottieni PE craftando incantesimi, canalizzando magia senza componenti, studiando e consegnando commissioni.'),
+        druido:   row('🌿', 'Druido', 'Ottieni PE preparando pozioni, studiando ricette naturali e completando missioni con la natura.'),
+        guerriero:row('⚔️', 'Guerriero', 'Ottieni PE vincendo all\'arena, nelle gare di bevute e completando missioni di combattimento.'),
+        paladino: row('🛡️', 'Paladino', 'Ottieni PE salvando prigionieri, addestrando il tuo destriero e completando missioni di protezione.'),
+        chierico: row('🙏', 'Chierico', 'Ottieni PE pregando, convertendo fedeli e superando prove di devozione divina.'),
+      };
+      return {
+        title: '⭐ Esperienza (PE)',
+        body: `
+          <p class="text-muted small">I Punti Esperienza (PE) misurano la tua crescita come avventuriero. Raggiungi la soglia del tuo livello attuale per <strong>salire di livello</strong> e migliorare le caratteristiche.</p>
+          <p class="text-muted small">Guadagni PE completando <strong>missioni</strong>, usando le <strong>abilità di classe</strong> e svolgendo azioni quotidiane.</p>
+          <hr class="border-secondary my-2">
+          <div class="small text-gold mb-1">Fonti di PE per ${clsName}:</div>
+          ${classRows[id] || ''}
+          <div class="text-muted small mt-2">💡 Più sei attivo ogni giorno, più velocemente sali di livello.</div>`,
+      };
+    }
+
+    if (stat === 'fame') {
+      const classRows = {
+        ladro:    row('⚠️', 'Attenzione', 'Troppa fama come Ladro aumenta anche la tua <strong>Taglia</strong>: più sei noto, più sei un bersaglio ambito.'),
+        mago:     row('📜', 'Mago', 'Una fama alta attira clienti con commissioni di incantesimi più preziose e rare.'),
+        druido:   row('🌱', 'Druido', 'La fama apre l\'accesso a richieste di pozioni rare e missioni con ricompense naturali esclusive.'),
+        guerriero:row('🏆', 'Guerriero', 'La fama dell\'arena attira avversari più forti — e premi molto più ricchi.'),
+        paladino: row('⚔️', 'Paladino', 'La fama da eroe sblocca missioni di protezione ad alto rischio con grandi ricompense in oro e PE.'),
+        chierico: row('✝️', 'Chierico', 'Una fama elevata attira fedeli più devoti e aumenta il guadagno dalla conversione e dalle offerte.'),
+      };
+      return {
+        title: '🌟 Fama',
+        body: `
+          <p class="text-muted small">La Fama è il tuo <strong>prestigio</strong> in città. Più è alta, più <strong>missioni esclusive</strong> diventano disponibili — alcune richiedono una soglia minima per essere accettate.</p>
+          <p class="text-muted small">Aumenta completando missioni, azioni nobili e consegnando commissioni di qualità.</p>
+          <hr class="border-secondary my-2">
+          <div class="small text-gold mb-1">Effetti speciali per ${clsName}:</div>
+          ${classRows[id] || ''}
+          <div class="text-muted small mt-2">💡 Tieni la fama alta per accedere alle missioni più redditizie ogni giorno.</div>`,
+      };
+    }
+
+    if (stat === 'wanted') {
+      if (id === 'ladro') {
+        return {
+          title: '💀 Taglia',
+          body: `
+            <p class="text-muted small">Come Ladro, la <strong>Taglia</strong> è il prezzo sulla tua testa. Cresce quando vieni scoperto a rubare, fallisci un borseggio o completi azioni illecite.</p>
+            <div class="mb-2">${row('🚨', 'Soglie critiche', 'Superata una certa soglia di taglia, <strong>un Cacciatore di Taglie</strong> ti blocca la strada. Devi affrontarlo (e batterlo) prima di poter avanzare al giorno successivo.')}</div>
+            <div class="mb-2">${row('📉', 'Come ridurla', 'Affronta e sconfiggi il cacciatore di taglie oppure completa la missione taglia speciale. Il tempo e un basso profilo la abbassano lentamente.')}</div>
+            <div class="text-warning small mt-2">⚠️ Ogni furto fallito al mercato aumenta taglia, riduce fama e ti vieta gli acquisti per quel giorno.</div>`,
+        };
+      }
+      return {
+        title: '👁️ Visibilità',
+        body: `
+          <p class="text-muted small">La <strong>Visibilità</strong> indica quanto sei esposto agli sguardi dei potenti e delle fazioni cittadine. Una visibilità alta può attirare eventi indesiderati.</p>
+          <div class="mb-2">${row('📈', 'Come cresce', 'Aumenta con azioni controverse, missioni ad alto rischio o comportamenti che attirano l\'attenzione.')}</div>
+          <div class="mb-2">${row('📉', 'Come diminuisce', 'Mantieni un profilo basso, evita scontri non necessari e scegli missioni discrete.')}</div>
+          <div class="text-muted small mt-2">💡 Per ${clsName} la visibilità ha effetti moderati rispetto ad altri personaggi più nell\'ombra.</div>`,
+      };
+    }
+
+    if (stat === 'tax') {
+      const tax = Game.guildTax ? Game.guildTax() : '?';
+      const classRows = {
+        ladro:    row('🎲', 'Suggerimento', 'Borseggia ogni giorno e vendi i bottini — bastano pochi colpi riusciti per coprire la tassa.'),
+        mago:     row('✨', 'Suggerimento', 'Canalizza incantesimi al mattino e vendili subito. Consegna commissioni per un guadagno doppio.'),
+        druido:   row('🌿', 'Suggerimento', 'Prepara pozioni ogni giorno e consegna le richieste attive per incassare oro rapidamente.'),
+        guerriero:row('⚔️', 'Suggerimento', 'L\'arena è il modo più veloce per guadagnare. Due combattimenti al giorno coprono la tassa e avanzano.'),
+        paladino: row('🛡️', 'Suggerimento', '"Salva i Prigionieri" garantisce buoni guadagni. Usa anche le missioni giornaliere per integrare.'),
+        chierico: row('🙏', 'Suggerimento', 'Prega, converti fedeli e accetta offerte. Le missioni di guarigione sono spesso le più redditizie.'),
+      };
+      return {
+        title: '🏦 Tassa Giornaliera Gilda',
+        body: `
+          <p class="text-muted small">Ogni giorno la <strong>Gilda degli Avventurieri</strong> riscuote una quota fissa di <strong>${tax} mo</strong> come contributo per l\'uso dei servizi (missioni, mercato, strutture).</p>
+          <p class="text-muted small">Se al momento del passaggio al giorno successivo non hai abbastanza oro, subisci una <strong>penalità in Fama</strong>.</p>
+          <hr class="border-secondary my-2">
+          <div class="small text-gold mb-1">Come coprirla con ${clsName}:</div>
+          ${classRows[id] || ''}
+          <div class="text-muted small mt-2">💡 Le missioni giornaliere sono progettate per coprire almeno la tassa — completane una ogni giorno.</div>`,
+      };
+    }
+
+    return { title: '', body: '' };
+  },
+
   /* ─── Bootstrap ───────────────────────────────────────── */
   init() {
     // Tema (light/dark) — ripristina preferenza salvata
@@ -211,6 +307,20 @@ const App = {
       bootstrap.Modal.getInstance(document.getElementById('modal-create')).hide();
       UI.refresh();
       UI.toast(`Benvenuto, ${name}! La tua avventura da ${Game.getClasse().name} ha inizio.`);
+    });
+
+    // Stat info trigger — etichette cliccabili
+    document.addEventListener('click', (e) => {
+      const trigger = e.target.closest('.stat-info-trigger');
+      if (!trigger || !Game.state) return;
+      const stat  = trigger.dataset.statInfo;
+      const cls   = Game.getClasse();
+      const modal = document.getElementById('modal-stat-info');
+      if (!modal) return;
+      const { title, body } = this._buildStatInfo(stat, cls);
+      document.getElementById('stat-info-title').innerHTML = title;
+      document.getElementById('stat-info-body').innerHTML  = body;
+      bootstrap.Modal.getOrCreateInstance(modal).show();
     });
 
     // Passa al giorno successivo

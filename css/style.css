@@ -49,6 +49,13 @@ body {
 .bg-green  { background-color: var(--green-light) !important; }
 .border-gold { border-color: var(--gold-dark) !important; }
 
+/* ── Stat info trigger ── */
+.stat-info-trigger {
+  cursor: pointer;
+  transition: opacity .15s;
+}
+.stat-info-trigger:hover { opacity: .75; }
+
 /* ── HUD separator ── */
 .hud-sep {
   color: rgba(201, 168, 76, 0.35);
