@@ -242,7 +242,10 @@ const UI = {
     const titleEl = document.getElementById('rescue-result-title');
     const subEl   = document.getElementById('rescue-result-sub');
     const rewEl   = document.getElementById('rescue-result-rewards');
-    if (result.tier === 'glorioso') {
+    if (result.tier === 'leggendario') {
+      iconEl.textContent  = '👑';
+      titleEl.innerHTML   = '<span style="color:#ff80ff">Boss Sconfitto! Leggendario!</span>';
+    } else if (result.tier === 'glorioso') {
       iconEl.textContent  = '🏆';
       titleEl.innerHTML   = '<span class="text-gold">Missione Gloriosa!</span>';
     } else if (result.tier === 'buono') {
@@ -258,7 +261,8 @@ const UI = {
       iconEl.textContent  = '😔';
       titleEl.innerHTML   = '<span class="text-muted">Missione Fallita</span>';
     }
-    subEl.textContent = `${result.saved}/${result.total} prigionieri liberati (${result.pct}%)`;
+    const bossNote = result.bossKilled ? ' <span style="color:#ff80ff">👑 Boss eliminato!</span>' : '';
+    subEl.innerHTML = `${result.saved}/${result.total} prigionieri liberati (${result.pct}%)${bossNote}`;
     if (result.xp > 0 || result.gold > 0) {
       rewEl.innerHTML = `<span class="text-warning">+${result.xp} PE</span> &nbsp; <span class="text-gold">+${result.gold} mo</span>` +
         (result.fameXp > 0 ? ` &nbsp; <span style="color:#a29bfe">+${result.fameXp} fama</span>` : '');
@@ -835,7 +839,9 @@ const UI = {
   renderEquipmentPanel() {
     const panel  = document.getElementById('equipment-panel');
     const equip  = Game.state.character.equipment;
-    const slots  = ['head', 'torso', 'gloves', 'legs', 'boots', 'ringRight', 'ringLeft', 'weapon'];
+    const cls    = Game.getClasse();
+    const slots  = ['head', 'torso', 'gloves', 'legs', 'boots', 'ringRight', 'ringLeft', 'weapon',
+                    ...(cls.hasShieldSlot ? ['shield'] : [])];
 
     panel.innerHTML = slots.map(slot => {
       const itemId   = equip[slot];

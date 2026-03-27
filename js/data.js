@@ -20,6 +20,7 @@ const SLOT_META = {
   ringRight: { icon: '💍', label: 'Anello',        bi: 'bi-circle'          },
   ringLeft:  { icon: '💍', label: 'Anello',        bi: 'bi-circle-fill'     },
   weapon:     { icon: '🗡️',  label: 'Arma',         bi: 'bi-scissors'       },
+  shield:     { icon: '🛡️',  label: 'Scudo',        bi: 'bi-shield-fill'    },
   consumable: { icon: '⚗️',  label: 'Consumabile',  bi: 'bi-flask-fill'     },
 };
 
@@ -123,6 +124,7 @@ const CLASSES = [
     hasDrinkingGame: true,
     hasArena: true,
     arenaPerDay: 2,
+    hasShieldSlot: true,
     startingGold: 50,
   },
   {
@@ -150,7 +152,8 @@ const CLASSES = [
     stablePerDay: 2,
     hasRescueTab: true,
     rescuePerDay: 2,
-    rescueStrengthBase: 10,
+    rescueStrengthBase: 20,
+    hasShieldSlot: true,
     startingGold: 40,
   },
   {
@@ -2479,35 +2482,135 @@ const DB = {
   items: [
 
     /* ── WEAPON ── */
-    { id: 101, name: "Pugnale Arrugginito",         slot: "weapon", quality: 1, tier: 1, reqLevel: 1, reqStat: null,
+    { id: 101, name: "Pugnale Arrugginito",         slot: "weapon", weaponType: "knife", quality: 1, tier: 1, reqLevel: 1, reqStat: null,
       desc: "Un vecchio pugnale ancora affilato, per chi sa usarlo.",
-      stats: { dex: 1 },
+      stats: { dex: 1 }, classRestrict: ['ladro'],
       abilities: { pickpocketBonus: 0, rerollBonus: 0, taxDiscount: 0, goldBonus: 0, xpBonus: 0 },
       buyPrice: 40,  sellPrice: 16 },
 
-    { id: 102, name: "Coltello da Borsaiolo",       slot: "weapon", quality: 2, tier: 1, reqLevel: 1, reqStat: null,
+    { id: 102, name: "Coltello da Borsaiolo",       slot: "weapon", weaponType: "knife", quality: 2, tier: 1, reqLevel: 1, reqStat: null,
       desc: "Lama sottile perfetta per tagliare cinturini e borse.",
-      stats: { dex: 2 },
+      stats: { dex: 2 }, classRestrict: ['ladro'],
       abilities: { pickpocketBonus: 1, rerollBonus: 0, taxDiscount: 0, goldBonus: 0, xpBonus: 0 },
       buyPrice: 130, sellPrice: 52 },
 
-    { id: 103, name: "Lama dell'Ombra",             slot: "weapon", quality: 3, tier: 2, reqLevel: 4, reqStat: null,
+    { id: 103, name: "Lama dell'Ombra",             slot: "weapon", weaponType: "sword", quality: 3, tier: 2, reqLevel: 4, reqStat: null,
       desc: "Forgiata nell'oscurità, si rivolge in modo quasi magico verso la prossima vittima.",
-      stats: { dex: 3 },
+      stats: { dex: 3 }, classRestrict: ['ladro'],
       abilities: { pickpocketBonus: 0, rerollBonus: 1, taxDiscount: 0, goldBonus: 0, xpBonus: 0 },
       buyPrice: 380, sellPrice: 152 },
 
-    { id: 104, name: "Stiletto del Fantasma",       slot: "weapon", quality: 4, tier: 2, reqLevel: 6, reqStat: { key: 'dex', val: 14 },
+    { id: 104, name: "Stiletto del Fantasma",       slot: "weapon", weaponType: "knife", quality: 4, tier: 2, reqLevel: 6, reqStat: { key: 'dex', val: 14 },
       desc: "Chi viene colpito da questa lama non ricorda niente.",
-      stats: { dex: 4 },
+      stats: { dex: 4 }, classRestrict: ['ladro'],
       abilities: { pickpocketBonus: 1, rerollBonus: 1, taxDiscount: 0, goldBonus: 0, xpBonus: 0 },
       buyPrice: 950, sellPrice: 380 },
 
-    { id: 105, name: "Lama Maledetta di Nerull",    slot: "weapon", quality: 5, tier: 3, reqLevel: 9, reqStat: { key: 'dex', val: 17 },
+    { id: 105, name: "Lama Maledetta di Nerull",    slot: "weapon", weaponType: "knife", quality: 5, tier: 3, reqLevel: 9, reqStat: { key: 'dex', val: 17 },
       desc: "Il dio della morte benedice ogni furto compiuto con questa lama.",
-      stats: { dex: 5 },
+      stats: { dex: 5 }, classRestrict: ['ladro'],
       abilities: { pickpocketBonus: 2, rerollBonus: 1, taxDiscount: 0, goldBonus: 0.10, xpBonus: 0 },
       buyPrice: 2500, sellPrice: 1000 },
+
+    /* ── WEAPON — Guerriero/Paladino (spade) ── */
+    { id: 110, name: "Spada di Ferro", slot: "weapon", weaponType: "sword", quality: 1, tier: 1, reqLevel: 1, reqStat: null,
+      desc: "Una spada robusta e senza fronzoli. Fa il suo lavoro.",
+      stats: { str: 1 }, classRestrict: ['guerriero','paladino'],
+      abilities: { arenaBonus: 0 }, buyPrice: 45, sellPrice: 18 },
+
+    { id: 111, name: "Spada del Milite", slot: "weapon", weaponType: "sword", quality: 2, tier: 1, reqLevel: 2, reqStat: null,
+      desc: "La lama preferita dei soldati di fanteria. Equilibrata e affidabile.",
+      stats: { str: 2 }, classRestrict: ['guerriero','paladino'],
+      abilities: { arenaBonus: 0 }, buyPrice: 140, sellPrice: 56 },
+
+    { id: 112, name: "Spada del Crociato", slot: "weapon", weaponType: "sword", quality: 3, tier: 2, reqLevel: 4, reqStat: null,
+      desc: "Lama benedetta che risuona con la giustizia.",
+      stats: { str: 2, cha: 1 }, classRestrict: ['guerriero','paladino'],
+      abilities: { arenaBonus: 0 }, buyPrice: 400, sellPrice: 160 },
+
+    { id: 113, name: "Spada Epica del Guerriero", slot: "weapon", weaponType: "sword", quality: 4, tier: 2, reqLevel: 6, reqStat: {key:'str', val:14},
+      desc: "Forgiata nel fuoco di una montagna vulcanica, taglia l'acciaio come burro.",
+      stats: { str: 4 }, classRestrict: ['guerriero','paladino'],
+      abilities: { arenaBonus: 1 }, buyPrice: 1000, sellPrice: 400 },
+
+    /* ── WEAPON — Guerriero/Paladino/Chierico (mazze) ── */
+    { id: 114, name: "Mazza di Guerra", slot: "weapon", weaponType: "mace", quality: 1, tier: 1, reqLevel: 1, reqStat: null,
+      desc: "Pesante ma micidiale. Chi la impugna non ha dubbi sulle proprie intenzioni.",
+      stats: { str: 1, con: 1 }, classRestrict: ['guerriero','paladino','chierico'],
+      abilities: {}, buyPrice: 35, sellPrice: 14 },
+
+    { id: 115, name: "Mazza del Templare", slot: "weapon", weaponType: "mace", quality: 2, tier: 1, reqLevel: 2, reqStat: null,
+      desc: "Consacrata da un ordine di paladini, porta benedizioni in battaglia.",
+      stats: { str: 1, con: 1 }, classRestrict: ['guerriero','paladino','chierico'],
+      abilities: {}, buyPrice: 130, sellPrice: 52 },
+
+    { id: 116, name: "Mazza Sacra di Pelor", slot: "weapon", weaponType: "mace", quality: 3, tier: 2, reqLevel: 4, reqStat: null,
+      desc: "Il sole si riflette nel metallo sacro. I non-morti tremano alla sua vista.",
+      stats: { str: 2, wis: 1 }, classRestrict: ['guerriero','paladino','chierico'],
+      abilities: {}, buyPrice: 380, sellPrice: 152 },
+
+    /* ── WEAPON — Mago/Druido (bastoni) ── */
+    { id: 120, name: "Bastone di Legno", slot: "weapon", weaponType: "staff", quality: 1, tier: 1, reqLevel: 1, reqStat: null,
+      desc: "Un semplice bastone d'olmo con qualche runa incisa.",
+      stats: { int: 1 }, classRestrict: ['mago','druido'],
+      abilities: { studyBonus: 0 }, buyPrice: 30, sellPrice: 12 },
+
+    { id: 121, name: "Bastone dell'Apprendista", slot: "weapon", weaponType: "staff", quality: 2, tier: 1, reqLevel: 2, reqStat: null,
+      desc: "Donato ai migliori studenti della torre arcana.",
+      stats: { int: 2 }, classRestrict: ['mago','druido'],
+      abilities: { studyBonus: 0 }, buyPrice: 125, sellPrice: 50 },
+
+    { id: 122, name: "Bastone dell'Arcimago", slot: "weapon", weaponType: "staff", quality: 3, tier: 2, reqLevel: 4, reqStat: null,
+      desc: "Il cristallo in cima pulsa di magia arcana concentrata.",
+      stats: { int: 3 }, classRestrict: ['mago','druido'],
+      abilities: { studyBonus: 1 }, buyPrice: 400, sellPrice: 160 },
+
+    { id: 123, name: "Bacchetta di Frassino", slot: "weapon", weaponType: "wand", quality: 2, tier: 1, reqLevel: 2, reqStat: null,
+      desc: "Leggera e precisa, amplifica i canali magici.",
+      stats: { int: 1, cha: 1 }, classRestrict: ['mago'],
+      abilities: {}, buyPrice: 110, sellPrice: 44 },
+
+    { id: 124, name: "Bacchetta di Cristallo", slot: "weapon", weaponType: "wand", quality: 4, tier: 2, reqLevel: 6, reqStat: {key:'int', val:14},
+      desc: "Modellata da un unicorno de facto, risuona solo con chi possiede vera magia.",
+      stats: { int: 4 }, classRestrict: ['mago'],
+      abilities: { studyBonus: 1 }, buyPrice: 950, sellPrice: 380 },
+
+    { id: 125, name: "Tomo degli Arcani", slot: "weapon", weaponType: "tome", quality: 3, tier: 2, reqLevel: 4, reqStat: null,
+      desc: "Un grimorio vivente che sussurra formule al proprio portatore.",
+      stats: { int: 2, wis: 1 }, classRestrict: ['mago','chierico'],
+      abilities: { studyBonus: 1 }, buyPrice: 380, sellPrice: 152 },
+
+    { id: 126, name: "Tomo Proibito del Lich", slot: "weapon", weaponType: "tome", quality: 5, tier: 3, reqLevel: 9, reqStat: {key:'int', val:17},
+      desc: "Scritto in inchiostro di non-morto. Proibito ma straordinariamente potente.",
+      stats: { int: 5 }, classRestrict: ['mago','chierico'],
+      abilities: { studyBonus: 2, xpBonus: 0.10 }, buyPrice: 2500, sellPrice: 1000 },
+
+    /* ── WEAPON — Druido (bastoni natura) ── */
+    { id: 127, name: "Bastone della Foresta", slot: "weapon", weaponType: "staff", quality: 1, tier: 1, reqLevel: 1, reqStat: null,
+      desc: "Intrecciato con rami vivi, pulsa con la linfa della natura.",
+      stats: { wis: 1 }, classRestrict: ['druido'],
+      abilities: {}, buyPrice: 30, sellPrice: 12 },
+
+    { id: 128, name: "Bastone del Cervo Antico", slot: "weapon", weaponType: "staff", quality: 4, tier: 2, reqLevel: 6, reqStat: {key:'wis', val:14},
+      desc: "Intagliato da un druido di rango superiore, parla agli spiriti della terra.",
+      stats: { wis: 4 }, classRestrict: ['druido'],
+      abilities: { studyBonus: 1 }, buyPrice: 950, sellPrice: 380 },
+
+    { id: 129, name: "Bastone del Grande Albero", slot: "weapon", weaponType: "staff", quality: 5, tier: 3, reqLevel: 9, reqStat: {key:'wis', val:17},
+      desc: "Forgiato dal cuore di un millenario. Risveglia la natura con ogni tocco.",
+      stats: { wis: 5 }, classRestrict: ['druido'],
+      abilities: { studyBonus: 2 }, buyPrice: 2500, sellPrice: 1000 },
+
+    /* ── WEAPON — Chierico (mazze divine) ── */
+    { id: 130, name: "Martello Divino", slot: "weapon", weaponType: "mace", quality: 4, tier: 2, reqLevel: 6, reqStat: {key:'wis', val:14},
+      desc: "La divinità ha forgiato questo martello per scacciare il male.",
+      stats: { wis: 3, con: 1 }, classRestrict: ['chierico'],
+      abilities: { conversionBonus: 1 }, buyPrice: 1000, sellPrice: 400 },
+
+    { id: 131, name: "Mazza dei Santi", slot: "weapon", weaponType: "mace", quality: 5, tier: 3, reqLevel: 9, reqStat: {key:'wis', val:17},
+      desc: "Portata dai più devoti tra i chierici. Ogni colpo è una preghiera.",
+      stats: { wis: 5 }, classRestrict: ['chierico'],
+      abilities: { conversionBonus: 1, conversionSpeed: 0.2 }, buyPrice: 2500, sellPrice: 1000 },
 
     /* ── HEAD ── */
     { id: 201, name: "Cappuccio Sgualcito",         slot: "head", quality: 1, tier: 1, reqLevel: 1, reqStat: null,
@@ -2738,9 +2841,9 @@ const DB = {
       abilities: { pickpocketBonus: 0, rerollBonus: 0, taxDiscount: 0, goldBonus: 0, xpBonus: 0, challengeBonus: 0, challengeRefresh: 1 },
       buyPrice: 480, sellPrice: 192 },
 
-    { id: 1001, name: "Spada dei Campioni dell'Arena", slot: "weapon", quality: 5, tier: 3, reqLevel: 9, reqStat: { key: 'str', val: 16 },
+    { id: 1001, name: "Spada dei Campioni dell'Arena", slot: "weapon", weaponType: "sword", quality: 5, tier: 3, reqLevel: 9, reqStat: { key: 'str', val: 16 },
       desc: "Forgiata per i guerrieri leggendari. Ogni fendente colpisce due volte e la resistenza garantisce un ingresso extra nell'Arena ogni giorno.",
-      stats: { str: 5, con: 3 },
+      stats: { str: 5, con: 3 }, classRestrict: ['guerriero','paladino'],
       abilities: { pickpocketBonus: 0, rerollBonus: 0, taxDiscount: 0, goldBonus: 0, xpBonus: 0, arenaBonus: 1, arenaDoubleHit: true },
       buyPrice: 3200, sellPrice: 1280 },
 
@@ -2762,9 +2865,9 @@ const DB = {
       abilities: { pickpocketBonus: 0, rerollBonus: 0, taxDiscount: 0, goldBonus: 0, xpBonus: 0, conversionSpeed: 0.35 },
       buyPrice: 320, sellPrice: 128 },
 
-    { id: 1104, name: "Croce Sacra",              slot: "weapon",  quality: 4, tier: 3, reqLevel: 6, reqStat: { key: 'cha', val: 14 },
+    { id: 1104, name: "Croce Sacra",              slot: "weapon", weaponType: "cross", quality: 4, tier: 3, reqLevel: 6, reqStat: { key: 'cha', val: 14 },
       desc: "Reliquia benedetta. Potenzia la conversione e permette una missione extra ogni giorno.",
-      stats: { wis: 3, cha: 4 },
+      stats: { wis: 3, cha: 4 }, classRestrict: ['chierico'],
       abilities: { pickpocketBonus: 0, rerollBonus: 0, taxDiscount: 0, goldBonus: 0, xpBonus: 0, conversionBonus: 1, conversionSpeed: 0.20 },
       buyPrice: 980, sellPrice: 392 },
 
@@ -2787,7 +2890,7 @@ const DB = {
       abilities: { pickpocketBonus: 0, rerollBonus: 0, taxDiscount: 0, goldBonus: 0, xpBonus: 0, rescueStrengthBonus: 3 },
       buyPrice: 180, sellPrice: 72 },
 
-    { id: 1111, name: "Scudo del Redentore",     slot: "weapon",  quality: 3, tier: 2, reqLevel: 4, reqStat: { key: 'str', val: 12 },
+    { id: 1111, name: "Scudo del Redentore",     slot: "shield",  quality: 3, tier: 2, reqLevel: 4, reqStat: { key: 'str', val: 12 }, classRestrict: ['paladino'],
       desc: "Uno scudo benedetto che protegge l'anima. Aumenta la forza di 5 e concede una sessione extra di salvataggio al giorno.",
       stats: { str: 3, con: 2 },
       abilities: { pickpocketBonus: 0, rerollBonus: 0, taxDiscount: 0, goldBonus: 0, xpBonus: 0, rescueBonus: 1, rescueStrengthBonus: 5 },
@@ -2804,6 +2907,64 @@ const DB = {
       stats: { str: 1, dex: 2 },
       abilities: { pickpocketBonus: 0, rerollBonus: 0, taxDiscount: 0, goldBonus: 0, xpBonus: 0, rescueStrengthBonus: 4 },
       buyPrice: 380, sellPrice: 152 },
+
+
+    /* ── SCUDI (solo Guerriero e Paladino) ──────────────── */
+    { id: 140, name: 'Targa di Legno',           slot: 'shield', quality: 1, tier: 1, reqLevel: 1, reqStat: null,
+      classRestrict: ['guerriero','paladino'],
+      desc: 'Uno scudo di legno grezzo ma efficace. Deflette i colpi più deboli.',
+      stats: { con: 1 },
+      abilities: {},
+      buyPrice: 30, sellPrice: 12 },
+
+    { id: 141, name: 'Scudo di Ferro',            slot: 'shield', quality: 2, tier: 1, reqLevel: 2, reqStat: null,
+      classRestrict: ['guerriero','paladino'],
+      desc: 'Robusto scudo di ferro, segni di battaglia visibili sulla superficie.',
+      stats: { con: 2 },
+      abilities: {},
+      buyPrice: 120, sellPrice: 48 },
+
+    { id: 142, name: 'Scudo del Cavaliere',       slot: 'shield', quality: 3, tier: 1, reqLevel: 3, reqStat: null,
+      classRestrict: ['guerriero'],
+      desc: 'Decorato con lo stemma cavalleresco. Difesa solida per ogni battaglia.',
+      stats: { con: 3 },
+      abilities: {},
+      buyPrice: 350, sellPrice: 140 },
+
+    { id: 143, name: 'Scudo del Paladino',        slot: 'shield', quality: 3, tier: 1, reqLevel: 3, reqStat: null,
+      classRestrict: ['paladino'],
+      desc: 'Scudo consacrato che difende corpo e anima. Potenzia la forza spirituale.',
+      stats: { con: 1 },
+      abilities: { rescueStrengthBonus: 3 },
+      buyPrice: 370, sellPrice: 148 },
+
+    { id: 144, name: 'Bastione Sacro',            slot: 'shield', quality: 4, tier: 2, reqLevel: 5, reqStat: { key: 'con', val: 14 },
+      classRestrict: ['guerriero'],
+      desc: "Forgiato con acciaio benedetto. Regge anche l'attacco di un gigante.",
+      stats: { con: 4 },
+      abilities: {},
+      buyPrice: 900, sellPrice: 360 },
+
+    { id: 145, name: 'Egida della Luce',          slot: 'shield', quality: 4, tier: 2, reqLevel: 5, reqStat: { key: 'con', val: 14 },
+      classRestrict: ['paladino'],
+      desc: 'Lo scudo dei paladini leggendari. La luce divina si riflette sulla sua superficie.',
+      stats: { con: 2 },
+      abilities: { rescueStrengthBonus: 6 },
+      buyPrice: 950, sellPrice: 380 },
+
+    { id: 146, name: 'Muro di Moradin',           slot: 'shield', quality: 5, tier: 3, reqLevel: 8, reqStat: { key: 'con', val: 17 },
+      classRestrict: ['guerriero'],
+      desc: 'Forgiato dal dio dei nani. Letteralmente indistruttibile.',
+      stats: { con: 5 },
+      abilities: {},
+      buyPrice: 2200, sellPrice: 880 },
+
+    { id: 147, name: "Scudo dell'Apocalisse Santa", slot: 'shield', quality: 5, tier: 3, reqLevel: 8, reqStat: { key: 'con', val: 17 },
+      classRestrict: ['paladino'],
+      desc: "Il supremo scudo del paladino. Nessun male può passare attraverso di esso.",
+      stats: { con: 3 },
+      abilities: { rescueStrengthBonus: 10 },
+      buyPrice: 2400, sellPrice: 960 },
 
     /* ── CONSUMABILI ──────────────────────────────────────── */
     // Istantanei

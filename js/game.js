@@ -46,6 +46,7 @@ const Game = {
           if (this.state.arenaHighScore === undefined)         this.state.arenaHighScore = 0;
           if (this.state.stableUsed === undefined)  this.state.stableUsed = 0;
           if (this.state.rescueUsed === undefined)  this.state.rescueUsed = 0;
+          if (this.state.character.equipment.shield === undefined) this.state.character.equipment.shield = null;
           return true;
         }
       } catch (e) {
@@ -71,7 +72,7 @@ const Game = {
         proficiency: 2,
         equipment: {
           head: null, gloves: null, legs: null, torso: null,
-          boots: null, ringRight: null, ringLeft: null, weapon: null
+          boots: null, ringRight: null, ringLeft: null, weapon: null, shield: null
         },
         inventory: [],
         day: 1,
@@ -773,6 +774,21 @@ const Game = {
       }
     }
 
+    // Check class restriction
+    if (item.classRestrict && item.classRestrict.length > 0) {
+      if (!item.classRestrict.includes(char.classe)) {
+        return { ok: false, reason: 'Oggetto non utilizzabile da questa classe.' };
+      }
+    }
+
+    // Check shield slot availability
+    if (item.slot === 'shield') {
+      const cls = this.getClasse();
+      if (!cls.hasShieldSlot) {
+        return { ok: false, reason: 'Questa classe non può usare uno scudo.' };
+      }
+    }
+
     // Rimuovi dall'inventario
     const idx = char.inventory.indexOf(itemId);
     if (idx === -1) return { ok: false, reason: 'Oggetto non in inventario.' };
@@ -1450,12 +1466,14 @@ const Game = {
     return { ok: true };
   },
 
-  applyRescueResult(saved, total, died) {
+  applyRescueResult(saved, total, died, bossKilled) {
     const char = this.state.character;
     const pct  = total > 0 ? (saved / total) * 100 : 0;
     let xp = 0, gold = 0, fameXp = 0, tier;
     if (died && saved === 0) {
       tier = 'sconfitta';
+    } else if (bossKilled) {
+      tier = 'leggendario'; xp = 380; gold = 140; fameXp = 28;
     } else if (pct >= 80) {
       tier = 'glorioso'; xp = 250; gold = 90; fameXp = 18;
     } else if (pct >= 60) {
@@ -1472,27 +1490,28 @@ const Game = {
       char.gold += gold;
       char.fame += fameXp;
     } else if (died) {
-      // Piccola consolazione se qualcuno salvato ma morto
       if (saved > 0) {
         xp = saved * 15; gold = saved * 5;
         char.xp   += xp;
         char.gold += gold;
       }
     }
-    const logText = tier === 'glorioso'
+    const logText = tier === 'leggendario'
+      ? `Il Boss è stato sconfitto! ${saved}/${total} prigionieri liberati! (+${xp} PE, +${gold} mo)`
+      : tier === 'glorioso'
       ? `Missione gloriosa! ${saved}/${total} prigionieri liberati! (+${xp} PE, +${gold} mo)`
       : tier === 'sconfitta'
       ? `Il paladino è caduto senza salvare nessuno.`
       : tier === 'fallimento'
       ? `Solo ${saved}/${total} prigionieri liberati. Nessuna ricompensa.`
       : `${saved}/${total} prigionieri liberati. (+${xp} PE, +${gold} mo)`;
-    const logEntry = { day: char.day, text: logText, type: (tier === 'glorioso' || tier === 'buono') ? 'success' : tier === 'parziale' ? 'partial' : 'fail' };
-    char.log.unshift(logEntry);
+    const logType = (tier === 'leggendario' || tier === 'glorioso' || tier === 'buono') ? 'success' : tier === 'parziale' ? 'partial' : 'fail';
+    char.log.unshift({ day: char.day, text: logText, type: logType });
     if (char.log.length > 500) char.log.pop();
     const completedChallenges = this.checkChallenges('passive');
     const levelUpResult = this.checkLevelUp();
     this.save();
-    return { ok: true, xp, gold, fameXp, tier, saved, total, pct: Math.floor(pct), died, completedChallenges, levelUpResult };
+    return { ok: true, xp, gold, fameXp, tier, saved, total, pct: Math.floor(pct), died, bossKilled, completedChallenges, levelUpResult };
   },
 
   /* ─── Attacco Ladro ─────────────────────────────────────── */

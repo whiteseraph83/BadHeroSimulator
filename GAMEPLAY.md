@@ -314,16 +314,18 @@ Puoi **rifiutare e sostituire** una sfida se hai l'abilità `challengeRefresh` s
 - Soglie ricompensa: ≥85% eccellente · ≥65% buona · ≥50% sufficiente · <50% nulla
 
 #### Salva i Prigionieri (2 volte/giorno)
-- Mini-gioco **top-down action** su canvas 560×360: il Paladino a cavallo (disegnato a mano) si muove in una mappa dungeon
+- Mini-gioco **top-down action** su canvas 520×320: il Paladino a cavallo (disegnato a mano) si muove in una mappa dungeon
 - **Clicca sulla mappa** per muovere il paladino verso quel punto
-- **4 campi prigionieri** distribuiti ai quattro angoli, ognuno difeso da nemici esagonali viola
+- **6 campi prigionieri** distribuiti sulla mappa (3 in alto, 3 in basso), ognuno difeso da nemici che **pattugliando** continuamente il loro campo
 
-| Campo | Nemici | HP nemico | Prigionieri |
-|-------|--------|-----------|-------------|
-| 1 (angolo in alto a sinistra) | 2 | 3 HP | 2 |
-| 2 (angolo in alto a destra) | 2 | 4 HP | 2 |
-| 3 (angolo in basso a sinistra) | 3 | 5 HP | 3 |
-| 4 (angolo in basso a destra) | 3 | 7 HP | 3 |
+| Campo | Posizione | Nemici | HP nemico | Prigionieri |
+|-------|-----------|--------|-----------|-------------|
+| 1 | Alto sx | 2 | 3 HP | 2 |
+| 2 | Alto centro | 2 | 3 HP | 2 |
+| 3 | Alto dx | 2 | 4 HP | 2 |
+| 4 | Basso sx | 3 | 5 HP | 3 |
+| 5 | Basso centro | 3 | 6 HP | 3 |
+| 6 | Basso dx | 3 | 8 HP | 3 |
 
 - **Clicca un nemico** (entro raggio 95px dal paladino) per attaccarlo
   - Troppo lontano? Il paladino si muove automaticamente verso il nemico
@@ -334,14 +336,26 @@ Puoi **rifiutare e sostituire** una sfida se hai l'abilità `challengeRefresh` s
 - Un cerchio tratteggiato oro mostra il raggio d'attacco attivo
 - **Durata:** 60 secondi
 
+#### ⚡ Giusto Potere! (abilità automatica)
+- Si ricarica ogni **10 secondi**; quando pronta si **attiva automaticamente** per **3 secondi**
+- Durante l'attivazione: ogni **0,5 secondi** infligge danno a tutti i nemici nel raggio d'attacco
+- Un arco dorato attorno al paladino mostra il progresso della ricarica
+- La scritta **"⚡ Giusto Potere! ⚡"** appare in basso durante l'attivazione
+
+#### 👑 Boss Finale
+- Quando **tutti e 6 i campi** sono stati liberati, un **boss** appare al centro della mappa
+- Il boss è più grande, ha **28 HP** e pattuglia il centro
+- Sconfiggere il boss sblocca il tier **Leggendario** (ricompensa massima)
+
 **Soglie di ricompensa:**
 
-| % prigionieri salvati | Tier | XP | Oro | Fama |
-|---|---|---|---|---|
-| ≥ 80% | 🏆 Glorioso | 250 + lv×10 | 90 + lv×3 | 18 |
-| ≥ 60% | ✅ Buono | 160 + lv×10 | 55 + lv×3 | 11 |
-| ≥ 40% | ⚔️ Parziale | 90 + lv×10 | 28 + lv×3 | 5 |
-| < 40% o morte | 😔 Fallimento | — | — | — |
+| % prigionieri salvati | Boss | Tier | XP | Oro | Fama |
+|---|---|---|---|---|---|
+| ≥ 80% + boss sconfitto | ✅ | 👑 Leggendario | 380 | 140 | 28 |
+| ≥ 80% | — | 🏆 Glorioso | 250 + lv×10 | 90 + lv×3 | 18 |
+| ≥ 60% | — | ✅ Buono | 160 + lv×10 | 55 + lv×3 | 11 |
+| ≥ 40% | — | ⚔️ Parziale | 90 + lv×10 | 28 + lv×3 | 5 |
+| < 40% o morte | — | 😔 Fallimento | — | — | — |
 
 > 💡 Gli oggetti con `rescueStrengthBonus` aumentano la **Forza iniziale**; quelli con `rescueBonus` aggiungono **sessioni extra** al giorno.
 

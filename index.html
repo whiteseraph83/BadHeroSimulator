@@ -656,15 +656,19 @@
           <div id="rescue-lobby" class="card-dark mb-3">
             <div class="card-dark-header">🛡️ Salva i Prigionieri</div>
             <div class="card-dark-body text-center">
-              <p class="text-muted small mb-3">Muovi il paladino cliccando sulla mappa. Clicca sui nemici viola quando sei vicino per attaccarli. Libera i prigionieri di luce prima che la tua Forza scenda a zero!</p>
-              <div class="d-flex justify-content-center gap-4 mb-3">
+              <p class="text-muted small mb-3">Muovi il paladino cliccando sulla mappa. Clicca i nemici da vicino per attaccarli. Ogni 10s si attiva il <strong class="text-gold">Giusto Potere!</strong> che colpisce automaticamente i nemici vicini. Sconfiggi tutti i nemici per evocare il Boss finale!</p>
+              <div class="d-flex justify-content-center gap-3 mb-3">
                 <div class="text-center">
-                  <div class="text-gold fw-bold fs-5" id="rescue-strength-display">10</div>
+                  <div class="text-gold fw-bold fs-5" id="rescue-strength-display">20</div>
                   <div class="text-muted small">⚡ Forza iniziale</div>
                 </div>
                 <div class="text-center">
                   <div class="text-gold fw-bold fs-5"><span id="rescue-uses-left">2</span></div>
                   <div class="text-muted small">Missioni oggi</div>
+                </div>
+                <div class="text-center">
+                  <div class="text-gold fw-bold fs-5">6</div>
+                  <div class="text-muted small">Campi nemici</div>
                 </div>
                 <div class="text-center">
                   <div class="text-gold fw-bold fs-5">60s</div>
@@ -677,13 +681,14 @@
 
           <!-- Game area -->
           <div id="rescue-game-area" class="d-none">
-            <div class="d-flex justify-content-between align-items-center mb-2 px-1">
-              <span class="text-danger fw-bold">⚡ Forza: <strong id="rescue-hud-strength">10</strong></span>
+            <div class="d-flex justify-content-between align-items-center mb-1 px-1">
+              <span class="text-danger fw-bold">⚡ <strong id="rescue-hud-strength">20</strong></span>
+              <span class="text-gold fw-bold small" id="rescue-hud-holylabel" style="opacity:0.5;">⚡ Giusto Potere</span>
               <span class="text-warning fw-bold">⏱️ <strong id="rescue-hud-timer">60</strong>s</span>
-              <span class="text-success fw-bold">🧑 Salvati: <strong id="rescue-hud-saved">0</strong>/<span id="rescue-hud-total">10</span></span>
+              <span class="text-success fw-bold">🧑 <strong id="rescue-hud-saved">0</strong>/<span id="rescue-hud-total">15</span></span>
             </div>
-            <canvas id="rescue-canvas" class="rescue-canvas" width="560" height="360"></canvas>
-            <p class="text-muted small text-center mt-1" id="rescue-hint">Clicca sulla mappa per muoverti • Clicca un nemico (da vicino) per attaccarlo</p>
+            <canvas id="rescue-canvas" class="rescue-canvas" width="460" height="270"></canvas>
+            <p class="text-muted small text-center mt-1" id="rescue-hint">Clicca mappa → muovi · Clicca nemico da vicino → attacca · Ogni 10s → Giusto Potere! · Sconfitta tutti → Boss!</p>
           </div>
 
           <!-- Result -->
