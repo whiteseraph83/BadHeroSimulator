@@ -508,8 +508,9 @@ const App = {
       const spellId = btn.dataset.sellSpellId;
       const result  = Game.sellSpell(spellId);
       if (result.ok) {
-        UI.toast(`💰 "${result.recipe.name}" venduto per ${result.sellPrice} mo.`, 'success');
-        UI.refresh();
+        UI.toast(`💰 "${result.recipe.name}" venduto per ${result.sellPrice} mo.`);
+        UI.renderIncantesimiTab();
+        UI.renderCharacter();
       } else {
         UI.toast(result.reason);
       }
