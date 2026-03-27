@@ -851,8 +851,14 @@ const Game = {
       cumulative += weights[q - 1];
       if (rand < cumulative) { chosenQuality = q; break; }
     }
-    // Escludi consumabili dalla pool normale (hanno la loro sezione nel mercato)
-    const pool = DB.items.filter(i => i.quality === chosenQuality && !i.consumable);
+    const classe = this.state?.character?.classe;
+    // Escludi consumabili e oggetti non disponibili per la classe corrente
+    const pool = DB.items.filter(i => {
+      if (i.quality !== chosenQuality || i.consumable) return false;
+      if (!i.classRestrict) return true;
+      const r = i.classRestrict;
+      return Array.isArray(r) ? r.includes(classe) : r === classe;
+    });
     if (!pool.length) return null;
     return pool[Math.floor(Math.random() * pool.length)];
   },
@@ -896,9 +902,14 @@ const Game = {
       generated.push({ itemId: item.id, buyPrice: Math.round(item.buyPrice * variance) });
     }
 
-    // 3-5 consumabili (esclusi quelli con marketExcluded)
-    const consumablePool = DB.items.filter(i => i.consumable && !i.marketExcluded &&
-      (i.tier || 1) <= Math.ceil(char.level / 3) + 1 && !usedIds.has(i.id));
+    // 3-5 consumabili (esclusi quelli con marketExcluded, filtrati per classe)
+    const consumablePool = DB.items.filter(i => {
+      if (!i.consumable || i.marketExcluded || usedIds.has(i.id)) return false;
+      if ((i.tier || 1) > Math.ceil(char.level / 3) + 1) return false;
+      if (!i.classRestrict) return true;
+      const r = i.classRestrict;
+      return Array.isArray(r) ? r.includes(char.classe) : r === char.classe;
+    });
     const shuffledC = [...consumablePool].sort(() => Math.random() - 0.5);
     const cCount = 3 + Math.floor(Math.random() * 3); // 3, 4 or 5
     for (let i = 0; i < Math.min(cCount, shuffledC.length); i++) {
