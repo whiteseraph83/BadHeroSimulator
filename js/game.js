@@ -392,20 +392,20 @@ const Game = {
       this.save();
       return { ok: true, recipe, completedChallenges, levelUpResult };
     } else {
-      // Prova di Intelligenza DC 13: successo = ingredienti restituiti
-      const check = this.resolveCheck('int', 13);
+      // Prova di Saggezza DC 13: successo = ingredienti restituiti
+      const check = this.resolveCheck('wis', 13);
       const saved = check.result === 'nat20' || check.result === 'success';
       if (saved) {
         // Ingredienti non consumati
         char.xp += 10;
         this.save();
-        return { ok: false, saved: true, check, reason: `Prova INT ${check.result === 'nat20' ? 'critica' : 'superata'} (${check.roll}+${check.bonus}=${check.total} vs DC 13) — ingredienti recuperati. +10 PE.` };
+        return { ok: false, saved: true, check, reason: `Prova SAG ${check.result === 'nat20' ? 'critica' : 'superata'} (${check.roll}+${check.bonus}=${check.total} vs DC 13) — ingredienti recuperati. +10 PE.` };
       } else {
         // Ingredienti persi
         this.state.ingredientInventory = inv;
         char.xp += 15;
         this.save();
-        return { ok: false, saved: false, check, reason: `Prova INT fallita (${check.roll}+${check.bonus}=${check.total} vs DC 13) — ingredienti persi. +15 PE per la sperimentazione.` };
+        return { ok: false, saved: false, check, reason: `Prova SAG fallita (${check.roll}+${check.bonus}=${check.total} vs DC 13) — ingredienti persi. +15 PE per la sperimentazione.` };
       }
     }
   },
