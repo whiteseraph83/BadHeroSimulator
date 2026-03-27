@@ -217,6 +217,56 @@ const UI = {
     document.getElementById('conv-rewards').innerHTML = rows.join('');
   },
 
+  /* ─── Salva i Prigionieri (solo Paladino) ─────────────────── */
+  renderRescueLobby() {
+    const usesEl = document.getElementById('rescue-uses-left');
+    if (!usesEl) return;
+    const rem = Game.rescueRemaining();
+    usesEl.textContent = rem;
+    const btn = document.getElementById('btn-rescue-start');
+    if (btn) btn.disabled = rem <= 0 || (Game.state && Game.state.gameOver);
+    // Show starting strength (including item bonuses)
+    const strEl = document.getElementById('rescue-strength-display');
+    if (strEl) {
+      const cls = Game.getClasse();
+      const bonus = Game.getEquipmentAbilities().rescueStrengthBonus || 0;
+      strEl.textContent = (cls.rescueStrengthBase || 10) + bonus;
+    }
+  },
+
+  showRescueResult(result) {
+    document.getElementById('rescue-game-area').classList.add('d-none');
+    document.getElementById('rescue-result').classList.remove('d-none');
+    document.getElementById('rescue-lobby').classList.add('d-none');
+    const iconEl  = document.getElementById('rescue-result-icon');
+    const titleEl = document.getElementById('rescue-result-title');
+    const subEl   = document.getElementById('rescue-result-sub');
+    const rewEl   = document.getElementById('rescue-result-rewards');
+    if (result.tier === 'glorioso') {
+      iconEl.textContent  = '🏆';
+      titleEl.innerHTML   = '<span class="text-gold">Missione Gloriosa!</span>';
+    } else if (result.tier === 'buono') {
+      iconEl.textContent  = '✅';
+      titleEl.innerHTML   = '<span style="color:#2ecc71">Missione Riuscita</span>';
+    } else if (result.tier === 'parziale') {
+      iconEl.textContent  = '⚔️';
+      titleEl.innerHTML   = '<span class="text-warning">Missione Parziale</span>';
+    } else if (result.died) {
+      iconEl.textContent  = '💀';
+      titleEl.innerHTML   = '<span class="text-danger">Il Paladino è Caduto</span>';
+    } else {
+      iconEl.textContent  = '😔';
+      titleEl.innerHTML   = '<span class="text-muted">Missione Fallita</span>';
+    }
+    subEl.textContent = `${result.saved}/${result.total} prigionieri liberati (${result.pct}%)`;
+    if (result.xp > 0 || result.gold > 0) {
+      rewEl.innerHTML = `<span class="text-warning">+${result.xp} PE</span> &nbsp; <span class="text-gold">+${result.gold} mo</span>` +
+        (result.fameXp > 0 ? ` &nbsp; <span style="color:#a29bfe">+${result.fameXp} fama</span>` : '');
+    } else {
+      rewEl.innerHTML = '<span class="text-muted small">Nessuna ricompensa</span>';
+    }
+  },
+
   /* ─── Stalla (solo Paladino) ──────────────────────────────── */
   renderStableLobby() {
     const badge = document.getElementById('stable-badge');
@@ -1481,6 +1531,7 @@ const UI = {
     this.renderPrayBtn();
     this.renderConversionLobby();
     this.renderStableLobby();
+    this.renderRescueLobby();
     this.renderArenaLobby();
     this.renderPozioniTab();
     this.renderIncantesimiTab();
@@ -1534,6 +1585,9 @@ const UI = {
     // Cavalcatura button (solo Paladino)
     document.getElementById('stable-wrapper').classList.toggle('d-none', !cls.hasStableTab);
 
+    // Tab Salva i Prigionieri (solo Paladino)
+    document.getElementById('tab-rescue-nav').classList.toggle('d-none', !cls.hasRescueTab);
+
     // Classe sotto il nome
     document.getElementById('char-class').textContent = cls.name;
 
@@ -1571,7 +1625,8 @@ const UI = {
             ${cls.hasPrayer       ? '<span class="ms-1" title="Preghiera: chiedi la grazia divina">🙏</span>' : ''}
             ${cls.hasPotioniTab   ? '<span class="ms-1" title="Alchimia: prepara pozioni">🌿</span>' : ''}
             ${cls.hasSpellTab     ? '<span class="ms-1 text-info"    title="Grimorio: lancia incantesimi"><i class="bi bi-stars"></i></span>' : ''}
-            ${cls.hasStableTab ? '<span class="ms-1" title="Cavalcatura: accudisci il tuo cavallo">🐎</span>' : ''}
+            ${cls.hasStableTab  ? '<span class="ms-1" title="Cavalcatura: accudisci il tuo cavallo">🐎</span>' : ''}
+            ${cls.hasRescueTab  ? '<span class="ms-1" title="Salva i Prigionieri: libera i captivi e combatti i nemici">🛡️</span>' : ''}
           </div>
         </div>
       </div>`).join('');

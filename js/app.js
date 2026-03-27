@@ -715,6 +715,59 @@ const App = {
       UI.refresh();
     });
 
+    // Salva i Prigionieri (Paladino) — tab
+    document.getElementById('btn-rescue-start').addEventListener('click', () => {
+      if (!Game.state || Game.state.gameOver) return;
+      const res = Game.startRescue();
+      if (!res.ok) { UI.toast(res.reason || 'Nessuna missione disponibile oggi.'); return; }
+      UI.refresh();
+      document.getElementById('rescue-lobby').classList.add('d-none');
+      document.getElementById('rescue-result').classList.add('d-none');
+      document.getElementById('rescue-game-area').classList.remove('d-none');
+      this._startRescueGame();
+    });
+
+    document.getElementById('btn-rescue-again').addEventListener('click', () => {
+      document.getElementById('rescue-result').classList.add('d-none');
+      document.getElementById('rescue-lobby').classList.remove('d-none');
+      UI.refresh();
+    });
+
+    document.getElementById('rescue-canvas').addEventListener('click', (e) => {
+      const s = this._rescue;
+      if (!s || !s.running) return;
+      const canvas = e.currentTarget;
+      const rect   = canvas.getBoundingClientRect();
+      const sx     = canvas.width  / rect.width;
+      const sy     = canvas.height / rect.height;
+      const mx     = (e.clientX - rect.left) * sx;
+      const my     = (e.clientY - rect.top)  * sy;
+      this._rescueHandleClick(mx, my, canvas);
+    });
+
+    document.getElementById('rescue-canvas').addEventListener('mousemove', (e) => {
+      const s = this._rescue;
+      if (!s || !s.running) return;
+      const canvas = e.currentTarget;
+      const rect   = canvas.getBoundingClientRect();
+      const sx     = canvas.width  / rect.width;
+      const sy     = canvas.height / rect.height;
+      const mx     = (e.clientX - rect.left) * sx;
+      const my     = (e.clientY - rect.top)  * sy;
+      // Check if hovering an attackable enemy for cursor change
+      let onEnemy = false;
+      for (const camp of s.camps) {
+        for (const en of camp.enemies) {
+          if (!en.alive) continue;
+          const d = Math.hypot(mx - en.x, my - en.y);
+          const pd = Math.hypot(s.paladin.x - en.x, s.paladin.y - en.y);
+          if (d <= 22 && pd <= 95) { onEnemy = true; break; }
+        }
+        if (onEnemy) break;
+      }
+      canvas.style.cursor = onEnemy ? 'crosshair' : 'pointer';
+    });
+
     // Stalla (Paladino) — apri modal
     document.getElementById('btn-stable').addEventListener('click', () => {
       if (!Game.state || Game.state.gameOver) return;
@@ -2746,6 +2799,584 @@ const App = {
     this._prayAnimFrameId = null;
     const result = Game.applyPrayResult(this._prayDevotion);
     UI.showPrayerResult(result);
+    UI.refresh();
+    if (result.levelUpResult) this._triggerLevelUp(result.levelUpResult);
+  },
+
+  /* ─── Salva i Prigionieri (Paladino) ──────────────────────── */
+  _rescue: null,
+
+  _buildRescueCamp(config) {
+    const { id, cx, cy, pCount, enemyHp, enemyCount } = config;
+    const enemies = [];
+    for (let i = 0; i < enemyCount; i++) {
+      const angle = (i / enemyCount) * Math.PI * 2 - Math.PI / 2;
+      enemies.push({
+        id: `e${id}_${i}`,
+        x: cx + Math.cos(angle) * 44,
+        y: cy + Math.sin(angle) * 38,
+        hp: enemyHp, maxHp: enemyHp, alive: true,
+        flashT: 0,
+      });
+    }
+    const prisoners = [];
+    for (let i = 0; i < pCount; i++) {
+      const angle = (i / pCount) * Math.PI * 2;
+      prisoners.push({
+        x: cx + Math.cos(angle) * 16,
+        y: cy + Math.sin(angle) * 16,
+        state: 'guarded', // guarded | freed | rescued
+      });
+    }
+    return { id, cx, cy, enemies, prisoners };
+  },
+
+  _startRescueGame() {
+    const cls       = Game.getClasse();
+    const abilities = Game.getEquipmentAbilities();
+    const strBase   = (cls.rescueStrengthBase || 10) + (abilities.rescueStrengthBonus || 0);
+    const canvas    = document.getElementById('rescue-canvas');
+    if (!canvas) return;
+
+    const campConfigs = [
+      { id: 0, cx: 112, cy: 88,  pCount: 2, enemyHp: 3, enemyCount: 2 },
+      { id: 1, cx: 448, cy: 88,  pCount: 2, enemyHp: 4, enemyCount: 2 },
+      { id: 2, cx: 112, cy: 272, pCount: 3, enemyHp: 5, enemyCount: 3 },
+      { id: 3, cx: 448, cy: 272, pCount: 3, enemyHp: 7, enemyCount: 3 },
+    ];
+
+    this._rescue = {
+      running:    true,
+      timer:      60,
+      strengthBase: strBase,
+      strength:   strBase,
+      savedCount: 0,
+      totalPrisoners: 10,
+      died:       false,
+      paladin:    { x: 280, y: 180, destX: 280, destY: 180, speed: 145 },
+      camps:      campConfigs.map(c => this._buildRescueCamp(c)),
+      particles:  [],
+      hitCooldown: {},
+      lastTs:     null,
+      rafId:      null,
+    };
+
+    // Update HUD initial values
+    document.getElementById('rescue-hud-strength').textContent = strBase;
+    document.getElementById('rescue-hud-timer').textContent    = '60';
+    document.getElementById('rescue-hud-saved').textContent    = '0';
+    document.getElementById('rescue-hud-total').textContent    = '10';
+
+    this._rescue.rafId = requestAnimationFrame(ts => this._rescueLoop(ts));
+  },
+
+  _rescueLoop(ts) {
+    const s = this._rescue;
+    if (!s || !s.running) return;
+    const dt = s.lastTs ? Math.min((ts - s.lastTs) / 1000, 0.1) : 0.016;
+    s.lastTs = ts;
+
+    // ── Timer ──────────────────────────────────────────────
+    s.timer = Math.max(0, s.timer - dt);
+    document.getElementById('rescue-hud-timer').textContent    = Math.ceil(s.timer);
+    document.getElementById('rescue-hud-strength').textContent = Math.ceil(s.strength);
+    document.getElementById('rescue-hud-saved').textContent    = s.savedCount;
+
+    // ── Move paladin ───────────────────────────────────────
+    const pal = s.paladin;
+    const pdx = pal.destX - pal.x;
+    const pdy = pal.destY - pal.y;
+    const pdist = Math.hypot(pdx, pdy);
+    if (pdist > 2) {
+      const spd = Math.min(pdist, pal.speed * dt);
+      pal.x += (pdx / pdist) * spd;
+      pal.y += (pdy / pdist) * spd;
+    }
+
+    // ── Proximity drain ────────────────────────────────────
+    let nearCount = 0;
+    for (const camp of s.camps) {
+      for (const en of camp.enemies) {
+        if (!en.alive) continue;
+        if (Math.hypot(pal.x - en.x, pal.y - en.y) < 92) nearCount++;
+        // Flash timer decay
+        if (en.flashT > 0) en.flashT = Math.max(0, en.flashT - dt);
+      }
+    }
+    if (nearCount > 0) {
+      s.strength = Math.max(0, s.strength - 2.8 * nearCount * dt);
+      if (s.strength <= 0) { s.died = true; this._endRescueGame(); return; }
+    }
+
+    // ── Hit cooldowns ─────────────────────────────────────
+    for (const id in s.hitCooldown) {
+      s.hitCooldown[id] = Math.max(0, s.hitCooldown[id] - dt);
+    }
+
+    // ── Particles ─────────────────────────────────────────
+    s.particles = s.particles.filter(p => { p.t = Math.max(0, p.t - dt); return p.t > 0; });
+
+    // ── Move freed prisoners toward paladin ───────────────
+    for (const camp of s.camps) {
+      for (const pris of camp.prisoners) {
+        if (pris.state !== 'freed') continue;
+        const dx = pal.x - pris.x, dy = pal.y - pris.y;
+        const d  = Math.hypot(dx, dy);
+        if (d < 14) {
+          pris.state = 'rescued';
+          s.savedCount++;
+          s.strength = Math.min(s.strength + 3, s.strengthBase + s.savedCount * 4);
+          s.particles.push({ x: pal.x, y: pal.y - 22, t: 0.9, maxT: 0.9, type: 'join', txt: `+3⚡` });
+          document.getElementById('rescue-hud-strength').textContent = Math.ceil(s.strength);
+          document.getElementById('rescue-hud-saved').textContent    = s.savedCount;
+        } else {
+          const spd = Math.min(d, 160 * dt);
+          pris.x += (dx / d) * spd;
+          pris.y += (dy / d) * spd;
+        }
+      }
+      // Check camp clear → free prisoners
+      if (camp.enemies.every(e => !e.alive)) {
+        for (const pris of camp.prisoners) {
+          if (pris.state === 'guarded') pris.state = 'freed';
+        }
+      }
+    }
+
+    // ── End conditions ────────────────────────────────────
+    if (s.savedCount >= s.totalPrisoners || s.timer <= 0) {
+      this._endRescueGame(); return;
+    }
+
+    // ── Draw ──────────────────────────────────────────────
+    const canvas = document.getElementById('rescue-canvas');
+    if (canvas) this._drawRescue(canvas, s);
+
+    s.rafId = requestAnimationFrame(ts2 => this._rescueLoop(ts2));
+  },
+
+  _rescueHandleClick(mx, my, canvas) {
+    const s = this._rescue;
+    if (!s || !s.running) return;
+
+    let attacked = false;
+    const dmg = Math.max(1, 1 + Math.floor(s.savedCount / 2));
+
+    for (const camp of s.camps) {
+      for (const en of camp.enemies) {
+        if (!en.alive) continue;
+        const clickDist = Math.hypot(mx - en.x, my - en.y);
+        if (clickDist <= 22) {
+          const palDist = Math.hypot(s.paladin.x - en.x, s.paladin.y - en.y);
+          if (palDist <= 95) {
+            // Attack!
+            if (!(s.hitCooldown[en.id] > 0)) {
+              en.hp = Math.max(0, en.hp - dmg);
+              en.flashT = 0.18;
+              s.hitCooldown[en.id] = 0.18;
+              s.particles.push({ x: en.x, y: en.y - 26, t: 0.65, maxT: 0.65, type: 'hit', txt: `-${dmg}` });
+              if (en.hp <= 0) {
+                en.alive = false;
+                for (let i = 0; i < 7; i++) {
+                  const ang = Math.random() * Math.PI * 2;
+                  const spd = 30 + Math.random() * 60;
+                  s.particles.push({ x: en.x, y: en.y, vx: Math.cos(ang)*spd, vy: Math.sin(ang)*spd, t: 0.55, maxT: 0.55, type: 'spark' });
+                }
+              }
+            }
+            attacked = true;
+          } else {
+            // Too far — move toward enemy
+            s.paladin.destX = en.x;
+            s.paladin.destY = en.y;
+            attacked = true;
+          }
+          break;
+        }
+      }
+      if (attacked) break;
+    }
+
+    if (!attacked) {
+      const m = 28;
+      s.paladin.destX = Math.max(m, Math.min(canvas.width  - m, mx));
+      s.paladin.destY = Math.max(m, Math.min(canvas.height - m, my));
+    }
+  },
+
+  _drawRescue(canvas, s) {
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height;
+    const now = Date.now();
+
+    // ── Background ────────────────────────────────────────
+    ctx.fillStyle = '#12121e';
+    ctx.fillRect(0, 0, W, H);
+
+    // Stone grid
+    ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+    ctx.lineWidth = 1;
+    for (let x = 0; x < W; x += 40) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
+    for (let y = 0; y < H; y += 40) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+
+    // ── Camp zones ────────────────────────────────────────
+    for (const camp of s.camps) {
+      const cleared = camp.enemies.every(e => !e.alive);
+      ctx.save();
+      const grad = ctx.createRadialGradient(camp.cx, camp.cy, 0, camp.cx, camp.cy, 68);
+      grad.addColorStop(0, cleared ? 'rgba(46,204,113,0.12)' : 'rgba(155,89,182,0.10)');
+      grad.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = grad;
+      ctx.beginPath(); ctx.arc(camp.cx, camp.cy, 68, 0, Math.PI*2); ctx.fill();
+      ctx.strokeStyle = cleared ? 'rgba(46,204,113,0.25)' : 'rgba(155,89,182,0.18)';
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([4,4]);
+      ctx.beginPath(); ctx.arc(camp.cx, camp.cy, 68, 0, Math.PI*2); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.restore();
+    }
+
+    // ── Particles ─────────────────────────────────────────
+    for (const p of s.particles) {
+      const alpha = p.t / p.maxT;
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      if (p.type === 'hit') {
+        const rise = (1 - alpha) * 22;
+        ctx.fillStyle = '#e74c3c';
+        ctx.font = 'bold 14px monospace';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(p.txt, p.x, p.y - rise);
+      } else if (p.type === 'join') {
+        const rise = (1 - alpha) * 28;
+        ctx.fillStyle = '#2ecc71';
+        ctx.font = 'bold 13px monospace';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(p.txt, p.x, p.y - rise);
+      } else if (p.type === 'spark') {
+        const dx = p.vx * (1 - alpha) * (p.maxT / Math.max(p.t, 0.01));
+        const dy = p.vy * (1 - alpha) * (p.maxT / Math.max(p.t, 0.01));
+        ctx.fillStyle = `hsl(${280 + alpha*60},90%,65%)`;
+        ctx.beginPath();
+        ctx.arc(p.x + dx * 0.3, p.y + dy * 0.3, 3 * alpha, 0, Math.PI*2);
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+
+    // ── Prisoners ─────────────────────────────────────────
+    for (const camp of s.camps) {
+      for (const pris of camp.prisoners) {
+        if (pris.state === 'rescued') continue;
+        const x = pris.x, y = pris.y;
+        const pulse = 0.55 + 0.45 * Math.sin(now / 550 + x);
+        ctx.save();
+        if (pris.state === 'freed') ctx.globalAlpha = 0.85 + 0.15 * pulse;
+        // Glow
+        const glow = ctx.createRadialGradient(x, y, 0, x, y, 26);
+        glow.addColorStop(0, pris.state === 'freed' ? `rgba(46,204,113,${0.5*pulse})` : `rgba(130,200,240,${0.45*pulse})`);
+        glow.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = glow;
+        ctx.beginPath(); ctx.arc(x, y, 26, 0, Math.PI*2); ctx.fill();
+        // Body
+        ctx.fillStyle = pris.state === 'freed' ? '#2ecc71' : '#7ec8e3';
+        ctx.strokeStyle = 'rgba(255,255,255,0.8)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.arc(x, y, 11, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+        // Person head
+        ctx.fillStyle = pris.state === 'freed' ? '#1a7a4a' : '#2c6a80';
+        ctx.beginPath(); ctx.arc(x, y - 4, 4, 0, Math.PI*2); ctx.fill();
+        // Person body
+        ctx.strokeStyle = pris.state === 'freed' ? '#1a7a4a' : '#2c6a80';
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x, y + 6); ctx.stroke();
+        if (pris.state === 'guarded') {
+          // Chain links
+          ctx.strokeStyle = 'rgba(200,200,200,0.5)';
+          ctx.lineWidth = 1;
+          ctx.beginPath(); ctx.arc(x+8, y+2, 3, 0, Math.PI*2); ctx.stroke();
+        }
+        ctx.restore();
+      }
+    }
+
+    // ── Enemies ───────────────────────────────────────────
+    for (const camp of s.camps) {
+      for (const en of camp.enemies) {
+        if (!en.alive) continue;
+        const x = en.x, y = en.y;
+        const pdist = Math.hypot(s.paladin.x - x, s.paladin.y - y);
+        const isNear = pdist < 95;
+        const pulse  = 0.5 + 0.5 * Math.sin(now / 220 + x);
+        ctx.save();
+        // Aura
+        const aura = ctx.createRadialGradient(x, y, 0, x, y, 30);
+        aura.addColorStop(0, `rgba(155,89,182,${isNear ? 0.30*pulse : 0.12})`);
+        aura.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = aura;
+        ctx.beginPath(); ctx.arc(x, y, 30, 0, Math.PI*2); ctx.fill();
+        // Flash on hit
+        if (en.flashT > 0) {
+          ctx.fillStyle = `rgba(255,100,100,${en.flashT / 0.18})`;
+          ctx.beginPath(); ctx.arc(x, y, 21, 0, Math.PI*2); ctx.fill();
+        }
+        // Body hexagon
+        ctx.fillStyle = '#4a1060';
+        ctx.strokeStyle = '#9b59b6';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        for (let i = 0; i < 6; i++) {
+          const a = (i / 6) * Math.PI * 2 - Math.PI / 6;
+          i === 0 ? ctx.moveTo(x + Math.cos(a)*20, y + Math.sin(a)*20)
+                  : ctx.lineTo(x + Math.cos(a)*20, y + Math.sin(a)*20);
+        }
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+        // Inner circle
+        ctx.fillStyle = '#7d3c98';
+        ctx.beginPath(); ctx.arc(x, y, 13, 0, Math.PI*2); ctx.fill();
+        // Eyes
+        ctx.fillStyle = '#e74c3c';
+        ctx.beginPath(); ctx.arc(x-5, y-2, 3, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(x+5, y-2, 3, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = '#ff6b6b';
+        ctx.beginPath(); ctx.arc(x-5, y-3, 1.2, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(x+5, y-3, 1.2, 0, Math.PI*2); ctx.fill();
+        // HP bar
+        const bw = 38, bh = 5;
+        const bx = x - bw/2, by = y - 33;
+        ctx.fillStyle = 'rgba(0,0,0,0.55)';
+        ctx.beginPath(); ctx.roundRect(bx-1, by-1, bw+2, bh+2, 2); ctx.fill();
+        const hpPct = en.hp / en.maxHp;
+        ctx.fillStyle = hpPct > 0.6 ? '#2ecc71' : hpPct > 0.3 ? '#f39c12' : '#e74c3c';
+        ctx.beginPath(); ctx.roundRect(bx, by, bw * hpPct, bh, 2); ctx.fill();
+        // HP text
+        ctx.fillStyle = 'rgba(255,255,255,0.8)';
+        ctx.font = '9px monospace';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(`${en.hp}/${en.maxHp}`, x, by + bh/2);
+        ctx.restore();
+      }
+    }
+
+    // ── Paladin (knight on horseback) ─────────────────────
+    this._drawRescuePaladin(ctx, s.paladin.x, s.paladin.y, s.strength, s.strengthBase, now);
+
+    // ── Attack range indicator (faint circle around paladin) ──
+    ctx.save();
+    ctx.strokeStyle = 'rgba(201,168,76,0.12)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([3,5]);
+    ctx.beginPath(); ctx.arc(s.paladin.x, s.paladin.y, 95, 0, Math.PI*2); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.restore();
+
+    // ── Strength bar ──────────────────────────────────────
+    const barW = 120, barH = 8;
+    const barX = W/2 - barW/2, barY = H - 14;
+    const strPct = Math.max(0, Math.min(1, s.strength / (s.strengthBase + s.savedCount * 4)));
+    ctx.fillStyle = 'rgba(0,0,0,0.4)';
+    ctx.beginPath(); ctx.roundRect(barX-1, barY-1, barW+2, barH+2, 3); ctx.fill();
+    const barColor = strPct > 0.5 ? '#c9a84c' : strPct > 0.25 ? '#f39c12' : '#e74c3c';
+    ctx.fillStyle = barColor;
+    ctx.beginPath(); ctx.roundRect(barX, barY, barW * strPct, barH, 3); ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.6)';
+    ctx.font = '9px monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('FORZA', W/2, barY + barH/2);
+  },
+
+  _drawRescuePaladin(ctx, x, y, strength, strengthBase, now) {
+    ctx.save();
+
+    // Aura glow
+    const auraR  = 32 + (strength / Math.max(strengthBase, 1)) * 10;
+    const auraA  = 0.15 + 0.10 * Math.sin(now / 600);
+    const aura   = ctx.createRadialGradient(x, y, 0, x, y, auraR);
+    aura.addColorStop(0, `rgba(201,168,76,${auraA * 2})`);
+    aura.addColorStop(1, 'rgba(201,168,76,0)');
+    ctx.fillStyle = aura;
+    ctx.beginPath(); ctx.arc(x, y, auraR, 0, Math.PI*2); ctx.fill();
+
+    // ── HORSE ────────────────────────────────────────────
+    // Body
+    ctx.fillStyle = '#7a4e2d';
+    ctx.beginPath();
+    ctx.ellipse(x + 7, y + 9, 25, 13, 0, 0, Math.PI*2);
+    ctx.fill();
+    // Belly highlight
+    ctx.fillStyle = '#9b6840';
+    ctx.beginPath();
+    ctx.ellipse(x + 6, y + 11, 18, 8, 0, 0, Math.PI*2);
+    ctx.fill();
+    // Neck
+    ctx.fillStyle = '#6b3d20';
+    ctx.beginPath();
+    ctx.ellipse(x - 14, y, 9, 15, -0.45, 0, Math.PI*2);
+    ctx.fill();
+    // Head
+    ctx.fillStyle = '#7a4e2d';
+    ctx.beginPath();
+    ctx.ellipse(x - 24, y - 11, 10, 7, -0.6, 0, Math.PI*2);
+    ctx.fill();
+    // Nostril
+    ctx.fillStyle = '#3d1a08';
+    ctx.beginPath();
+    ctx.ellipse(x - 31, y - 10, 2, 1.5, -0.3, 0, Math.PI*2);
+    ctx.fill();
+    // Ear
+    ctx.fillStyle = '#6b3d20';
+    ctx.beginPath();
+    ctx.moveTo(x - 29, y - 17);
+    ctx.lineTo(x - 34, y - 24);
+    ctx.lineTo(x - 25, y - 20);
+    ctx.closePath(); ctx.fill();
+    // Mane
+    ctx.fillStyle = '#2c1406';
+    ctx.beginPath();
+    ctx.ellipse(x - 17, y - 5, 4, 13, -0.45, 0, Math.PI*2);
+    ctx.fill();
+    // Eye
+    ctx.fillStyle = '#1a0a00';
+    ctx.beginPath(); ctx.arc(x - 27, y - 13, 2, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.arc(x - 26.5, y - 13.5, 0.8, 0, Math.PI*2); ctx.fill();
+    // Legs (galloping)
+    ctx.fillStyle = '#5a3015';
+    const legs = [
+      { ox: -8,  a: -0.3, len: 14 },
+      { ox:  2,  a:  0.2, len: 13 },
+      { ox: 12,  a: -0.1, len: 14 },
+      { ox: 22,  a:  0.35, len: 13 },
+    ];
+    for (const l of legs) {
+      const bx = x + l.ox, by = y + 19;
+      const ex = bx + Math.sin(l.a) * l.len;
+      const ey = by + Math.cos(l.a) * l.len;
+      ctx.strokeStyle = '#5a3015';
+      ctx.lineWidth = 5;
+      ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(bx, by); ctx.lineTo(ex, ey); ctx.stroke();
+      // Hoof
+      ctx.fillStyle = '#1a0a00';
+      ctx.beginPath(); ctx.ellipse(ex, ey, 4, 2.5, l.a, 0, Math.PI*2); ctx.fill();
+    }
+    // Tail
+    ctx.strokeStyle = '#2c1406';
+    ctx.lineWidth = 4; ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(x + 30, y + 6);
+    ctx.quadraticCurveTo(x + 42, y, x + 36, y + 22);
+    ctx.stroke();
+
+    // ── RIDER ─────────────────────────────────────────────
+    // Cape / Surcoat
+    ctx.fillStyle = '#8B0000';
+    ctx.beginPath();
+    ctx.moveTo(x + 9, y - 22);
+    ctx.quadraticCurveTo(x + 24, y - 6, x + 18, y + 10);
+    ctx.lineTo(x + 8, y - 2);
+    ctx.closePath(); ctx.fill();
+    // Armor body
+    ctx.fillStyle = '#2a5f8a';
+    ctx.beginPath();
+    ctx.ellipse(x + 1, y - 14, 12, 14, 0, 0, Math.PI*2);
+    ctx.fill();
+    // Armor highlights
+    ctx.fillStyle = '#3a7ab0';
+    ctx.beginPath();
+    ctx.ellipse(x - 1, y - 16, 8, 9, 0, 0, Math.PI*2);
+    ctx.fill();
+    // Cross on chest
+    ctx.fillStyle = '#c9a84c';
+    ctx.fillRect(x - 1.5, y - 26, 3.5, 14);
+    ctx.fillRect(x - 7,   y - 20, 13, 3.5);
+    // Belt
+    ctx.fillStyle = '#6b3d20';
+    ctx.fillRect(x - 10, y - 4, 22, 3);
+    // Helmet
+    ctx.fillStyle = '#c9a84c';
+    ctx.beginPath();
+    ctx.arc(x + 1, y - 30, 11, 0, Math.PI*2);
+    ctx.fill();
+    // Helmet coif/neck guard
+    ctx.fillStyle = '#a88030';
+    ctx.beginPath();
+    ctx.ellipse(x + 1, y - 22, 9, 5, 0, 0, Math.PI*2);
+    ctx.fill();
+    // Visor
+    ctx.fillStyle = '#1c2333';
+    ctx.beginPath();
+    ctx.roundRect(x - 8, y - 34, 18, 6, 2);
+    ctx.fill();
+    // Visor slit
+    ctx.strokeStyle = 'rgba(201,168,76,0.4)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(x - 6, y - 31); ctx.lineTo(x + 8, y - 31); ctx.stroke();
+    // Plume
+    ctx.strokeStyle = '#e74c3c';
+    ctx.lineWidth = 3; ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(x + 1, y - 41);
+    ctx.quadraticCurveTo(x + 5, y - 50, x + 3, y - 56);
+    ctx.stroke();
+    ctx.strokeStyle = '#c0392b';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(x + 3, y - 42);
+    ctx.quadraticCurveTo(x + 7, y - 51, x + 5, y - 57);
+    ctx.stroke();
+    // Shield (left)
+    ctx.fillStyle = '#1a4b7a';
+    ctx.strokeStyle = '#c9a84c';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(x - 12, y - 28); ctx.lineTo(x - 6, y - 28);
+    ctx.lineTo(x - 6,  y - 12); ctx.lineTo(x - 9, y - 8);
+    ctx.lineTo(x - 12, y - 12);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    // Shield cross
+    ctx.strokeStyle = '#c9a84c'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(x - 9, y - 28); ctx.lineTo(x - 9, y - 10); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x - 12, y - 19); ctx.lineTo(x - 6, y - 19); ctx.stroke();
+    // Sword (right)
+    ctx.strokeStyle = '#d8d8d8'; ctx.lineWidth = 2.5; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(x + 14, y - 10); ctx.lineTo(x + 22, y - 36); ctx.stroke();
+    ctx.strokeStyle = '#c9a84c'; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(x + 10, y - 17); ctx.lineTo(x + 18, y - 17); ctx.stroke();
+    // Sword pommel
+    ctx.fillStyle = '#c9a84c';
+    ctx.beginPath(); ctx.arc(x + 16, y - 9, 3, 0, Math.PI*2); ctx.fill();
+
+    // ── STRENGTH BADGE ────────────────────────────────────
+    const strLow  = strength < 4;
+    const strHigh = strength > strengthBase * 1.4;
+    const badgeColor = strLow ? '#e74c3c' : strHigh ? '#2ecc71' : '#c9a84c';
+    ctx.fillStyle   = 'rgba(0,0,0,0.72)';
+    ctx.strokeStyle = badgeColor;
+    ctx.lineWidth   = 1.5;
+    ctx.beginPath(); ctx.roundRect(x - 20, y - 72, 42, 18, 5); ctx.fill(); ctx.stroke();
+    ctx.fillStyle   = badgeColor;
+    ctx.font        = 'bold 12px monospace';
+    ctx.textAlign   = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(`⚡ ${Math.ceil(strength)}`, x + 1, y - 63);
+
+    ctx.restore();
+  },
+
+  _endRescueGame() {
+    const s = this._rescue;
+    if (!s) return;
+    s.running = false;
+    cancelAnimationFrame(s.rafId);
+
+    const result = Game.applyRescueResult(s.savedCount, s.totalPrisoners, s.died);
+    document.getElementById('rescue-game-area').classList.add('d-none');
+    UI.showRescueResult(result);
     UI.refresh();
     if (result.levelUpResult) this._triggerLevelUp(result.levelUpResult);
   },

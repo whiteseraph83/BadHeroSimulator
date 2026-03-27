@@ -235,6 +235,11 @@
             ⚔️ Arena
           </button>
         </li>
+        <li class="nav-item d-none" id="tab-rescue-nav">
+          <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-rescue">
+            🛡️ Salva i Prigionieri
+          </button>
+        </li>
         <li class="nav-item">
           <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-log">
             <i class="bi bi-journal-text"></i> Diario
@@ -642,6 +647,56 @@
               <button class="btn btn-gold" id="btn-arena-again">⚔️ Gioca di Nuovo</button>
             </div>
           </div>
+        </div>
+
+        <!-- TAB: SALVA I PRIGIONIERI (solo Paladino) -->
+        <div class="tab-pane fade" id="tab-rescue">
+
+          <!-- Lobby -->
+          <div id="rescue-lobby" class="card-dark mb-3">
+            <div class="card-dark-header">🛡️ Salva i Prigionieri</div>
+            <div class="card-dark-body text-center">
+              <p class="text-muted small mb-3">Muovi il paladino cliccando sulla mappa. Clicca sui nemici viola quando sei vicino per attaccarli. Libera i prigionieri di luce prima che la tua Forza scenda a zero!</p>
+              <div class="d-flex justify-content-center gap-4 mb-3">
+                <div class="text-center">
+                  <div class="text-gold fw-bold fs-5" id="rescue-strength-display">10</div>
+                  <div class="text-muted small">⚡ Forza iniziale</div>
+                </div>
+                <div class="text-center">
+                  <div class="text-gold fw-bold fs-5"><span id="rescue-uses-left">2</span></div>
+                  <div class="text-muted small">Missioni oggi</div>
+                </div>
+                <div class="text-center">
+                  <div class="text-gold fw-bold fs-5">60s</div>
+                  <div class="text-muted small">Durata</div>
+                </div>
+              </div>
+              <button class="btn btn-gold btn-lg" id="btn-rescue-start">🛡️ Inizia la Missione</button>
+            </div>
+          </div>
+
+          <!-- Game area -->
+          <div id="rescue-game-area" class="d-none">
+            <div class="d-flex justify-content-between align-items-center mb-2 px-1">
+              <span class="text-danger fw-bold">⚡ Forza: <strong id="rescue-hud-strength">10</strong></span>
+              <span class="text-warning fw-bold">⏱️ <strong id="rescue-hud-timer">60</strong>s</span>
+              <span class="text-success fw-bold">🧑 Salvati: <strong id="rescue-hud-saved">0</strong>/<span id="rescue-hud-total">10</span></span>
+            </div>
+            <canvas id="rescue-canvas" class="rescue-canvas" width="560" height="360"></canvas>
+            <p class="text-muted small text-center mt-1" id="rescue-hint">Clicca sulla mappa per muoverti • Clicca un nemico (da vicino) per attaccarlo</p>
+          </div>
+
+          <!-- Result -->
+          <div id="rescue-result" class="card-dark d-none">
+            <div class="card-dark-body text-center">
+              <div id="rescue-result-icon" class="fs-1 mb-2">🛡️</div>
+              <div id="rescue-result-title" class="fw-bold fs-4 mb-1 text-gold"></div>
+              <div id="rescue-result-sub" class="text-muted small mb-3"></div>
+              <div id="rescue-result-rewards" class="mb-3"></div>
+              <button class="btn btn-gold" id="btn-rescue-again">🛡️ Nuova Missione</button>
+            </div>
+          </div>
+
         </div>
 
         <!-- TAB: DIARIO -->

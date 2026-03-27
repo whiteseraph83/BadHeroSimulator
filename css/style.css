@@ -1817,3 +1817,14 @@ body {
   transform: scale(0.9);
   filter: brightness(1.4);
 }
+
+/* ── Salva i Prigionieri (Paladino) ─────────────────────── */
+.rescue-canvas {
+  display: block;
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid rgba(201,168,76,0.3);
+  cursor: pointer;
+  background: #12121e;
+  box-shadow: 0 0 24px rgba(155,89,182,0.12), inset 0 0 40px rgba(0,0,0,0.4);
+}

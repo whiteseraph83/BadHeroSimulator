@@ -44,7 +44,8 @@ const Game = {
           if (this.state.conversionUsed === undefined)         this.state.conversionUsed = 0;
           if (this.state.arenaUsed === undefined)               this.state.arenaUsed = 0;
           if (this.state.arenaHighScore === undefined)         this.state.arenaHighScore = 0;
-          if (this.state.stableUsed === undefined) this.state.stableUsed = 0;
+          if (this.state.stableUsed === undefined)  this.state.stableUsed = 0;
+          if (this.state.rescueUsed === undefined)  this.state.rescueUsed = 0;
           return true;
         }
       } catch (e) {
@@ -104,6 +105,7 @@ const Game = {
       arenaUsed: 0,
       arenaHighScore: 0,
       stableUsed: 0,
+      rescueUsed: 0,
       gameOver: false
     };
     this.generateDailyMissions();
@@ -178,7 +180,7 @@ const Game = {
 
   /* ─── Abilità aggregate equipaggiamento ─────────────────── */
   getEquipmentAbilities() {
-    const result = { pickpocketBonus: 0, rerollBonus: 0, taxDiscount: 0, goldBonus: 0, xpBonus: 0, missionBonus: 0, challengeBonus: 0, challengeRefresh: 0, diceRerollBonus: 0, studyBonus: 0, arenaBonus: 0, arenaDoubleHit: false, conversionBonus: 0, conversionSpeed: 0, stableBonus: 0 };
+    const result = { pickpocketBonus: 0, rerollBonus: 0, taxDiscount: 0, goldBonus: 0, xpBonus: 0, missionBonus: 0, challengeBonus: 0, challengeRefresh: 0, diceRerollBonus: 0, studyBonus: 0, arenaBonus: 0, arenaDoubleHit: false, conversionBonus: 0, conversionSpeed: 0, stableBonus: 0, rescueBonus: 0, rescueStrengthBonus: 0 };
     for (const itemId of Object.values(this.state.character.equipment)) {
       if (!itemId) continue;
       const item = DB.items.find(i => i.id === itemId);
@@ -197,7 +199,9 @@ const Game = {
       result.arenaDoubleHit = result.arenaDoubleHit || !!(item.abilities.arenaDoubleHit);
       result.conversionBonus += item.abilities.conversionBonus || 0;
       result.conversionSpeed += item.abilities.conversionSpeed || 0;
-      result.stableBonus     += item.abilities.stableBonus     || 0;
+      result.stableBonus         += item.abilities.stableBonus         || 0;
+      result.rescueBonus         += item.abilities.rescueBonus         || 0;
+      result.rescueStrengthBonus += item.abilities.rescueStrengthBonus || 0;
     }
     return result;
   },
@@ -1098,6 +1102,7 @@ const Game = {
     this.state.conversionUsed         = 0;
     this.state.arenaUsed              = 0;
     this.state.stableUsed             = 0;
+    this.state.rescueUsed             = 0;
     this.state.wantedMissionCompleted = false;
     this.state.thiefAttackCompleted   = false;
 
@@ -1427,6 +1432,67 @@ const Game = {
     const levelUpResult = this.checkLevelUp();
     this.save();
     return { ok: true, xp, gold, fameXp, tier, score: Math.floor(score), completedChallenges, levelUpResult };
+  },
+
+  /* ─── Salva i Prigionieri (Paladino) ────────────────────── */
+  rescueRemaining() {
+    if (!this.state) return 0;
+    const cls = this.getClasse();
+    if (!cls.hasRescueTab) return 0;
+    const abilBonus = this.getEquipmentAbilities().rescueBonus || 0;
+    return Math.max(0, (cls.rescuePerDay || 2) + abilBonus - (this.state.rescueUsed || 0));
+  },
+
+  startRescue() {
+    if (this.rescueRemaining() <= 0) return { ok: false, reason: 'Hai già compiuto tutte le missioni di salvataggio di oggi.' };
+    this.state.rescueUsed = (this.state.rescueUsed || 0) + 1;
+    this.save();
+    return { ok: true };
+  },
+
+  applyRescueResult(saved, total, died) {
+    const char = this.state.character;
+    const pct  = total > 0 ? (saved / total) * 100 : 0;
+    let xp = 0, gold = 0, fameXp = 0, tier;
+    if (died && saved === 0) {
+      tier = 'sconfitta';
+    } else if (pct >= 80) {
+      tier = 'glorioso'; xp = 250; gold = 90; fameXp = 18;
+    } else if (pct >= 60) {
+      tier = 'buono';    xp = 160; gold = 55; fameXp = 11;
+    } else if (pct >= 40) {
+      tier = 'parziale'; xp = 90;  gold = 28; fameXp = 5;
+    } else {
+      tier = 'fallimento';
+    }
+    if (tier !== 'sconfitta' && tier !== 'fallimento') {
+      xp   += char.level * 10;
+      gold += char.level * 3;
+      char.xp   += xp;
+      char.gold += gold;
+      char.fame += fameXp;
+    } else if (died) {
+      // Piccola consolazione se qualcuno salvato ma morto
+      if (saved > 0) {
+        xp = saved * 15; gold = saved * 5;
+        char.xp   += xp;
+        char.gold += gold;
+      }
+    }
+    const logText = tier === 'glorioso'
+      ? `Missione gloriosa! ${saved}/${total} prigionieri liberati! (+${xp} PE, +${gold} mo)`
+      : tier === 'sconfitta'
+      ? `Il paladino è caduto senza salvare nessuno.`
+      : tier === 'fallimento'
+      ? `Solo ${saved}/${total} prigionieri liberati. Nessuna ricompensa.`
+      : `${saved}/${total} prigionieri liberati. (+${xp} PE, +${gold} mo)`;
+    const logEntry = { day: char.day, text: logText, type: (tier === 'glorioso' || tier === 'buono') ? 'success' : tier === 'parziale' ? 'partial' : 'fail' };
+    char.log.unshift(logEntry);
+    if (char.log.length > 500) char.log.pop();
+    const completedChallenges = this.checkChallenges('passive');
+    const levelUpResult = this.checkLevelUp();
+    this.save();
+    return { ok: true, xp, gold, fameXp, tier, saved, total, pct: Math.floor(pct), died, completedChallenges, levelUpResult };
   },
 
   /* ─── Attacco Ladro ─────────────────────────────────────── */

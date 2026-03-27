@@ -148,6 +148,9 @@ const CLASSES = [
     hasDiceGame: false,
     hasStableTab: true,
     stablePerDay: 2,
+    hasRescueTab: true,
+    rescuePerDay: 2,
+    rescueStrengthBase: 10,
     startingGold: 40,
   },
   {
@@ -2776,6 +2779,31 @@ const DB = {
       stats: { str: 3, con: 3 },
       abilities: { pickpocketBonus: 0, rerollBonus: 0, taxDiscount: 0, goldBonus: 0, xpBonus: 0, stableBonus: 1 },
       buyPrice: 520, sellPrice: 208 },
+
+    /* ── PALADINO — Salva i Prigionieri ──────────────────── */
+    { id: 1110, name: "Elmo del Liberatore",     slot: "head",    quality: 2, tier: 1, reqLevel: 2, reqStat: null,
+      desc: "Un elmo sacro che potenzia la forza spirituale del paladino durante le missioni di salvataggio. +3 Forza iniziale.",
+      stats: { str: 2, con: 1 },
+      abilities: { pickpocketBonus: 0, rerollBonus: 0, taxDiscount: 0, goldBonus: 0, xpBonus: 0, rescueStrengthBonus: 3 },
+      buyPrice: 180, sellPrice: 72 },
+
+    { id: 1111, name: "Scudo del Redentore",     slot: "weapon",  quality: 3, tier: 2, reqLevel: 4, reqStat: { key: 'str', val: 12 },
+      desc: "Uno scudo benedetto che protegge l'anima. Aumenta la forza di 5 e concede una sessione extra di salvataggio al giorno.",
+      stats: { str: 3, con: 2 },
+      abilities: { pickpocketBonus: 0, rerollBonus: 0, taxDiscount: 0, goldBonus: 0, xpBonus: 0, rescueBonus: 1, rescueStrengthBonus: 5 },
+      buyPrice: 520, sellPrice: 208 },
+
+    { id: 1112, name: "Armatura del Crociato",   slot: "torso",   quality: 4, tier: 3, reqLevel: 7, reqStat: { key: 'str', val: 15 },
+      desc: "Forgiata per i crociati leggendari. La benedizione incisa regala forza sovrumana e consente una missione extra ogni giorno.",
+      stats: { str: 4, con: 4, cha: 1 },
+      abilities: { pickpocketBonus: 0, rerollBonus: 0, taxDiscount: 0, goldBonus: 0, xpBonus: 0, rescueBonus: 1, rescueStrengthBonus: 8 },
+      buyPrice: 1200, sellPrice: 480 },
+
+    { id: 1113, name: "Stivali della Carica Santa", slot: "boots", quality: 3, tier: 2, reqLevel: 5, reqStat: null,
+      desc: "Permettono di raggiungere più rapidamente i prigionieri. +4 Forza iniziale.",
+      stats: { str: 1, dex: 2 },
+      abilities: { pickpocketBonus: 0, rerollBonus: 0, taxDiscount: 0, goldBonus: 0, xpBonus: 0, rescueStrengthBonus: 4 },
+      buyPrice: 380, sellPrice: 152 },
 
     /* ── CONSUMABILI ──────────────────────────────────────── */
     // Istantanei
