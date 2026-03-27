@@ -212,6 +212,8 @@ Gli oggetti equipaggiati possono conferire abilità speciali:
 | `conversionBonus` | +N sessioni conversione/giorno (Chierico) |
 | `conversionSpeed` | +X% velocità di conversione (Chierico) |
 | `stableBonus` | +N sessioni cavalcatura/giorno (Paladino) |
+| `rescueBonus` | +N sessioni "Salva i Prigionieri"/giorno (Paladino) |
+| `rescueStrengthBonus` | +N Forza iniziale nel minigioco salvataggio (Paladino) |
 
 ### Mercato
 - Si aggiorna ogni giorno con **6–8 oggetti**
@@ -310,6 +312,38 @@ Puoi **rifiutare e sostituire** una sfida se hai l'abilità `challengeRefresh` s
 - **Barre Salute e Felicità** del cavallo crescono con ogni hit corretta
 - **Punteggio finale** = media di Salute + Felicità
 - Soglie ricompensa: ≥85% eccellente · ≥65% buona · ≥50% sufficiente · <50% nulla
+
+#### Salva i Prigionieri (2 volte/giorno)
+- Mini-gioco **top-down action** su canvas 560×360: il Paladino a cavallo (disegnato a mano) si muove in una mappa dungeon
+- **Clicca sulla mappa** per muovere il paladino verso quel punto
+- **4 campi prigionieri** distribuiti ai quattro angoli, ognuno difeso da nemici esagonali viola
+
+| Campo | Nemici | HP nemico | Prigionieri |
+|-------|--------|-----------|-------------|
+| 1 (angolo in alto a sinistra) | 2 | 3 HP | 2 |
+| 2 (angolo in alto a destra) | 2 | 4 HP | 2 |
+| 3 (angolo in basso a sinistra) | 3 | 5 HP | 3 |
+| 4 (angolo in basso a destra) | 3 | 7 HP | 3 |
+
+- **Clicca un nemico** (entro raggio 95px dal paladino) per attaccarlo
+  - Troppo lontano? Il paladino si muove automaticamente verso il nemico
+  - **Danno per click** scala con i salvati: 1 dmg (inizio) → 2 → 3 → 4 → 5 → 6 (max)
+- **Forza ⚡** visibile sopra il paladino: si svuota **-2.8/s** per ogni nemico nelle vicinanze
+  - Se raggiunge 0 → **sconfitta immediata**
+- Quando tutti i nemici di un campo sono eliminati → i prigionieri corrono verso il paladino e si uniscono a lui (+3 forza ciascuno)
+- Un cerchio tratteggiato oro mostra il raggio d'attacco attivo
+- **Durata:** 60 secondi
+
+**Soglie di ricompensa:**
+
+| % prigionieri salvati | Tier | XP | Oro | Fama |
+|---|---|---|---|---|
+| ≥ 80% | 🏆 Glorioso | 250 + lv×10 | 90 + lv×3 | 18 |
+| ≥ 60% | ✅ Buono | 160 + lv×10 | 55 + lv×3 | 11 |
+| ≥ 40% | ⚔️ Parziale | 90 + lv×10 | 28 + lv×3 | 5 |
+| < 40% o morte | 😔 Fallimento | — | — | — |
+
+> 💡 Gli oggetti con `rescueStrengthBonus` aumentano la **Forza iniziale**; quelli con `rescueBonus` aggiungono **sessioni extra** al giorno.
 
 ---
 

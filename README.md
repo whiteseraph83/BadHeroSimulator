@@ -27,7 +27,7 @@ Il gioco è in **italiano**, con un tono ironico e narrativo.
 | 🗡️ **Ladro** | Furtivo, ingannevole | Borseggio, Gioco dei Dadi, Sistema Taglia |
 | ⚔️ **Guerriero** | Brutale, resistente | Arena (2/giorno), Gara di Bevute |
 | 🔮 **Mago** | Arcano, studioso | Studia (memory game), Tab Incantesimi |
-| 🛡️ **Paladino** | Onorevole, fiero | Accudisci Cavalcatura (Guitar Hero) |
+| 🛡️ **Paladino** | Onorevole, fiero | Accudisci Cavalcatura (Guitar Hero), Salva i Prigionieri (top-down action) |
 | 🌿 **Druido** | Naturale, alchimico | Studia, Tab Pozioni, ingredienti da missioni |
 | ✝️ **Chierico** | Devoto, carismatico | Preghiera, Conversione (evangelizzazione) |
 

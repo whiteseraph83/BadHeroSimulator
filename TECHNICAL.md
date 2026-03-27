@@ -114,6 +114,9 @@ File di sola lettura. Contiene tutte le costanti di gioco.
   conversionPerDay: 2,
   hasStableTab: true,        // Paladino
   stablePerDay: 2,
+  hasRescueTab: true,        // Paladino
+  rescuePerDay: 2,
+  rescueStrengthBase: 10,    // Forza iniziale del minigioco salvataggio
 }
 ```
 
@@ -146,6 +149,8 @@ File di sola lettura. Contiene tutte le costanti di gioco.
     conversionBonus: 0,
     conversionSpeed: 0,
     stableBonus: 0,
+    rescueBonus: 0,          // +N sessioni salvataggio/giorno (Paladino)
+    rescueStrengthBonus: 0,  // +N forza iniziale (Paladino)
   },
   buyPrice: 400,
   sellPrice: 160,                  // Tipicamente ~40% buyPrice
@@ -277,10 +282,15 @@ Game.convRemaining()
 Game.startConversion()
 Game.applyConversionResult(score, blessedCount)
 
-// Paladino
+// Paladino — Cavalcatura
 Game.stableRemaining()
 Game.startStable()
 Game.applyStableResult(score)
+
+// Paladino — Salva i Prigionieri
+Game.rescueRemaining()
+Game.startRescue()
+Game.applyRescueResult(saved, total, died)
 ```
 
 ### Migrazioni state
@@ -288,7 +298,8 @@ Game.applyStableResult(score)
 In `Game.init()` dopo il parsing del salvataggio, ogni campo introdotto in versioni successive viene aggiunto se assente:
 
 ```javascript
-if (this.state.stableUsed === undefined) this.state.stableUsed = 0;
+if (this.state.stableUsed === undefined)  this.state.stableUsed = 0;
+if (this.state.rescueUsed === undefined)  this.state.rescueUsed = 0;
 // ecc.
 ```
 
@@ -334,6 +345,7 @@ UI.renderPrayBtn()             // Badge preghiere rimanenti
 UI.renderConversionLobby()     // Badge conversioni rimanenti
 UI.renderArenaLobby()          // Riepilo arena (record, timer, sessioni)
 UI.renderStableLobby()         // Badge cavalcatura rimanenti
+UI.renderRescueLobby()         // Forza iniziale + sessioni salvataggio rimanenti
 UI.renderDrinkingBtn()         // Badge bevute rimanenti
 UI.renderPozioniTab()          // Tab pozioni completo (Druido)
 UI.renderIncantesimiTab()      // Tab incantesimi completo (Mago)
@@ -346,6 +358,7 @@ UI.showMissionResult(result)   // Modal con esito missione
 UI.showPrayerResult(result)    // Sezione risultato preghiera
 UI.showConversionResult(result)// Sezione risultato conversione
 UI.showStableResult(result)    // Sezione risultato cavalcatura
+UI.showRescueResult(result)    // Sezione risultato salvataggio prigionieri
 ```
 
 ---
@@ -423,6 +436,7 @@ _endStableGame() {
 | Preghiera | Chierico | `_startPrayerAnimation`, `_prayerLoop`, `_drawPrayer` |
 | Conversione | Chierico | `_startConversionGame`, `_convLoop`, `_drawConversion` |
 | Cavalcatura | Paladino | `_startStableGame`, `_stableLoop`, `_drawStable`, `_stableHandleLaneClick` |
+| Salva i Prigionieri | Paladino | `_startRescueGame`, `_rescueLoop`, `_drawRescue`, `_drawRescuePaladin`, `_rescueHandleClick`, `_endRescueGame` |
 
 ---
 
@@ -468,6 +482,7 @@ Game.state = {
   conversionUsed: 0,
   arenaUsed: 0,
   stableUsed: 0,
+  rescueUsed: 0,
   challengeRefreshUsed: 0,
 
   // Persistenti
@@ -571,6 +586,57 @@ const speedMult = 1 + Game.getEquipmentAbilities().conversionSpeed;
 const CONV_RATE = 0.52 * speedMult;
 ```
 
+### Salva i Prigionieri (Top-down action) — dettagli implementativi
+
+```javascript
+// Struttura stato
+this._rescue = {
+  running: true,
+  timer: 60,
+  strengthBase: strBase,      // da classe + rescueStrengthBonus
+  strength: strBase,          // scende per prossimità nemici, sale al salvataggio
+  savedCount: 0,
+  totalPrisoners: 10,         // 4 campi × (2+2+3+3)
+  died: false,
+  paladin: { x, y, destX, destY, speed: 145 },  // px/s
+  camps: [...],               // 4 campi con enemies + prisoners
+  particles: [],              // hit floaters, spark alla morte, +strength
+  hitCooldown: {},            // id nemico → cooldown residuo (s)
+};
+
+// Struttura campo
+camp = {
+  id, cx, cy,
+  enemies: [{ id, x, y, hp, maxHp, alive, flashT }],
+  prisoners: [{ x, y, state }]  // state: 'guarded'|'freed'|'rescued'
+}
+
+// Movimento paladin
+const dist = Math.hypot(destX - x, destY - y);
+if (dist > 2) { x += (dx/dist) * speed * dt; }
+
+// Proximity drain (per ogni nemico entro 92px)
+strength -= 2.8 * nearCount * dt;
+if (strength <= 0) → _endRescueGame() con died=true
+
+// Danno per click (scala con prigionieri salvati)
+const dmg = Math.max(1, 1 + Math.floor(savedCount / 2));
+// 0 salvati = 1 dmg, 2 = 2 dmg, 4 = 3 dmg, ... 10 = 6 dmg
+
+// Recupero forza al salvataggio
+strength = Math.min(strength + 3, strengthBase + savedCount * 4);
+
+// Hit detection: click su nemico entro raggio 22px
+// se paladin entro 95px → attacco; altrimenti → movimento automatico verso nemico
+// cooldown per click: 0.18s per nemico (evita spam)
+```
+
+**Render del paladino a cavallo** (`_drawRescuePaladin`):
+- Disegno puramente canvas: cavallo marrone a 4 gambe, collo, testa, mane, coda
+- Cavaliere: armatura blu con croce dorata sul petto, elmo oro, pennacchio rosso, scudo, spada
+- Aura radiale oro scalata sulla forza attuale / forza base
+- Badge forza sopra la testa: verde se >140% base, oro se normale, rosso se <4
+
 ---
 
 ## Sistema equipaggiamento e abilità
@@ -586,7 +652,8 @@ Game.getEquipmentAbilities() {
     goldBonus: 0, xpBonus: 0, missionBonus: 0,
     challengeBonus: 0, challengeRefresh: 0, diceRerollBonus: 0,
     studyBonus: 0, arenaBonus: 0, arenaDoubleHit: false,
-    conversionBonus: 0, conversionSpeed: 0, stableBonus: 0,
+    conversionBonus: 0, conversionSpeed: 0,
+    stableBonus: 0, rescueBonus: 0, rescueStrengthBonus: 0,
   };
   for (const itemId of Object.values(this.state.character.equipment)) {
     if (!itemId) continue;
@@ -662,7 +729,8 @@ Gli item sono raggruppati per fascia di ID:
 - 700–799: oggetti leggendari
 - 800–899: oggetti speciali
 - 900–999: oggetti sfide (challenge) e consumabili
-- 1001–1199: oggetti classi speciali (Arena, Chierico, Paladino)
+- 1001–1109: oggetti classi speciali (Arena, Chierico, Paladino cavalcatura)
+- 1110–1199: oggetti Paladino salvataggio (`rescueBonus`, `rescueStrengthBonus`)
 - 901–910: consumabili (istantanei e boost)
 
 ---
