@@ -11,7 +11,7 @@ const QUALITY = {
 };
 
 const SLOT_META = {
-  head:      { icon: '🗣️', label: 'Testa',       bi: 'bi-person-badge'    },
+  head:      { icon: '👤', label: 'Testa',       bi: 'bi-person-badge'    },
   gloves:    { icon: '🧤', label: 'Guanti',       bi: 'bi-hand-index'      },
   legs:      { icon: '🦿', label: 'Gambe',        bi: 'bi-person-standing' },
   torso:     { icon: '🥋', label: 'Torso',        bi: 'bi-shield-shaded'   },
