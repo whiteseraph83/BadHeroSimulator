@@ -511,6 +511,27 @@
                 </button>
               </div>
               <div id="craft-spell-result" class="d-none text-center py-2 rounded"></div>
+
+              <hr class="border-secondary my-3">
+
+              <!-- Crea senza componenti -->
+              <div class="d-flex align-items-start gap-3 flex-wrap">
+                <div style="flex:1; min-width:200px">
+                  <div class="fw-semibold text-gold mb-1"><i class="bi bi-brain"></i> Crea un incantesimo senza componenti</div>
+                  <p class="text-muted small mb-0">
+                    Grazie alla tua profonda padronanza arcana puoi manifestare magia dal nulla, attingendo direttamente alla tua mente.
+                    Richiede una prova di <strong>Intelligenza</strong> (CD 12). In caso di successo otterrai un incantesimo casuale,
+                    proporzionale al tuo livello — più sei esperto, maggiore sarà la potenza dell'incantesimo.
+                    <em>Utilizzabile due volte al giorno.</em>
+                  </p>
+                </div>
+                <div class="text-center" style="min-width:120px">
+                  <button class="btn btn-spell" id="btn-free-spell">
+                    <i class="bi bi-lightning-charge"></i> Canalizza
+                  </button>
+                  <div class="text-muted small mt-1" id="free-spell-uses"></div>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -1047,6 +1068,36 @@
           <div id="prayer-rewards" class="mission-rewards mb-2 text-start"></div>
           <button class="btn btn-sm btn-outline-gold" data-bs-dismiss="modal">Chiudi</button>
         </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL: RISULTATO CANALIZZAZIONE ===== -->
+<div class="modal fade" id="modal-spell-result" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content modal-dark">
+      <div class="modal-body text-center py-4">
+        <div id="spell-result-icon" class="display-4 mb-2"></div>
+        <div id="spell-result-title" class="fs-5 fw-bold mb-2"></div>
+        <div id="spell-result-roll" class="text-muted small mb-3"></div>
+        <div id="spell-result-detail" class="mb-3"></div>
+        <button class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Chiudi</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL: RISULTATO FURTO ===== -->
+<div class="modal fade" id="modal-steal-result" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content modal-dark">
+      <div class="modal-body text-center py-4">
+        <div id="steal-result-icon" class="display-4 mb-2"></div>
+        <div id="steal-result-title" class="fs-5 fw-bold mb-2"></div>
+        <div id="steal-result-roll" class="text-muted small mb-3"></div>
+        <div id="steal-result-rewards" class="mb-3"></div>
+        <button class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Chiudi</button>
       </div>
     </div>
   </div>

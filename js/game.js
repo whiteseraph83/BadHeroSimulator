@@ -32,6 +32,7 @@ const Game = {
           if (!this.state.potionInventory)                    this.state.potionInventory = [];
           if (!this.state.potionRequests)                     this.state.potionRequests = [];
           if (this.state.studyUsed === undefined)              this.state.studyUsed = 0;
+          if (this.state.freeSpellUsed === undefined)          this.state.freeSpellUsed = 0;
           if (!this.state.componentInventory)                 this.state.componentInventory = [];
           if (!this.state.spellInventory)                     this.state.spellInventory = [];
           if (!this.state.spellRequests)                      this.state.spellRequests = [];
@@ -327,9 +328,9 @@ const Game = {
   applyStudyReward(timeLeft, errors) {
     let xp, gold, itemCount, itemTierMax;
     // Soglie calibrate per timer 90s e 8 errori max
-    if (timeLeft > 55 && errors <= 2)      { xp = 180; gold = 60; itemCount = 2; itemTierMax = 2; }
-    else if (timeLeft > 25 && errors <= 5) { xp = 100; gold = 30; itemCount = 1; itemTierMax = 2; }
-    else                                   { xp = 50;  gold = 10; itemCount = 1; itemTierMax = 1; }
+    if (timeLeft > 55 && errors <= 2)      { xp = 180; gold = 100; itemCount = 2; itemTierMax = 2; }
+    else if (timeLeft > 25 && errors <= 5) { xp = 100; gold =  55; itemCount = 1; itemTierMax = 2; }
+    else                                   { xp = 50;  gold =  25; itemCount = 1; itemTierMax = 1; }
     const char = this.state.character;
     const cls  = this.getClasse();
     char.xp   += xp;
@@ -474,6 +475,63 @@ const Game = {
   },
 
   /* ─── Incantesimi (solo Mago) ──────────────────────────── */
+
+  sellSpell(spellId) {
+    if (!this.state.spellInventory) this.state.spellInventory = [];
+    const idx = this.state.spellInventory.indexOf(spellId);
+    if (idx === -1) return { ok: false, reason: 'Incantesimo non nell\'inventario.' };
+    const recipe = SPELL_RECIPES.find(r => r.id === spellId);
+    if (!recipe) return { ok: false, reason: 'Ricetta non trovata.' };
+    const sellPrice = Math.round((recipe.clientGold || 40) / 2);
+    this.state.spellInventory.splice(idx, 1);
+    this.state.character.gold += sellPrice;
+    const logText = `Venduto "${recipe.name}" per ${sellPrice} mo (metà prezzo).`;
+    this.state.character.log.unshift({ day: this.state.character.day, text: logText, type: 'success' });
+    this.save();
+    return { ok: true, recipe, sellPrice };
+  },
+
+  createSpellFree() {
+    const char = this.state.character;
+    if (this.getClasse().id !== 'mago') return { ok: false, reason: 'Solo il Mago può canalizzare incantesimi.' };
+    if ((this.state.freeSpellUsed || 0) >= 2) return { ok: false, reason: 'Hai già usato questa abilità 2 volte oggi. Riprova domani.' };
+
+    const dc       = 12;
+    const intMod   = this.modifier(char.stats.int || 10);
+    const roll     = this.rollD20();
+    const total    = roll + intMod;
+    const success  = total >= dc;
+
+    this.state.freeSpellUsed = (this.state.freeSpellUsed || 0) + 1;
+
+    if (!success) {
+      // Piccolo XP per il tentativo
+      char.xp += 8;
+      const logText = `Canalizzazione fallita (${roll}+${intMod}=${total} vs CD${dc}). +8 PE per il tentativo.`;
+      char.log.unshift({ day: char.day, text: logText, type: 'warning' });
+      const levelUpResult = this.checkLevelUp();
+      this.save();
+      return { ok: true, success: false, roll, intMod, total, dc, levelUpResult };
+    }
+
+    // Qualità massima in base al livello
+    const level    = char.level || 1;
+    const maxQ     = level <= 2 ? 1 : level <= 5 ? 2 : level <= 8 ? 3 : 4;
+    const pool     = SPELL_RECIPES.filter(r => r.quality <= maxQ);
+    const recipe   = pool[Math.floor(Math.random() * pool.length)];
+    if (!recipe) { this.save(); return { ok: false, reason: 'Nessun incantesimo disponibile.' }; }
+
+    if (!this.state.spellInventory) this.state.spellInventory = [];
+    this.state.spellInventory.push(recipe.id);
+    const xpGained = Math.round(recipe.reward.xp / 2);
+    char.xp += xpGained;
+    const logText = `Canalizzazione riuscita (${roll}+${intMod}=${total} vs CD${dc}): "${recipe.name}" creato. +${xpGained} PE.`;
+    char.log.unshift({ day: char.day, text: logText, type: 'success' });
+    const levelUpResult = this.checkLevelUp();
+    this.save();
+    return { ok: true, success: true, recipe, roll, intMod, total, dc, xpGained, levelUpResult };
+  },
+
   craftSpell(selectedComponentIds) {
     if (!this.state.componentInventory) this.state.componentInventory = [];
     const inv = [...this.state.componentInventory];
@@ -1176,6 +1234,7 @@ const Game = {
     this.state.wantedMissionCompleted = false;
     this.state.thiefAttackCompleted   = false;
     this.state.marketStealBanned      = false;
+    this.state.freeSpellUsed          = 0;
 
     // Decrementa boost attivi
     this.state.activeBoosts = (this.state.activeBoosts || [])

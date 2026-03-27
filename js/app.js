@@ -501,6 +501,61 @@ const App = {
       UI.renderIncantesimiTab();
     });
 
+    // Incantesimi preparati: vendi
+    document.getElementById('spell-inventory').addEventListener('click', (e) => {
+      const btn = e.target.closest('.btn-sell-spell');
+      if (!btn || !Game.state) return;
+      const spellId = btn.dataset.sellSpellId;
+      const result  = Game.sellSpell(spellId);
+      if (result.ok) {
+        UI.toast(`💰 "${result.recipe.name}" venduto per ${result.sellPrice} mo.`, 'success');
+        UI.refresh();
+      } else {
+        UI.toast(result.reason);
+      }
+    });
+
+    // Crea incantesimo senza componenti
+    document.getElementById('btn-free-spell').addEventListener('click', () => {
+      if (!Game.state || Game.state.gameOver) return;
+      const result = Game.createSpellFree();
+      if (!result.ok) { UI.toast(result.reason); return; }
+
+      const signInt = result.intMod >= 0 ? '+' : '';
+      const rollStr = `D20 (${result.roll}) ${signInt}${result.intMod} INT = <strong>${result.total}</strong> vs CD ${result.dc}`;
+      const modalEl = document.getElementById('modal-spell-result');
+      if (modalEl) {
+        if (result.success) {
+          const r = result.recipe;
+          document.getElementById('spell-result-icon').textContent  = r.icon || '✨';
+          document.getElementById('spell-result-title').textContent = 'Canalizzazione riuscita!';
+          document.getElementById('spell-result-title').className   = 'fs-5 fw-bold mb-2 text-success';
+          document.getElementById('spell-result-roll').innerHTML    = rollStr;
+          document.getElementById('spell-result-detail').innerHTML  =
+            `<div class="fw-semibold">${r.name}</div>` +
+            `<div class="text-muted small">${r.desc || ''}</div>` +
+            `<div class="text-success mt-1">+${result.xpGained} PE</div>`;
+        } else {
+          document.getElementById('spell-result-icon').textContent  = '😓';
+          document.getElementById('spell-result-title').textContent = 'Canalizzazione fallita';
+          document.getElementById('spell-result-title').className   = 'fs-5 fw-bold mb-2 text-danger';
+          document.getElementById('spell-result-roll').innerHTML    = rollStr;
+          document.getElementById('spell-result-detail').innerHTML  =
+            `<div class="text-muted small">La magia ti ha sfuggito di mano… ma qualcosa hai imparato.</div>` +
+            `<div class="text-warning mt-1">+8 PE per il tentativo</div>`;
+        }
+        const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+        modal.show();
+        clearTimeout(this._spellModalTimer);
+        this._spellModalTimer = setTimeout(() => modal.hide(), 5000);
+      }
+
+      // Aggiorna immediatamente l'inventario incantesimi
+      UI.renderIncantesimiTab();
+      UI.renderCharacter();
+      if (result.levelUpResult) this._triggerLevelUp(result.levelUpResult);
+    });
+
     // Richieste incantesimi: consegna
     document.getElementById('spell-requests').addEventListener('click', (e) => {
       const btn = e.target.closest('[data-spell-request-id]');
@@ -1294,12 +1349,29 @@ const App = {
     const result = Game.stealItem(itemId);
     if (!result.ok) { UI.toast(result.reason); return; }
 
-    const rollStr = `D20(${result.roll}) + DES(${result.dexMod >= 0 ? '+' : ''}${result.dexMod}) = ${result.total} vs DC${result.dc}`;
-    if (result.success) {
-      const item = DB.items.find(i => i.id === itemId);
-      UI.toast(`🗝️ Furto riuscito! ${item ? item.name : 'oggetto'} rubato. (${rollStr})`, 'success');
-    } else {
-      UI.toast(`❌ Furto fallito! ${rollStr} — -${result.goldLost} mo, -${result.fameLost} fama, +${result.wantedGain} taglia. Il mercante ti ha bandito per oggi.`, 'danger');
+    const signDex = result.dexMod >= 0 ? '+' : '';
+    const rollStr = `D20 (${result.roll}) ${signDex}${result.dexMod} DES = <strong>${result.total}</strong> vs DC ${result.dc}`;
+    const modalEl = document.getElementById('modal-steal-result');
+    if (modalEl) {
+      document.getElementById('steal-result-icon').textContent    = result.success ? '🗝️' : '🚨';
+      document.getElementById('steal-result-title').textContent   = result.success ? 'Furto riuscito!' : 'Beccato!';
+      document.getElementById('steal-result-title').className     = 'fs-5 fw-bold mb-2 ' + (result.success ? 'text-success' : 'text-danger');
+      document.getElementById('steal-result-roll').innerHTML      = rollStr;
+      if (result.success) {
+        const item = DB.items.find(i => i.id === itemId);
+        document.getElementById('steal-result-rewards').innerHTML =
+          `<span class="text-success">+1 ${item ? item.name : 'oggetto'}</span> aggiunto all'inventario.`;
+      } else {
+        document.getElementById('steal-result-rewards').innerHTML =
+          `<div class="text-danger">−${result.goldLost} <i class="bi bi-coin"></i> oro</div>` +
+          `<div class="text-warning">−${result.fameLost} fama</div>` +
+          `<div class="text-danger">+${result.wantedGain} taglia</div>` +
+          `<div class="text-muted small mt-2">Il mercante ti ha riconosciuto — bandito per oggi.</div>`;
+      }
+      const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+      modal.show();
+      clearTimeout(this._stealModalTimer);
+      this._stealModalTimer = setTimeout(() => modal.hide(), 5000);
     }
     UI.refresh();
   },
@@ -2873,14 +2945,29 @@ const App = {
     if (!canvas) return;
     const W = canvas.width, H = canvas.height;
 
-    const campConfigs = [
-      { id: 0, cx: Math.round(W*0.16), cy: Math.round(H*0.22), pCount: 2, enemyHp: 3, enemyCount: 2, patrolR: 18 },
-      { id: 1, cx: Math.round(W*0.50), cy: Math.round(H*0.22), pCount: 2, enemyHp: 3, enemyCount: 2, patrolR: 18 },
-      { id: 2, cx: Math.round(W*0.84), cy: Math.round(H*0.22), pCount: 2, enemyHp: 4, enemyCount: 2, patrolR: 18 },
-      { id: 3, cx: Math.round(W*0.16), cy: Math.round(H*0.78), pCount: 3, enemyHp: 5, enemyCount: 3, patrolR: 20 },
-      { id: 4, cx: Math.round(W*0.50), cy: Math.round(H*0.78), pCount: 3, enemyHp: 6, enemyCount: 3, patrolR: 20 },
-      { id: 5, cx: Math.round(W*0.84), cy: Math.round(H*0.78), pCount: 3, enemyHp: 8, enemyCount: 3, patrolR: 20 },
-    ];
+    const numCamps = 5 + Math.floor(Math.random() * 6); // 5–10 camps
+    // Build a 4×3 grid of candidate positions, shuffle, take numCamps
+    const _margin = 90, _cols = 4, _rows = 3;
+    const _cw = (W - _margin*2) / _cols, _ch = (H - _margin*2) / _rows;
+    const _positions = [];
+    for (let r = 0; r < _rows; r++) {
+      for (let c = 0; c < _cols; c++) {
+        const cx = Math.round(_margin + _cw*(c + 0.2 + Math.random()*0.6));
+        const cy = Math.round(_margin + _ch*(r + 0.2 + Math.random()*0.6));
+        if (Math.hypot(cx - W/2, cy - H/2) > 90) _positions.push({ cx, cy });
+      }
+    }
+    _positions.sort(() => Math.random() - 0.5);
+    const campConfigs = [];
+    for (let i = 0; i < numCamps; i++) {
+      const pos  = _positions[i % _positions.length];
+      const tier = i < numCamps / 3 ? 0 : i < numCamps * 2 / 3 ? 1 : 2;
+      const hpBase   = [8, 14, 20][tier];
+      const hpExtra  = Math.floor(Math.random() * [5, 6, 8][tier]);
+      const eCount   = tier === 0 ? 2 : (Math.random() < 0.5 ? 2 : 3);
+      const pCount   = tier === 0 ? 2 : (Math.random() < 0.5 ? 2 : 3);
+      campConfigs.push({ id: i, cx: pos.cx, cy: pos.cy, pCount, enemyHp: hpBase + hpExtra, enemyCount: eCount, patrolR: 18 + tier * 2 });
+    }
     const totalPrisoners = campConfigs.reduce((s, c) => s + c.pCount, 0);
 
     this._rescue = {
@@ -2974,7 +3061,7 @@ const App = {
     s.auraDmgTimer = Math.max(0, (s.auraDmgTimer || 0) - dt);
     if (s.auraDmgTimer <= 0) {
       s.auraDmgTimer = 0.5;
-      const auraR = 52;
+      const auraR = s.holyPowerActive ? 82 : 52;
       const baseDmg = Math.max(1, 1 + Math.floor(s.savedCount / 2));
       const dmg = s.holyPowerActive ? baseDmg * 2 : baseDmg;
       const pType = s.holyPowerActive ? 'holy_hit' : 'hit';
@@ -3023,18 +3110,28 @@ const App = {
     }
     if (s.holyTextT > 0) s.holyTextT = Math.max(0, s.holyTextT - dt);
 
-    // Free prisoners
+    // Free prisoners — move toward paladin; once close, orbit with him
     for (const camp of s.camps) {
       for (const pris of camp.prisoners) {
-        if (pris.state !== 'freed') continue;
-        const dx = pal.x - pris.x, dy = pal.y - pris.y, d = Math.hypot(dx, dy);
-        if (d < 12) {
-          pris.state = 'rescued'; s.savedCount++;
-          s.strength = Math.min(s.strength + 3, s.strengthBase + s.savedCount * 4);
-          s.particles.push({ x: pal.x, y: pal.y - 22, t: 0.9, maxT: 0.9, type: 'join', txt: '+3\u26A1' });
-          document.getElementById('rescue-hud-strength').textContent = Math.ceil(s.strength);
-          document.getElementById('rescue-hud-saved').textContent    = s.savedCount;
-        } else { const spd = Math.min(d, 160*dt); pris.x += (dx/d)*spd; pris.y += (dy/d)*spd; }
+        if (pris.state === 'following') {
+          // Orbit around paladin
+          pris.orbitAngle = ((pris.orbitAngle || 0) + 1.1 * dt) % (Math.PI * 2);
+          const orbitR = 30 + (pris.orbitIndex % 3) * 16;
+          pris.x = pal.x + Math.cos(pris.orbitAngle) * orbitR;
+          pris.y = pal.y + Math.sin(pris.orbitAngle) * orbitR;
+        } else if (pris.state === 'freed') {
+          const dx = pal.x - pris.x, dy = pal.y - pris.y, d = Math.hypot(dx, dy);
+          if (d < 22) {
+            pris.orbitIndex = s.savedCount;
+            pris.orbitAngle = Math.atan2(pris.y - pal.y, pris.x - pal.x);
+            pris.state = 'following';
+            s.savedCount++;
+            s.strength = Math.min(s.strength + 3, s.strengthBase + s.savedCount * 4);
+            s.particles.push({ x: pal.x, y: pal.y - 22, t: 0.9, maxT: 0.9, type: 'join', txt: '+3\u26A1' });
+            document.getElementById('rescue-hud-strength').textContent = Math.ceil(s.strength);
+            document.getElementById('rescue-hud-saved').textContent    = s.savedCount;
+          } else { const spd = Math.min(d, 160*dt); pris.x += (dx/d)*spd; pris.y += (dy/d)*spd; }
+        }
       }
       if (camp.enemies.every(e => !e.alive)) {
         for (const pris of camp.prisoners) { if (pris.state === 'guarded') pris.state = 'freed'; }
@@ -3046,7 +3143,7 @@ const App = {
     const W = canvas ? canvas.width : 520, H = canvas ? canvas.height : 320;
     if (!s.bossSpawned && s.camps.every(c => c.enemies.every(e => !e.alive))) {
       s.bossSpawned = true;
-      s.boss = { x: W/2, y: H/2, cx: W/2, cy: H/2, hp: 28, maxHp: 28, alive: true, flashT: 0, patrolAngle: 0, patrolSpeed: 0.38, patrolR: 38 };
+      s.boss = { x: W/2, y: H/2, cx: W/2, cy: H/2, hp: 80, maxHp: 80, alive: true, flashT: 0, patrolAngle: 0, patrolSpeed: 0.38, patrolR: 38 };
       for (let i = 0; i < 18; i++) {
         const a = (i/18)*Math.PI*2;
         s.particles.push({ x: W/2, y: H/2, vx: Math.cos(a)*100, vy: Math.sin(a)*100, t: 1.0, maxT: 1.0, type: 'boss_spawn' });
@@ -3129,23 +3226,27 @@ const App = {
       ctx.restore();
     }
 
-    // Prisoners
+    // Prisoners (guarded, freed, following)
     for (const camp of s.camps) {
       for (const pris of camp.prisoners) {
-        if (pris.state === 'rescued') continue;
+        if (pris.state === 'rescued') continue; // legacy guard
         const { x, y } = pris;
+        const isFollowing = pris.state === 'following';
+        const isFree = pris.state === 'freed' || isFollowing;
         const pulse = 0.55 + 0.45*Math.sin(now/550+x);
         ctx.save();
+        const glowColor = isFollowing ? ('rgba(82,183,136,' + (0.45*pulse) + ')') : isFree ? ('rgba(46,204,113,' + (0.38*pulse) + ')') : ('rgba(130,200,240,' + (0.35*pulse) + ')');
         const glow = ctx.createRadialGradient(x,y,0,x,y,12);
-        glow.addColorStop(0, pris.state==='freed' ? 'rgba(46,204,113,' + (0.38*pulse) + ')' : 'rgba(130,200,240,' + (0.35*pulse) + ')');
+        glow.addColorStop(0, glowColor);
         glow.addColorStop(1, 'rgba(0,0,0,0)');
         ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(x,y,12,0,Math.PI*2); ctx.fill();
-        ctx.fillStyle = pris.state==='freed' ? '#2ecc71' : '#7ec8e3';
-        ctx.strokeStyle = 'rgba(255,255,255,0.75)'; ctx.lineWidth = 1;
+        ctx.fillStyle = isFollowing ? '#52b788' : isFree ? '#2ecc71' : '#7ec8e3';
+        ctx.strokeStyle = isFollowing ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.75)'; ctx.lineWidth = 1;
         ctx.beginPath(); ctx.arc(x,y,6,0,Math.PI*2); ctx.fill(); ctx.stroke();
-        ctx.fillStyle = pris.state==='freed' ? '#1a7a4a' : '#2c6a80';
+        const bodyColor = isFollowing ? '#1d6e52' : isFree ? '#1a7a4a' : '#2c6a80';
+        ctx.fillStyle = bodyColor;
         ctx.beginPath(); ctx.arc(x,y-2.3,1.8,0,Math.PI*2); ctx.fill();
-        ctx.strokeStyle = pris.state==='freed' ? '#1a7a4a' : '#2c6a80'; ctx.lineWidth = 1;
+        ctx.strokeStyle = bodyColor; ctx.lineWidth = 1;
         ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x,y+3.5); ctx.stroke();
         if (pris.state==='guarded') { ctx.strokeStyle='rgba(200,200,200,0.5)'; ctx.lineWidth=1; ctx.beginPath(); ctx.arc(x+3.5,y+1,1.6,0,Math.PI*2); ctx.stroke(); }
         ctx.restore();
@@ -3215,30 +3316,31 @@ const App = {
       ctx.restore();
     }
 
-    // Paladin combat aura (damage zone, radius 52)
+    // Paladin combat aura (damage zone — radius expands during Giusto Potere)
     {
       const px = s.paladin.x, py = s.paladin.y;
+      const auraR = s.holyPowerActive ? 82 : 52;
       const pulse = 0.5 + 0.5*Math.sin(now/400);
       ctx.save();
       if (s.holyPowerActive) {
-        const g = ctx.createRadialGradient(px,py,0,px,py,52);
+        const g = ctx.createRadialGradient(px,py,0,px,py,auraR);
         g.addColorStop(0, 'rgba(255,230,30,' + (0.22+0.12*pulse) + ')');
         g.addColorStop(0.6, 'rgba(255,200,0,' + (0.10+0.06*pulse) + ')');
         g.addColorStop(1, 'rgba(255,200,0,0)');
-        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(px,py,52,0,Math.PI*2); ctx.fill();
+        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(px,py,auraR,0,Math.PI*2); ctx.fill();
         ctx.strokeStyle = 'rgba(255,230,30,' + (0.65+0.25*pulse) + ')';
         ctx.lineWidth = 1.5;
       } else {
-        const g = ctx.createRadialGradient(px,py,0,px,py,52);
+        const g = ctx.createRadialGradient(px,py,0,px,py,auraR);
         g.addColorStop(0, 'rgba(201,168,76,' + (0.12+0.06*pulse) + ')');
         g.addColorStop(0.6, 'rgba(201,168,76,' + (0.06+0.03*pulse) + ')');
         g.addColorStop(1, 'rgba(201,168,76,0)');
-        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(px,py,52,0,Math.PI*2); ctx.fill();
+        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(px,py,auraR,0,Math.PI*2); ctx.fill();
         ctx.strokeStyle = 'rgba(201,168,76,' + (0.35+0.15*pulse) + ')';
         ctx.lineWidth = 1;
       }
       ctx.setLineDash([4,5]);
-      ctx.beginPath(); ctx.arc(px,py,52,0,Math.PI*2); ctx.stroke();
+      ctx.beginPath(); ctx.arc(px,py,auraR,0,Math.PI*2); ctx.stroke();
       ctx.setLineDash([]);
       ctx.restore();
     }

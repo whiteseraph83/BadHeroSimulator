@@ -503,6 +503,17 @@ const UI = {
     this._renderSpellRequests(requests);
     this._renderKnownSpells(known);
 
+    // Aggiorna pulsante "Crea senza componenti"
+    const freeBtn  = document.getElementById('btn-free-spell');
+    const freeUses = document.getElementById('free-spell-uses');
+    const usedToday = Game.state.freeSpellUsed || 0;
+    const maxFreeSpells = 2;
+    if (freeBtn)  { freeBtn.disabled = usedToday >= maxFreeSpells; }
+    if (freeUses) {
+      freeUses.textContent = usedToday >= maxFreeSpells ? 'Esaurite per oggi' : `${maxFreeSpells - usedToday} rimanenti`;
+      freeUses.className   = 'small mt-1 ' + (usedToday >= maxFreeSpells ? 'text-muted' : 'text-success');
+    }
+
     // Anche aggiorna il Ricettario del Druido se visibile
     const knownRecipes = Game.state.knownRecipes || [];
     const krCountEl = document.getElementById('known-recipes-count');
@@ -551,11 +562,15 @@ const UI = {
     el.innerHTML = Object.keys(counts).map(id => {
       const recipe = SPELL_RECIPES.find(r => r.id === id);
       if (!recipe) return '';
-      const qCls = QUALITY[recipe.quality]?.cls || '';
+      const qCls  = QUALITY[recipe.quality]?.cls || '';
+      const sellPrice = Math.round((recipe.clientGold || 40) / 2);
       return `<div class="potion-card">
         <span>${recipe.icon}</span>
         <span class="${qCls}" style="flex:1">${recipe.name}</span>
-        <span class="ingredient-qty">×${counts[id]}</span>
+        <span class="ingredient-qty me-2">×${counts[id]}</span>
+        <button class="btn btn-xs btn-outline-warning btn-sell-spell" data-sell-spell-id="${id}" title="Vendi al mercato (metà prezzo)">
+          <i class="bi bi-cash-coin"></i> ${sellPrice} mo
+        </button>
       </div>`;
     }).join('');
   },
@@ -695,9 +710,9 @@ const UI = {
     const el     = document.getElementById('day-tax-info');
     if (!el) return;
     if (canPay) {
-      el.innerHTML = `<i class="bi bi-bank"></i> Tassa: ${tax} mo <span class="tax-can-pay"><i class="bi bi-check-circle"></i></span>`;
+      el.innerHTML = `<i class="bi bi-bank"></i> Tassa giornaliera gilda: ${tax} mo <span class="tax-can-pay"><i class="bi bi-check-circle"></i></span>`;
     } else {
-      el.innerHTML = `<i class="bi bi-bank"></i> Tassa: ${tax} mo <span class="tax-cannot-pay"><i class="bi bi-x-circle"></i> Insufficiente!</span>`;
+      el.innerHTML = `<i class="bi bi-bank"></i> Tassa giornaliera gilda: ${tax} mo <span class="tax-cannot-pay"><i class="bi bi-x-circle"></i> Insufficiente!</span>`;
     }
   },
 
