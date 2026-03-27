@@ -588,8 +588,32 @@ const Game = {
       'Mercenario Brug', 'Strega Isolde', 'Alchimista Fenix', 'Lord Shadowmere',
       'Ladra Zara', 'Cultista Eryn'
     ];
-    const shuffled = [...SPELL_RECIPES].sort(() => Math.random() - 0.5);
-    this.state.spellRequests = shuffled.slice(0, count).map((r, i) => ({
+
+    // Qualità massima tra incantesimi posseduti e ricette conosciute (min. 1)
+    const spellInv    = this.state.spellInventory || [];
+    const knownSpells = this.state.knownSpells    || [];
+    const allKnown    = [...new Set([...spellInv, ...knownSpells])];
+    let maxQ = 1;
+    for (const id of allKnown) {
+      const r = SPELL_RECIPES.find(x => x.id === id);
+      if (r && r.quality > maxQ) maxQ = r.quality;
+    }
+
+    // Pool filtrato per qualità ≤ maxQ; peso inverso verso le qualità più alte
+    // per non avere solo Q1 quando si ha anche Q2
+    const pool = SPELL_RECIPES.filter(r => r.quality <= maxQ);
+    const weighted = pool.flatMap(r => Array(r.quality).fill(r)); // Q1→×1, Q2→×2 …
+    const shuffled = [...weighted].sort(() => Math.random() - 0.5);
+
+    // Deduplica preservando l'ordine dopo lo shuffle
+    const seen = new Set();
+    const picked = [];
+    for (const r of shuffled) {
+      if (!seen.has(r.id)) { seen.add(r.id); picked.push(r); }
+      if (picked.length >= count) break;
+    }
+
+    this.state.spellRequests = picked.map((r, i) => ({
       id: `sreq_${Date.now()}_${i}`,
       recipeId: r.id,
       clientName: CLIENT_NAMES[i % CLIENT_NAMES.length],
