@@ -105,10 +105,7 @@
             <div class="small text-muted mt-1"><span id="fame-points">0</span> punti fama</div>
           </div>
 
-          <!-- Gold -->
-          <div class="gold-display mb-2">
-            <i class="bi bi-coin"></i> <span id="char-gold">0</span> <span class="text-muted small">mo</span>
-          </div>
+
 
           <!-- Taglia / Visibilità -->
           <div id="wanted-display" class="wanted-display mb-3">
@@ -147,19 +144,27 @@
           <!-- Gara di Bevute button (solo Guerriero) -->
           <div class="mb-2 d-none" id="drinking-wrapper">
             <button class="btn btn-drinking w-100" id="btn-drinking-game">
-              <i class="bi bi-cup-hot-fill"></i> Gara di Bevute
+              🍺 Gara di Bevute
               <span class="badge bg-dark ms-1" id="drinking-badge">1</span>
             </button>
           </div>
 
-          <!-- Guild tax info -->
-          <div class="tax-info" id="guild-tax-info">
-            <div class="d-flex justify-content-between align-items-center">
-              <span class="small text-muted"><i class="bi bi-bank"></i> Tassa Gilda</span>
-              <span class="small" id="tax-amount">0 mo</span>
-            </div>
-            <div class="small mt-1" id="tax-canpay-label">—</div>
+          <!-- Prega button (solo Chierico) -->
+          <div class="mb-2 d-none" id="prayer-wrapper">
+            <button class="btn btn-prayer w-100" id="btn-prayer">
+              🙏 Prega
+              <span class="badge bg-dark ms-1" id="prayer-badge">2</span>
+            </button>
           </div>
+
+          <!-- Cavalcatura button (solo Paladino) -->
+          <div class="mb-2 d-none" id="stable-wrapper">
+            <button class="btn btn-stable w-100" id="btn-stable">
+              🐎 Accudisci Cavalcatura
+              <span class="badge bg-dark ms-1" id="stable-badge">2</span>
+            </button>
+          </div>
+
 
         </div>
       </div>
@@ -171,8 +176,9 @@
       <!-- Day control bar -->
       <div class="card-dark mb-3">
         <div class="card-dark-header d-flex justify-content-between align-items-center flex-wrap gap-2">
-          <div class="d-flex align-items-center gap-2">
+          <div class="d-flex align-items-center gap-2 flex-wrap">
             <span class="badge bg-gold text-dark" id="day-badge">Giorno 1</span>
+            <span class="text-gold small fw-semibold"><i class="bi bi-coin"></i> <span id="char-gold">0</span> mo</span>
             <span class="small text-muted" id="day-tax-info"></span>
           </div>
           <button class="btn btn-sm btn-gold" id="btn-nextday">
@@ -217,6 +223,16 @@
         <li class="nav-item d-none" id="tab-incantesimi-nav">
           <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-incantesimi">
             <i class="bi bi-stars"></i> Incantesimi
+          </button>
+        </li>
+        <li class="nav-item d-none" id="tab-conversione-nav">
+          <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-conversione">
+            ✝️ Conversione
+          </button>
+        </li>
+        <li class="nav-item d-none" id="tab-arena-nav">
+          <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-arena">
+            ⚔️ Arena
           </button>
         </li>
         <li class="nav-item">
@@ -537,6 +553,97 @@
 
         </div>
 
+        <!-- TAB: CONVERSIONE (solo Chierico) -->
+        <div class="tab-pane fade" id="tab-conversione">
+          <div class="card-dark" style="max-width:520px;margin:0 auto;">
+            <div class="card-dark-header text-center" style="font-family:'Cinzel',serif;letter-spacing:.06em;">
+              ✝️ Piazza della Conversione
+            </div>
+            <div class="card-dark-body p-3">
+
+              <!-- Lobby -->
+              <div id="conv-lobby">
+                <p class="text-muted small text-center mb-3">
+                  Guida il Chierico nella piazza e converti i fedeli! I diavoli tolgono fede a chi si avvicina — tienili lontani muovendoti tra il gregge.
+                </p>
+                <div class="d-flex justify-content-center mb-3">
+                  <span class="badge" style="background:rgba(201,168,76,0.15);color:#c9a84c;border:1px solid rgba(201,168,76,0.3);font-size:.85rem;padding:.4rem .8rem;">
+                    ✝️ <span id="conv-uses-left">2</span> sessione disponibile oggi
+                  </span>
+                </div>
+                <button class="btn btn-prayer w-100" id="btn-conv-start">✝️ Inizia la Missione</button>
+              </div>
+
+              <!-- Game attivo -->
+              <div id="conv-game" class="d-none">
+                <div class="d-flex justify-content-between align-items-center mb-2 px-1">
+                  <span class="small" style="color:#c9a84c;">✝️ Convertiti: <strong id="conv-count">0</strong>/<strong id="conv-total">18</strong></span>
+                  <span class="small" style="color:#ffe082;">⭐ Benedetti: <strong id="conv-blessed">0</strong></span>
+                  <span class="small text-muted">⏱ <strong id="conv-timer">30</strong>s</span>
+                </div>
+                <canvas id="conv-canvas" width="500" height="350" class="conv-canvas mb-2"></canvas>
+                <div class="text-muted small text-center" id="conv-hint">Muovi il mouse sul canvas per guidare il Chierico</div>
+              </div>
+
+              <!-- Risultato -->
+              <div id="conv-result" class="d-none text-center py-2">
+                <div id="conv-outcome" class="fs-5 fw-bold mb-2"></div>
+                <div id="conv-rewards" class="mission-rewards mb-3 text-start"></div>
+                <button class="btn btn-sm btn-outline-gold" id="btn-conv-close">Chiudi</button>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB: ARENA (solo Guerriero) -->
+        <div class="tab-pane fade" id="tab-arena">
+          <!-- Lobby -->
+          <div id="arena-lobby" class="card-dark mb-3">
+            <div class="card-dark-header">⚔️ Arena dei Gladiatori</div>
+            <div class="card-dark-body text-center">
+              <p class="text-muted small mb-2">Sopravvivi il più a lungo possibile contro ondate di nemici. Clicca sui nemici per colpirli. Se uno ti tocca, è finita.</p>
+              <div class="d-flex justify-content-center gap-4 mb-3">
+                <div class="text-center">
+                  <div class="text-gold fw-bold fs-5" id="arena-timer-display">—</div>
+                  <div class="text-muted small">Secondi</div>
+                </div>
+                <div class="text-center">
+                  <div class="text-gold fw-bold fs-5" id="arena-highscore-display">0</div>
+                  <div class="text-muted small">Record uccisioni</div>
+                </div>
+                <div class="text-center">
+                  <div class="text-gold fw-bold fs-5"><span id="arena-uses-left">2</span></div>
+                  <div class="text-muted small">Sessioni oggi</div>
+                </div>
+              </div>
+              <div id="arena-double-hit-badge" class="d-none mb-2">
+                <span class="badge" style="background:rgba(255,200,50,0.18);color:#ffe082;border:1px solid rgba(255,200,50,0.4);">⚔️⚔️ Doppio Danno attivo</span>
+              </div>
+              <button class="btn btn-gold btn-lg" id="btn-arena-start">⚔️ Entra nell'Arena</button>
+            </div>
+          </div>
+          <!-- Canvas area (nascosta durante lobby/result) -->
+          <div id="arena-game-area" class="d-none">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <span class="text-gold fw-bold">⏱️ <span id="arena-hud-timer">30</span>s</span>
+              <span class="text-warning fw-bold">☠️ <span id="arena-hud-kills">0</span> abbattuti</span>
+              <span class="text-success fw-bold">🪙 +<span id="arena-hud-gold">0</span> mo</span>
+            </div>
+            <canvas id="arena-canvas" class="arena-canvas" width="600" height="380"></canvas>
+          </div>
+          <!-- Result -->
+          <div id="arena-result" class="card-dark d-none">
+            <div class="card-dark-body text-center">
+              <div id="arena-result-icon" class="fs-1 mb-2">⚔️</div>
+              <div id="arena-result-title" class="fw-bold fs-4 mb-1 text-gold"></div>
+              <div id="arena-result-sub" class="text-muted small mb-3"></div>
+              <div id="arena-result-rewards" class="mb-3"></div>
+              <button class="btn btn-gold" id="btn-arena-again">⚔️ Gioca di Nuovo</button>
+            </div>
+          </div>
+        </div>
+
         <!-- TAB: DIARIO -->
         <div class="tab-pane fade" id="tab-log">
           <div class="card-dark">
@@ -793,7 +900,7 @@
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content modal-dark" style="border:1px solid #8b4513;">
       <div class="modal-header" style="border-bottom:1px solid rgba(139,69,19,0.4);background:rgba(139,69,19,0.12);">
-        <h5 class="modal-title" style="color:#d4a017;"><i class="bi bi-cup-hot-fill"></i> Gara di Bevute</h5>
+        <h5 class="modal-title" style="color:#d4a017;">🍺 Gara di Bevute</h5>
       </div>
       <div class="modal-body">
         <!-- Round dots -->
@@ -843,6 +950,42 @@
   </div>
 </div>
 
+
+<!-- ===== MODAL: PREGHIERA (Chierico) ===== -->
+<div class="modal fade" id="modal-prayer" data-bs-backdrop="static" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content modal-dark" style="border:1px solid rgba(201,168,76,0.5);">
+      <div class="modal-header" style="border-bottom:1px solid rgba(201,168,76,0.25);background:rgba(201,168,76,0.07);">
+        <h5 class="modal-title" style="color:#fff8e1;">🙏 Preghiera</h5>
+      </div>
+      <div class="modal-body pb-2">
+        <canvas id="prayer-canvas" width="360" height="240" class="prayer-canvas mb-2"></canvas>
+        <!-- Devotion bar -->
+        <div class="d-flex align-items-center gap-2 mb-3 px-1">
+          <span class="small" style="color:#c9a84c;">🙏 Fede</span>
+          <div class="prayer-devo-bg flex-grow-1">
+            <div id="prayer-devo-fill" class="prayer-devo-fill" style="width:0%"></div>
+          </div>
+          <span class="small text-gold" id="prayer-devo-pct">0%</span>
+        </div>
+        <!-- Active phase -->
+        <div id="prayer-active-phase" class="text-center">
+          <div class="text-muted small mb-2" id="prayer-hint">Prega con devozione… aspetta il momento di grazia</div>
+          <div class="d-flex gap-2 justify-content-center">
+            <button class="btn btn-prayer px-4" id="btn-amen">🙏 Amen!</button>
+            <button class="btn btn-scaccia px-4 d-none" id="btn-scaccia">☩ Scaccia!</button>
+          </div>
+        </div>
+        <!-- Result phase -->
+        <div id="prayer-result-phase" class="d-none text-center py-2">
+          <div id="prayer-outcome" class="fs-5 fw-bold mb-2"></div>
+          <div id="prayer-rewards" class="mission-rewards mb-2 text-start"></div>
+          <button class="btn btn-sm btn-outline-gold" data-bs-dismiss="modal">Chiudi</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- ===== MODAL: MISSIONE TAGLIA ===== -->
 <div class="modal fade" id="modal-wanted" data-bs-backdrop="static" tabindex="-1">
@@ -974,6 +1117,46 @@
     </div>
   </div>
 </div>
+
+<!-- ===== MODAL: CAVALCATURA (Paladino) ===== -->
+<div class="modal fade" id="modal-stable" data-bs-backdrop="static" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content modal-dark" style="border:1px solid rgba(201,168,76,0.4);">
+      <div class="modal-header" style="border-bottom:1px solid rgba(201,168,76,0.25);background:rgba(201,168,76,0.07);">
+        <h5 class="modal-title" style="color:#c9a84c;font-family:'Cinzel',serif;">🐎 Cura della Cavalcatura</h5>
+      </div>
+      <div class="modal-body p-3">
+
+        <!-- Game attivo -->
+        <div id="stable-game">
+          <div class="d-flex justify-content-between align-items-center mb-2 px-1">
+            <span class="small text-warning">❤️ Salute: <strong id="stable-health">0</strong>%</span>
+            <span class="small" style="color:#f9ca24;">😊 Felicità: <strong id="stable-happiness">0</strong>%</span>
+            <span class="small text-muted">⏱ <strong id="stable-timer">40</strong>s</span>
+          </div>
+          <canvas id="stable-canvas" width="490" height="340" class="stable-canvas mb-2"></canvas>
+          <div class="stable-buttons d-flex gap-1 justify-content-center mt-1">
+            <button class="btn-stable-lane" data-lane="0" style="background:rgba(201,168,76,0.15);border-color:rgba(201,168,76,0.5);">🌾</button>
+            <button class="btn-stable-lane" data-lane="1" style="background:rgba(82,183,136,0.15);border-color:rgba(82,183,136,0.5);">🪮</button>
+            <button class="btn-stable-lane" data-lane="2" style="background:rgba(230,126,34,0.15);border-color:rgba(230,126,34,0.5);">🐎</button>
+            <button class="btn-stable-lane" data-lane="3" style="background:rgba(231,76,60,0.15);border-color:rgba(231,76,60,0.5);">🥕</button>
+            <button class="btn-stable-lane" data-lane="4" style="background:rgba(52,152,219,0.15);border-color:rgba(52,152,219,0.5);">💧</button>
+          </div>
+          <div class="text-muted small text-center mt-1" id="stable-hint">Premi il bottone quando l'icona raggiunge la riga!</div>
+        </div>
+
+        <!-- Risultato -->
+        <div id="stable-result" class="d-none text-center py-3">
+          <div id="stable-outcome" class="fs-5 fw-bold mb-2"></div>
+          <div id="stable-rewards" class="mission-rewards mb-3 text-start"></div>
+          <button class="btn btn-gold" data-bs-dismiss="modal">Chiudi</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
 
 <!-- ===== MODAL: DETTAGLIO RICETTA/INCANTESIMO ===== -->
 <div class="modal fade" id="modal-recipe" tabindex="-1">

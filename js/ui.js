@@ -176,6 +176,138 @@ const UI = {
     rewardEl.innerHTML = rows.join('');
   },
 
+  /* ─── Preghiera (solo Chierico) ───────────────────────────── */
+  renderPrayBtn() {
+    const btn   = document.getElementById('btn-prayer');
+    const badge = document.getElementById('prayer-badge');
+    if (!btn) return;
+    const rem = Game.prayRemaining();
+    badge.textContent = rem;
+    btn.disabled = rem <= 0 || Game.state.gameOver;
+  },
+
+  /* ─── Conversione (solo Chierico) ────────────────────────── */
+  renderConversionLobby() {
+    const el = document.getElementById('conv-uses-left');
+    if (!el) return;
+    const rem = Game.convRemaining();
+    el.textContent = rem;
+    const btn = document.getElementById('btn-conv-start');
+    if (btn) btn.disabled = rem <= 0 || (Game.state && Game.state.gameOver);
+  },
+
+  showConversionResult(result) {
+    document.getElementById('conv-game').classList.add('d-none');
+    document.getElementById('conv-result').classList.remove('d-none');
+    const outcomeEl = document.getElementById('conv-outcome');
+    if (result.tier === 'benedizione') {
+      outcomeEl.innerHTML = '<span style="color:#fffde7;">✨ Benedizione Divina!</span>';
+    } else if (result.tier === 'alta') {
+      outcomeEl.innerHTML = '<span class="text-gold">✝️ Grande conversione!</span>';
+    } else if (result.tier === 'media') {
+      outcomeEl.innerHTML = '<span class="text-warning">✝️ Il gregge cresce.</span>';
+    } else {
+      outcomeEl.innerHTML = '<span class="text-muted">✝️ Pochi cuori aperti oggi.</span>';
+    }
+    const rows = [];
+    if (result.xp    > 0) rows.push(`<div class="reward-row"><span class="reward-icon">⭐</span> +${result.xp} PE</div>`);
+    if (result.gold  > 0) rows.push(`<div class="reward-row"><span class="reward-icon">💰</span> +${result.gold} mo</div>`);
+    if (result.fameXp > 0) rows.push(`<div class="reward-row"><span class="reward-icon">👁️</span> +${result.fameXp} fama</div>`);
+    rows.push(`<div class="reward-row text-muted small"><span class="reward-icon">✝️</span> Punteggio: ${result.score}% · Benedetti: ${result.blessedCount}</div>`);
+    document.getElementById('conv-rewards').innerHTML = rows.join('');
+  },
+
+  /* ─── Stalla (solo Paladino) ──────────────────────────────── */
+  renderStableLobby() {
+    const badge = document.getElementById('stable-badge');
+    if (!badge) return;
+    const rem = Game.stableRemaining();
+    badge.textContent = rem;
+    const btn = document.getElementById('btn-stable');
+    if (btn) btn.disabled = rem <= 0 || (Game.state && Game.state.gameOver);
+  },
+
+  showStableResult(result) {
+    document.getElementById('stable-game').classList.add('d-none');
+    document.getElementById('stable-result').classList.remove('d-none');
+    const outcomeEl = document.getElementById('stable-outcome');
+    if (result.tier === 'eccellente') {
+      outcomeEl.innerHTML = '<span class="text-gold">🐎 Cavalcatura eccellente!</span>';
+    } else if (result.tier === 'buona') {
+      outcomeEl.innerHTML = '<span class="text-warning">🐎 Buona cura!</span>';
+    } else if (result.tier === 'sufficiente') {
+      outcomeEl.innerHTML = '<span class="text-muted">🐎 Sufficiente.</span>';
+    } else {
+      outcomeEl.innerHTML = '<span class="text-danger">😔 Il cavallo non era soddisfatto...</span>';
+    }
+    const rows = [];
+    if (result.xp   > 0) rows.push(`<div class="reward-row"><span class="reward-icon">⭐</span> +${result.xp} PE</div>`);
+    if (result.gold > 0) rows.push(`<div class="reward-row"><span class="reward-icon">🪙</span> +${result.gold} mo</div>`);
+    if (result.fameXp > 0) rows.push(`<div class="reward-row"><span class="reward-icon">👁️</span> +${result.fameXp} fama</div>`);
+    rows.push(`<div class="reward-row text-muted small"><span class="reward-icon">🐎</span> Punteggio: ${result.score}%</div>`);
+    document.getElementById('stable-rewards').innerHTML = rows.join('');
+  },
+
+  showPrayerResult(result) {
+    document.getElementById('prayer-active-phase').classList.add('d-none');
+    document.getElementById('prayer-result-phase').classList.remove('d-none');
+    const outcomeEl = document.getElementById('prayer-outcome');
+    if (result.tier === 'benedizione') {
+      outcomeEl.innerHTML = '<span style="color:#fffde7;">✨ Benedizione Divina!</span>';
+    } else if (result.tier === 'alta') {
+      outcomeEl.innerHTML = '<span class="text-gold">🙏 Preghiera esaudita!</span>';
+    } else if (result.tier === 'media') {
+      outcomeEl.innerHTML = '<span class="text-warning">🙏 Il Divino ti ha ascoltato.</span>';
+    } else {
+      outcomeEl.innerHTML = '<span class="text-muted">🙏 Una preghiera tranquilla.</span>';
+    }
+    const rows = [];
+    if (result.xp    > 0) rows.push(`<div class="reward-row"><span class="reward-icon">⭐</span> +${result.xp} PE</div>`);
+    if (result.gold  > 0) rows.push(`<div class="reward-row"><span class="reward-icon">💰</span> +${result.gold} mo</div>`);
+    if (result.fameXp > 0) rows.push(`<div class="reward-row"><span class="reward-icon">👁️</span> +${result.fameXp} fama</div>`);
+    rows.push(`<div class="reward-row text-muted small"><span class="reward-icon">🙏</span> Devozione: ${result.devotion}%</div>`);
+    document.getElementById('prayer-rewards').innerHTML = rows.join('');
+  },
+
+  /* ─── Arena (solo Guerriero) ──────────────────────────────── */
+  renderArenaLobby() {
+    const el = document.getElementById('arena-highscore-display');
+    if (el) el.textContent = Game.state.arenaHighScore || 0;
+    const level = Game.state.character.level;
+    const secs  = 30 + level * 5;
+    const timerEl = document.getElementById('arena-timer-display');
+    if (timerEl) timerEl.textContent = secs;
+    // Uses remaining
+    const usesEl = document.getElementById('arena-uses-left');
+    if (usesEl) {
+      const rem = Game.arenaRemaining();
+      usesEl.textContent = rem;
+      const btn = document.getElementById('btn-arena-start');
+      if (btn) btn.disabled = rem <= 0 || (Game.state && Game.state.gameOver);
+    }
+    // Double hit badge
+    const doubleEl = document.getElementById('arena-double-hit-badge');
+    if (doubleEl) doubleEl.classList.toggle('d-none', !Game.getEquipmentAbilities().arenaDoubleHit);
+  },
+
+  showArenaResult(result) {
+    document.getElementById('arena-game-area').classList.add('d-none');
+    const res = document.getElementById('arena-result');
+    res.classList.remove('d-none');
+    document.getElementById('arena-result-icon').textContent = result.survived ? '🏆' : '💀';
+    document.getElementById('arena-result-title').textContent = result.survived
+      ? `Sopravvissuto! ${result.killCount} nemici abbattuti!`
+      : `Sconfitto dopo ${result.killCount} uccisioni`;
+    document.getElementById('arena-result-sub').textContent = result.isRecord
+      ? '🎉 Nuovo record personale!'
+      : `Record: ${Game.state.arenaHighScore} uccisioni`;
+    const rows = [];
+    if (result.xp   > 0) rows.push(`<div class="reward-row"><span class="reward-icon">⭐</span> +${result.xp} PE</div>`);
+    if (result.gold > 0) rows.push(`<div class="reward-row"><span class="reward-icon">💰</span> +${result.gold} mo</div>`);
+    if (result.survived) rows.push(`<div class="reward-row text-success small"><span class="reward-icon">🛡️</span> Bonus sopravvivenza +25%</div>`);
+    document.getElementById('arena-result-rewards').innerHTML = rows.join('');
+  },
+
   /* ─── Tab Pozioni (solo Druido) ────────────────────────────── */
   renderPozioniTab() {
     const ingInv    = Game.state.ingredientInventory || [];
@@ -506,14 +638,13 @@ const UI = {
   renderGuildTaxInfo() {
     const tax    = Game.guildTax();
     const canPay = Game.canAffordTax();
-    document.getElementById('tax-amount').textContent = `${tax} mo`;
-    const label = document.getElementById('tax-canpay-label');
+    const el     = document.getElementById('day-tax-info');
+    if (!el) return;
     if (canPay) {
-      label.innerHTML = `<span class="tax-can-pay"><i class="bi bi-check-circle"></i> Puoi pagare</span>`;
+      el.innerHTML = `<i class="bi bi-bank"></i> Tassa: ${tax} mo <span class="tax-can-pay"><i class="bi bi-check-circle"></i></span>`;
     } else {
-      label.innerHTML = `<span class="tax-cannot-pay"><i class="bi bi-x-circle"></i> Oro insufficiente!</span>`;
+      el.innerHTML = `<i class="bi bi-bank"></i> Tassa: ${tax} mo <span class="tax-cannot-pay"><i class="bi bi-x-circle"></i> Insufficiente!</span>`;
     }
-    document.getElementById('day-tax-info').textContent = `Tassa: ${tax} mo`;
   },
 
   /* ─── Missioni giornaliere ─────────────────────────────── */
@@ -1347,6 +1478,10 @@ const UI = {
     this.renderPickpocketBtn();
     this.renderStudyBtn();
     this.renderDrinkingBtn();
+    this.renderPrayBtn();
+    this.renderConversionLobby();
+    this.renderStableLobby();
+    this.renderArenaLobby();
     this.renderPozioniTab();
     this.renderIncantesimiTab();
     this.renderCraftSlots();
@@ -1387,6 +1522,18 @@ const UI = {
     // Gara di Bevute (solo Guerriero)
     document.getElementById('drinking-wrapper').classList.toggle('d-none', !cls.hasDrinkingGame);
 
+    // Tab Arena (solo Guerriero)
+    document.getElementById('tab-arena-nav').classList.toggle('d-none', !cls.hasArena);
+
+    // Prega (solo Chierico)
+    document.getElementById('prayer-wrapper').classList.toggle('d-none', !cls.hasPrayer);
+
+    // Tab Conversione (solo Chierico)
+    document.getElementById('tab-conversione-nav').classList.toggle('d-none', !cls.hasConversionTab);
+
+    // Cavalcatura button (solo Paladino)
+    document.getElementById('stable-wrapper').classList.toggle('d-none', !cls.hasStableTab);
+
     // Classe sotto il nome
     document.getElementById('char-class').textContent = cls.name;
 
@@ -1419,9 +1566,12 @@ const UI = {
             ${cls.proficiencies.map(k => profAbbr[k]).join(' · ')}
             ${cls.hasPickpocket   ? '<span class="ms-1 text-warning" title="Ha il borseggio"><i class="bi bi-mask"></i></span>' : ''}
             ${cls.hasDiceGame     ? '<span class="ms-1 text-info"    title="Ha il gioco dei dadi"><i class="bi bi-dice-5"></i></span>' : ''}
-            ${cls.hasDrinkingGame ? '<span class="ms-1 text-warning" title="Gara di bevute"><i class="bi bi-cup-hot-fill"></i></span>' : ''}
-            ${cls.hasPotioniTab   ? '<span class="ms-1 text-success" title="Alchimia: prepara pozioni"><i class="bi bi-flask"></i></span>' : ''}
+            ${cls.hasDrinkingGame ? '<span class="ms-1" title="Gara di bevute">🍺</span>' : ''}
+            ${cls.hasArena        ? '<span class="ms-1" title="Arena: combatti ondate di nemici">⚔️</span>' : ''}
+            ${cls.hasPrayer       ? '<span class="ms-1" title="Preghiera: chiedi la grazia divina">🙏</span>' : ''}
+            ${cls.hasPotioniTab   ? '<span class="ms-1" title="Alchimia: prepara pozioni">🌿</span>' : ''}
             ${cls.hasSpellTab     ? '<span class="ms-1 text-info"    title="Grimorio: lancia incantesimi"><i class="bi bi-stars"></i></span>' : ''}
+            ${cls.hasStableTab ? '<span class="ms-1" title="Cavalcatura: accudisci il tuo cavallo">🐎</span>' : ''}
           </div>
         </div>
       </div>`).join('');

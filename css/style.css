@@ -1644,3 +1644,176 @@ body {
 /* Pulsante outline-secondary nel tema chiaro */
 [data-theme="light"] #btn-theme-toggle { border-color: var(--border-col); color: var(--gold); }
 [data-theme="light"] #btn-theme-toggle:hover { background: rgba(122,90,0,.08); border-color: var(--gold); }
+
+/* ══════════════════════════════════════════════════════════
+   CHIERICO — Preghiera
+   ══════════════════════════════════════════════════════════ */
+.btn-prayer {
+  background: linear-gradient(135deg, rgba(201,168,76,0.14) 0%, rgba(255,255,255,0.06) 100%);
+  border: 1px solid rgba(201,168,76,0.45);
+  color: #fff8e1;
+  font-weight: 600;
+  transition: all 0.25s;
+}
+.btn-prayer:hover:not(:disabled) {
+  background: linear-gradient(135deg, rgba(201,168,76,0.26) 0%, rgba(255,255,255,0.14) 100%);
+  border-color: rgba(201,168,76,0.8);
+  color: #fffde7;
+  box-shadow: 0 0 14px rgba(201,168,76,0.3);
+}
+.btn-prayer:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-prayer.grace-active {
+  background: linear-gradient(135deg, rgba(255,253,200,0.38) 0%, rgba(201,168,76,0.28) 100%);
+  border-color: #fffde7;
+  color: #5a4000;
+  animation: grace-pulse 0.4s ease-in-out infinite alternate;
+}
+@keyframes grace-pulse {
+  from { box-shadow: 0 0 12px rgba(255,253,200,0.4); }
+  to   { box-shadow: 0 0 28px rgba(255,253,200,0.9), 0 0 56px rgba(201,168,76,0.5); }
+}
+.prayer-canvas {
+  display: block;
+  width: 100%;
+  max-width: 360px;
+  margin: 0 auto;
+  border-radius: 12px;
+  border: 1px solid rgba(201,168,76,0.2);
+  background: #04020e;
+}
+.prayer-devo-bg {
+  height: 8px;
+  background: rgba(255,255,255,0.09);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.prayer-devo-fill {
+  height: 100%;
+  background: linear-gradient(90deg, rgba(201,168,76,0.55), #fffde7);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+[data-theme="light"] .btn-prayer { color: #7a5a00; border-color: rgba(122,90,0,0.45); }
+[data-theme="light"] .btn-prayer.grace-active { color: #3a2800; }
+[data-theme="light"] .prayer-canvas { background: #0a0516; border-color: rgba(122,90,0,0.35); }
+[data-theme="light"] .prayer-devo-bg { background: rgba(0,0,0,0.12); }
+
+/* Scaccia button (demoni / non-morti) */
+.btn-scaccia {
+  background: linear-gradient(135deg, rgba(180,30,30,0.09) 0%, rgba(100,10,80,0.07) 100%);
+  border: 1px solid rgba(200,50,50,0.28);
+  color: rgba(255,150,150,0.55);
+  font-weight: 600;
+  opacity: 0.7;
+  transition: all 0.2s;
+}
+.btn-scaccia:hover:not(:disabled) {
+  background: linear-gradient(135deg, rgba(220,50,50,0.2) 0%, rgba(120,20,100,0.15) 100%);
+  border-color: rgba(255,80,80,0.5);
+  color: rgba(255,180,180,0.85);
+  opacity: 0.85;
+}
+.btn-scaccia.demon-active {
+  animation: scaccia-pulse 0.55s ease-in-out infinite alternate;
+  border-color: #ff5050;
+  color: #fff;
+  opacity: 1;
+}
+@keyframes scaccia-pulse {
+  from { box-shadow: 0 0 8px rgba(255,50,50,0.4),  0 0 0 2px rgba(200,30,30,0.2); }
+  to   { box-shadow: 0 0 26px rgba(255,50,50,0.9),  0 0 0 4px rgba(200,30,30,0.45); }
+}
+/* Amen button idle vs grace (solo nel modal preghiera) */
+#btn-amen:not(.grace-active) { opacity: 0.7; }
+#btn-amen.grace-active       { opacity: 1; }
+[data-theme="light"] .btn-scaccia { color: rgba(153,0,0,0.5); border-color: rgba(180,30,30,0.3); }
+[data-theme="light"] .btn-scaccia.demon-active { color: #500000; opacity: 1; }
+
+/* ══════════════════════════════════════════════════════════
+   CHIERICO — Conversione
+   ══════════════════════════════════════════════════════════ */
+.conv-canvas {
+  display: block;
+  width: 100%;
+  border-radius: 6px;
+  border: 1px solid rgba(201,168,76,0.25);
+  background: #080614;
+  cursor: none;
+}
+[data-theme="light"] .conv-canvas { background: #0c0820; border-color: rgba(122,90,0,0.3); }
+
+/* ══════════════════════════════════════════════════════════
+   GUERRIERO — Arena
+   ══════════════════════════════════════════════════════════ */
+.arena-canvas {
+  display: block;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  border-radius: 8px;
+  border: 2px solid rgba(201,168,76,0.3);
+  cursor: none;
+  background: #0a0a1a;
+}
+#arena-game-area { text-align: center; }
+#arena-result .reward-row { justify-content: center; }
+[data-theme="light"] .arena-canvas { border-color: rgba(122,90,0,0.4); }
+
+/* ── Stable (Paladino) ─────────────────────────────────── */
+
+/* Bottone sidebar */
+.btn-stable {
+  background: linear-gradient(135deg, #1a2e1a 0%, #0d1f0d 100%);
+  color: #a8d8a8;
+  border: 1px solid rgba(82,183,136,0.5);
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  letter-spacing: .04em;
+  transition: all .2s;
+}
+.btn-stable:hover:not(:disabled) {
+  background: linear-gradient(135deg, #253a25 0%, #162816 100%);
+  border-color: #52b788;
+  color: #c8f0c8;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(82,183,136,.3);
+}
+.btn-stable:disabled { opacity: .4; cursor: not-allowed; }
+[data-theme="light"] .btn-stable {
+  background: linear-gradient(135deg, #d8f0d8 0%, #c4e8c4 100%);
+  color: #1a5a1a; border-color: rgba(30,120,60,.5);
+}
+[data-theme="light"] .btn-stable:hover:not(:disabled) {
+  background: linear-gradient(135deg, #c4e8c4 0%, #b0d8b0 100%);
+  border-color: #1e7840; color: #0a3a0a;
+}
+
+.stable-canvas {
+  display: block;
+  width: 100%;
+  border-radius: 8px;
+  border: 1px solid rgba(201,168,76,0.25);
+  cursor: default;
+  background: #0a0a18;
+}
+
+.stable-buttons {
+  flex-wrap: nowrap;
+}
+
+.btn-stable-lane {
+  flex: 1;
+  padding: 12px 4px;
+  font-size: 1.4rem;
+  border-radius: 8px;
+  border: 2px solid;
+  cursor: pointer;
+  transition: transform 0.08s, filter 0.08s;
+  user-select: none;
+  min-width: 0;
+}
+
+.btn-stable-lane:active {
+  transform: scale(0.9);
+  filter: brightness(1.4);
+}

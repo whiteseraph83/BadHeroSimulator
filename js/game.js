@@ -40,6 +40,11 @@ const Game = {
           if (this.state.thiefAttackPending === undefined)    this.state.thiefAttackPending = false;
           if (this.state.thiefAttackCompleted === undefined)  this.state.thiefAttackCompleted = false;
           if (this.state.drinkingGameUsed === undefined)      this.state.drinkingGameUsed = 0;
+          if (this.state.prayUsed === undefined)               this.state.prayUsed = 0;
+          if (this.state.conversionUsed === undefined)         this.state.conversionUsed = 0;
+          if (this.state.arenaUsed === undefined)               this.state.arenaUsed = 0;
+          if (this.state.arenaHighScore === undefined)         this.state.arenaHighScore = 0;
+          if (this.state.stableUsed === undefined) this.state.stableUsed = 0;
           return true;
         }
       } catch (e) {
@@ -94,6 +99,11 @@ const Game = {
       knownSpells: [],
       studyUsed: 0,
       drinkingGameUsed: 0,
+      prayUsed: 0,
+      conversionUsed: 0,
+      arenaUsed: 0,
+      arenaHighScore: 0,
+      stableUsed: 0,
       gameOver: false
     };
     this.generateDailyMissions();
@@ -168,7 +178,7 @@ const Game = {
 
   /* ─── Abilità aggregate equipaggiamento ─────────────────── */
   getEquipmentAbilities() {
-    const result = { pickpocketBonus: 0, rerollBonus: 0, taxDiscount: 0, goldBonus: 0, xpBonus: 0, missionBonus: 0, challengeBonus: 0, challengeRefresh: 0, diceRerollBonus: 0, studyBonus: 0 };
+    const result = { pickpocketBonus: 0, rerollBonus: 0, taxDiscount: 0, goldBonus: 0, xpBonus: 0, missionBonus: 0, challengeBonus: 0, challengeRefresh: 0, diceRerollBonus: 0, studyBonus: 0, arenaBonus: 0, arenaDoubleHit: false, conversionBonus: 0, conversionSpeed: 0, stableBonus: 0 };
     for (const itemId of Object.values(this.state.character.equipment)) {
       if (!itemId) continue;
       const item = DB.items.find(i => i.id === itemId);
@@ -183,6 +193,11 @@ const Game = {
       result.challengeRefresh  += item.abilities.challengeRefresh || 0;
       result.diceRerollBonus   += item.abilities.diceRerollBonus  || 0;
       result.studyBonus        += item.abilities.studyBonus       || 0;
+      result.arenaBonus    += item.abilities.arenaBonus    || 0;
+      result.arenaDoubleHit = result.arenaDoubleHit || !!(item.abilities.arenaDoubleHit);
+      result.conversionBonus += item.abilities.conversionBonus || 0;
+      result.conversionSpeed += item.abilities.conversionSpeed || 0;
+      result.stableBonus     += item.abilities.stableBonus     || 0;
     }
     return result;
   },
@@ -1079,6 +1094,10 @@ const Game = {
     this.state.diceRerollsUsed        = 0;
     this.state.studyUsed              = 0;
     this.state.drinkingGameUsed       = 0;
+    this.state.prayUsed               = 0;
+    this.state.conversionUsed         = 0;
+    this.state.arenaUsed              = 0;
+    this.state.stableUsed             = 0;
     this.state.wantedMissionCompleted = false;
     this.state.thiefAttackCompleted   = false;
 
@@ -1224,6 +1243,190 @@ const Game = {
     if (char.log.length > 500) char.log.pop();
     this.save();
     return { goldLost };
+  },
+
+  /* ─── Arena limit (Guerriero) ───────────────────────────── */
+  arenaRemaining() {
+    if (!this.state) return 0;
+    const cls = this.getClasse();
+    if (!cls.arenaPerDay) return 0;
+    const abilBonus = this.getEquipmentAbilities().arenaBonus;
+    return Math.max(0, (cls.arenaPerDay || 0) + abilBonus - (this.state.arenaUsed || 0));
+  },
+
+  startArena() {
+    if (this.arenaRemaining() <= 0) return { ok: false, reason: "Hai già combattuto nell'arena oggi." };
+    this.state.arenaUsed = (this.state.arenaUsed || 0) + 1;
+    this.save();
+    return { ok: true };
+  },
+
+  /* ─── Arena (Guerriero) ─────────────────────────────────── */
+  applyArenaResult(killCount, xpEarned, goldEarned, survived) {
+    const char = this.state.character;
+    let xp   = xpEarned;
+    let gold = goldEarned;
+    if (survived) {
+      xp   = Math.floor(xp   * 1.25);
+      gold = Math.floor(gold * 1.25);
+    }
+    char.xp   += xp;
+    char.gold += gold;
+    const isRecord = killCount > (this.state.arenaHighScore || 0);
+    if (isRecord) this.state.arenaHighScore = killCount;
+    const logText = survived
+      ? `Arena: ${killCount} nemici abbattuti! Sopravvissuto! (+${xp} PE, +${gold} mo)`
+      : `Arena: ${killCount} nemici abbattuti prima di cedere. (+${xp} PE, +${gold} mo)`;
+    const logEntry = { day: char.day, text: logText, type: survived ? 'success' : 'partial' };
+    char.log.unshift(logEntry);
+    if (char.log.length > 500) char.log.pop();
+    const completedChallenges = this.checkChallenges('passive');
+    const levelUpResult = this.checkLevelUp();
+    this.save();
+    return { xp, gold, survived, killCount, isRecord, completedChallenges, levelUpResult };
+  },
+
+  /* ─── Preghiera (Chierico) ─────────────────────────────── */
+  prayRemaining() {
+    const cls = this.getClasse();
+    return Math.max(0, (cls.prayPerDay || 0) - (this.state.prayUsed || 0));
+  },
+
+  startPray() {
+    if (this.prayRemaining() <= 0) return { ok: false, reason: 'Hai già pregato oggi.' };
+    this.state.prayUsed = (this.state.prayUsed || 0) + 1;
+    this.save();
+    return { ok: true };
+  },
+
+  applyPrayResult(devotion) {
+    const char = this.state.character;
+    let xp, gold, fameXp, tier;
+    if (devotion >= 80) {
+      const check = this.resolveCheck('wis', 14);
+      if (check.result === 'nat20') {
+        tier = 'benedizione'; xp = 220; gold = 70; fameXp = 14;
+      } else {
+        tier = 'alta'; xp = 150; gold = 45; fameXp = 9;
+      }
+    } else if (devotion >= 50) {
+      tier = 'media'; xp = 90; gold = 25; fameXp = 5;
+    } else {
+      tier = 'bassa'; xp = 45; gold = 10; fameXp = 2;
+    }
+    xp   += char.level * 10;
+    gold += char.level * 3;
+    char.xp   += xp;
+    char.gold += gold;
+    char.fame += fameXp;
+    const logText = tier === 'benedizione'
+      ? `Preghiera: benedizione divina ricevuta! (+${xp} PE, +${gold} mo)`
+      : `Preghiera completata — devozione ${Math.floor(devotion)}%. (+${xp} PE, +${gold} mo)`;
+    const logEntry = { day: char.day, text: logText, type: tier === 'benedizione' ? 'success' : 'partial' };
+    char.log.unshift(logEntry);
+    if (char.log.length > 500) char.log.pop();
+    const completedChallenges = this.checkChallenges('passive');
+    const levelUpResult = this.checkLevelUp();
+    this.save();
+    return { ok: true, xp, gold, fameXp, tier, devotion: Math.floor(devotion), completedChallenges, levelUpResult };
+  },
+
+  /* ─── Conversione (Chierico) ────────────────────────────── */
+  convRemaining() {
+    if (!this.state) return 0;
+    const cls = this.getClasse();
+    if (!cls.hasConversionTab) return 0;
+    const abilBonus = this.getEquipmentAbilities().conversionBonus || 0;
+    return Math.max(0, (cls.conversionPerDay || 1) + abilBonus - (this.state.conversionUsed || 0));
+  },
+
+  startConversion() {
+    if (this.convRemaining() <= 0) return { ok: false, reason: 'Hai già evangelizzato oggi.' };
+    this.state.conversionUsed = (this.state.conversionUsed || 0) + 1;
+    this.save();
+    return { ok: true };
+  },
+
+  applyConversionResult(score, blessedCount) {
+    const char = this.state.character;
+    let xp, gold, fameXp, tier;
+    const finalScore = Math.min(100, score + blessedCount * 8);
+    if (finalScore >= 82) {
+      const check = this.resolveCheck('cha', 14);
+      if (check.result === 'nat20') {
+        tier = 'benedizione'; xp = 240; gold = 80; fameXp = 16;
+      } else {
+        tier = 'alta'; xp = 160; gold = 50; fameXp = 10;
+      }
+    } else if (finalScore >= 52) {
+      tier = 'media'; xp = 95; gold = 28; fameXp = 6;
+    } else {
+      tier = 'bassa'; xp = 50; gold = 12; fameXp = 3;
+    }
+    xp   += char.level * 10;
+    gold += char.level * 3;
+    char.xp   += xp;
+    char.gold += gold;
+    char.fame += fameXp;
+    const logText = tier === 'benedizione'
+      ? `Missione di conversione: benedizione divina! (+${xp} PE, +${gold} mo)`
+      : `Missione di conversione — ${Math.floor(score)}% fedeli convertiti. (+${xp} PE, +${gold} mo)`;
+    const logEntry = { day: char.day, text: logText, type: tier === 'benedizione' ? 'success' : 'partial' };
+    char.log.unshift(logEntry);
+    if (char.log.length > 500) char.log.pop();
+    const completedChallenges = this.checkChallenges('passive');
+    const levelUpResult = this.checkLevelUp();
+    this.save();
+    return { ok: true, xp, gold, fameXp, tier, score: Math.floor(finalScore), blessedCount, completedChallenges, levelUpResult };
+  },
+
+  /* ─── Stalla (Paladino) ─────────────────────────────────── */
+  stableRemaining() {
+    if (!this.state) return 0;
+    const cls = this.getClasse();
+    if (!cls.hasStableTab) return 0;
+    const abilBonus = this.getEquipmentAbilities().stableBonus || 0;
+    return Math.max(0, (cls.stablePerDay || 1) + abilBonus - (this.state.stableUsed || 0));
+  },
+
+  startStable() {
+    if (this.stableRemaining() <= 0) return { ok: false, reason: 'Hai già accudito il cavallo oggi.' };
+    this.state.stableUsed = (this.state.stableUsed || 0) + 1;
+    this.save();
+    return { ok: true };
+  },
+
+  applyStableResult(score) {
+    const char = this.state.character;
+    let xp = 0, gold = 0, fameXp = 0, tier;
+    if (score >= 85) {
+      tier = 'eccellente'; xp = 200; gold = 65; fameXp = 12;
+    } else if (score >= 65) {
+      tier = 'buona'; xp = 130; gold = 40; fameXp = 8;
+    } else if (score >= 50) {
+      tier = 'sufficiente'; xp = 80; gold = 22; fameXp = 4;
+    } else {
+      tier = 'fallimento';
+    }
+    if (tier !== 'fallimento') {
+      xp   += char.level * 8;
+      gold += char.level * 2;
+      char.xp   += xp;
+      char.gold += gold;
+      char.fame += fameXp;
+    }
+    const logText = tier === 'eccellente'
+      ? `Cavalcatura accudita magnificamente! (+${xp} PE, +${gold} mo)`
+      : tier === 'fallimento'
+      ? `Il cavallo era insoddisfatto. Nessuna ricompensa.`
+      : `Cavalcatura accudita (${Math.floor(score)}%). (+${xp} PE, +${gold} mo)`;
+    const logEntry = { day: char.day, text: logText, type: tier === 'fallimento' ? 'fail' : 'partial' };
+    char.log.unshift(logEntry);
+    if (char.log.length > 500) char.log.pop();
+    const completedChallenges = this.checkChallenges('passive');
+    const levelUpResult = this.checkLevelUp();
+    this.save();
+    return { ok: true, xp, gold, fameXp, tier, score: Math.floor(score), completedChallenges, levelUpResult };
   },
 
   /* ─── Attacco Ladro ─────────────────────────────────────── */

@@ -119,8 +119,10 @@ const CLASSES = [
     proficiencies: ['str', 'con', 'dex'],
     avatar: 'guerriero.svg',
     hasPickpocket: false,
-    hasDiceGame: true,
+    hasDiceGame: false,
     hasDrinkingGame: true,
+    hasArena: true,
+    arenaPerDay: 2,
     startingGold: 50,
   },
   {
@@ -144,6 +146,8 @@ const CLASSES = [
     avatar: 'paladino.svg',
     hasPickpocket: false,
     hasDiceGame: false,
+    hasStableTab: true,
+    stablePerDay: 2,
     startingGold: 40,
   },
   {
@@ -167,6 +171,10 @@ const CLASSES = [
     avatar: 'chierico.svg',
     hasPickpocket: false,
     hasDiceGame: false,
+    hasPrayer: true,
+    hasConversionTab: true,
+    conversionPerDay: 2,
+    prayPerDay: 2,
     startingGold: 35,
   },
 ];
@@ -1678,6 +1686,789 @@ const DB = {
           failText: "Il ciclo è spezzato in troppi punti. Non sai da dove cominciare." }
       ],
       rewards: { xp: 400, goldMin: 300, goldMax: 600, fameXp: 55, itemChance: 0.65, itemTier: 3, ingredientChance: 1.0, ingredientTierMax: 4 }
+    },
+
+    /* ═══════════════  GUERRIERO — TIER 1 (0+ fama) ═══════════════ */
+    {
+      id: 401, tier: 1, minFame: 0, classMission: 'guerriero',
+      name: "Scorta al Mercante",
+      desc: "Un mercante deve attraversare una strada infestata di briganti. Ha bisogno di qualcuno capace di tenerli a bada.",
+      type: "scorta",
+      approaches: [
+        { label: "Intimidire i briganti", stat: "str", dc: 11,
+          successText: "La tua sola presenza fa vacillare i banditi. Si dileguano senza combattere.",
+          partialText: "Uno dei briganti prova fortuna. Lo metti a terra velocemente. Gli altri fuggono.",
+          failText: "I briganti erano in troppi. Il mercante perde parte della merce." },
+        { label: "Scortare con attenzione", stat: "dex", dc: 12,
+          successText: "Scegli il percorso sicuro e guidate senza incidenti.",
+          partialText: "Quasi perfetto, ma uno scontro minore ritarda la consegna.",
+          failText: "Un agguato ben organizzato sorprende anche te." }
+      ],
+      rewards: { xp: 65, goldMin: 10, goldMax: 22, fameXp: 5, itemChance: 0.1, itemTier: 1 }
+    },
+    {
+      id: 402, tier: 1, minFame: 0, classMission: 'guerriero',
+      name: "Il Bullo della Taverna",
+      desc: "Un bruto molesta i clienti di una locanda da settimane. L'oste ti chiede di metterlo a posto.",
+      type: "scontro",
+      approaches: [
+        { label: "Sfidarlo a duello diretto", stat: "str", dc: 12,
+          successText: "Lo butti fuori dalla porta con un solo colpo. Applausi dalla sala.",
+          partialText: "Uno scontro duro. Alla fine il bruto batte in ritirata, ammaccato.",
+          failText: "Era più forte del previsto. Uscite entrambi malconci." },
+        { label: "Resistere fino allo sfinimento", stat: "con", dc: 11,
+          successText: "Incassi ogni suo colpo sorridendo. Alla fine si stanca e smette.",
+          partialText: "Reggi a lungo ma alla fine chiamate patta. Il bruto smette comunque.",
+          failText: "Le sue dita di ferro ti piegano. Ritirata strategica." }
+      ],
+      rewards: { xp: 70, goldMin: 15, goldMax: 28, fameXp: 6, itemChance: 0.1, itemTier: 1 }
+    },
+    {
+      id: 403, tier: 1, minFame: 0, classMission: 'guerriero',
+      name: "Catturare il Disertore",
+      desc: "Un soldato ha abbandonato il suo posto durante la notte. Il comandante vuole che venga riportato.",
+      type: "recupero",
+      approaches: [
+        { label: "Inseguirlo e bloccarlo", stat: "str", dc: 11,
+          successText: "Lo raggiungi e lo immobilizzi prima che possa opporre resistenza.",
+          partialText: "Lo blocchi dopo una breve colluttazione. Entrambi con qualche graffio.",
+          failText: "Il disertore era più veloce. Si allontana nella foresta." },
+        { label: "Convincerlo a tornare", stat: "cha", dc: 12,
+          successText: "Le tue parole toccano il soldato. Torna di sua spontanea volontà.",
+          partialText: "Lo convinci a metà. Torna ma è riluttante.",
+          failText: "Non vuole sentire ragioni. Fugge senza guardare indietro." }
+      ],
+      rewards: { xp: 60, goldMin: 12, goldMax: 20, fameXp: 5, itemChance: 0.05, itemTier: 1 }
+    },
+    {
+      id: 404, tier: 1, minFame: 0, classMission: 'guerriero',
+      name: "La Guardia al Cancello",
+      desc: "Una guardia del cancello si è ammalata. Serve qualcuno che faccia il turno notturno senza cedere.",
+      type: "guardia",
+      approaches: [
+        { label: "Resistere al freddo e alla noia", stat: "con", dc: 11,
+          successText: "Stai sveglio tutta la notte, dritto come un soldato. Nessuno passa.",
+          partialText: "Quasi tutta la notte, ma un momento di distrazione lascia passare un contrabbandiere.",
+          failText: "Il freddo e la fatica ti vincono. Ti addormenti al posto." },
+        { label: "Mantenerti vigile con la disciplina", stat: "wis", dc: 12,
+          successText: "La tua mente disciplinata regge. All'alba sei ancora in piedi.",
+          partialText: "Reggi quasi tutto il turno. Una piccola violazione nel finale.",
+          failText: "La mente vaga. Perdi la concentrazione troppe volte." }
+      ],
+      rewards: { xp: 55, goldMin: 10, goldMax: 18, fameXp: 4, itemChance: 0.05, itemTier: 1 }
+    },
+    {
+      id: 405, tier: 1, minFame: 0, classMission: 'guerriero',
+      name: "Sopprimere una Rissa",
+      desc: "Una rissa tra due bande di operai sta diventando una battaglia. Prima che ci scappi il morto, qualcuno deve intervenire.",
+      type: "pacificazione",
+      approaches: [
+        { label: "Interporsi fisicamente", stat: "str", dc: 12,
+          successText: "Ti pianti in mezzo alla mischia come una roccia. Tutti si fermano.",
+          partialText: "Blocchi la rissa principale, ma qualche scontro minore continua ai margini.",
+          failText: "Vieni travolto dalla folla agitata. La rissa continua." },
+        { label: "Urlare un comando autorevole", stat: "cha", dc: 11,
+          successText: "La tua voce da campo di battaglia ferma tutti in un secondo.",
+          partialText: "Metà si fermano. Riesci a separare i gruppi principali.",
+          failText: "Nessuno ti ascolta nel caos." }
+      ],
+      rewards: { xp: 60, goldMin: 8, goldMax: 20, fameXp: 5, itemChance: 0.1, itemTier: 1 }
+    },
+
+    /* ═══════════════  GUERRIERO — TIER 2 (50+ fama) ═══════════════ */
+    {
+      id: 406, tier: 2, minFame: 50, classMission: 'guerriero',
+      name: "Respingere i Banditi della Foresta",
+      desc: "Una banda armata blocca la via commerciale principale. I mercanti della città ti ingaggiano per liberarla.",
+      type: "combattimento",
+      approaches: [
+        { label: "Assalto frontale", stat: "str", dc: 14,
+          successText: "Li travolgi come una tempesta. La strada è libera in pochi minuti.",
+          partialText: "Li disperdi ma alcuni fuggono verso il bosco. La strada è libera ma la minaccia non è eliminata.",
+          failText: "Erano in troppi e ben organizzati. Ritirata tattica." },
+        { label: "Resistere al loro contrattacco", stat: "con", dc: 14,
+          successText: "Incassi ogni loro colpo e rimani in piedi. Alla fine si arrendono.",
+          partialText: "Reggi a lungo. Quando si accorgono che non cadi, i più deboli fuggono.",
+          failText: "Il loro attacco coordinato è troppo. Non reggi." }
+      ],
+      rewards: { xp: 140, goldMin: 40, goldMax: 75, fameXp: 13, itemChance: 0.25, itemTier: 2 }
+    },
+    {
+      id: 407, tier: 2, minFame: 50, classMission: 'guerriero',
+      name: "Il Torneo della Città",
+      desc: "Il torneo annuale della città mette in palio un premio importante. Partecipa e vinci.",
+      type: "competizione",
+      approaches: [
+        { label: "Combattere con potenza bruta", stat: "str", dc: 15,
+          successText: "Ogni avversario cade sotto i tuoi colpi. Sei il campione indiscusso.",
+          partialText: "Arrivi in finale ma perdi per un punto. Secondo posto.",
+          failText: "Un avversario con una tecnica raffinata ti elimina ai quarti." },
+        { label: "Muoversi con precisione", stat: "dex", dc: 14,
+          successText: "La tua agilità sorprende tutti. Schivi e colpisci con perfezione.",
+          partialText: "Bel torneo, ma in semifinale un errore ti costa caro.",
+          failText: "Troppo lento nelle manovre. Eliminato precocemente." }
+      ],
+      rewards: { xp: 150, goldMin: 60, goldMax: 100, fameXp: 15, itemChance: 0.3, itemTier: 2 }
+    },
+    {
+      id: 408, tier: 2, minFame: 50, classMission: 'guerriero',
+      name: "Caccia al Troll",
+      desc: "Un troll ha saccheggiato tre fattorie. I contadini raccolgono una ricompensa per chiunque lo fermi.",
+      type: "caccia",
+      approaches: [
+        { label: "Affrontarlo a viso aperto", stat: "str", dc: 15,
+          successText: "Il troll era enorme, ma tu eri più determinato. Cade dopo un duro scontro.",
+          partialText: "Lo metti in fuga dopo una battaglia brutale. Non tornerà presto.",
+          failText: "Il troll era più grande del previsto. Fuggi prima che ti spezzi in due." },
+        { label: "Resistere alla sua furia", stat: "con", dc: 14,
+          successText: "Incassi ogni suo attacco finché non si stanca. Poi colpisci tu.",
+          partialText: "Reggi abbastanza da farlo esaurire. Missione compiuta, ammaccato.",
+          failText: "La sua furia non conosce fine. Non riesci a resistere abbastanza." }
+      ],
+      rewards: { xp: 160, goldMin: 55, goldMax: 90, fameXp: 14, itemChance: 0.3, itemTier: 2 }
+    },
+    {
+      id: 409, tier: 2, minFame: 50, classMission: 'guerriero',
+      name: "Difesa del Villaggio",
+      desc: "Un villaggio di confine sarà attaccato all'alba da una compagnia di razziatori. Organizza la difesa.",
+      type: "difesa",
+      approaches: [
+        { label: "Guidare la difesa in prima linea", stat: "str", dc: 14,
+          successText: "Inspiri i villagers con il tuo esempio. I razziatori vengono respinti.",
+          partialText: "Resistete, ma subite qualche perdita. I razziatori si ritirano.",
+          failText: "I razziatori sfondano il perimetro. Vieni travolto." },
+        { label: "Organizzare la resistenza tattica", stat: "wis", dc: 15,
+          successText: "Le tue posizioni difensive sono perfette. I razziatori cadono nelle trappole.",
+          partialText: "Il tuo piano funziona in parte. La difesa regge ma è stata dura.",
+          failText: "I razziatori ignorano i tuoi piani e attaccano dove non te l'aspetti." }
+      ],
+      rewards: { xp: 145, goldMin: 45, goldMax: 80, fameXp: 14, itemChance: 0.2, itemTier: 2 }
+    },
+    {
+      id: 410, tier: 2, minFame: 50, classMission: 'guerriero',
+      name: "Il Disertore Pericoloso",
+      desc: "Un ex soldato impazzito minaccia i civili. Va fermato prima che faccia del male.",
+      type: "neutralizzazione",
+      approaches: [
+        { label: "Immobilizzarlo con la forza", stat: "str", dc: 15,
+          successText: "Lo blocchi con una presa ferrea. Non può più fare del male.",
+          partialText: "Riesci a disarmarlo, ma sfugge alla presa. È ancora libero ma disarmato.",
+          failText: "La sua rabbia lo rende pericolosamente forte. Non riesci a bloccarlo." },
+        { label: "Stancarsi del suo attacco", stat: "con", dc: 14,
+          successText: "Lasci che si esaurisca contro di te. Poi lo neutralizzi facilmente.",
+          partialText: "Si stanca ma prima che tu possa agire, colpisce un civile. Ricompensa ridotta.",
+          failText: "Non reggi abbastanza. La sua furia non si esaurisce." }
+      ],
+      rewards: { xp: 135, goldMin: 40, goldMax: 70, fameXp: 12, itemChance: 0.2, itemTier: 2 }
+    },
+
+    /* ═══════════════  GUERRIERO — TIER 3 (150+ fama) ═══════════════ */
+    {
+      id: 411, tier: 3, minFame: 150, classMission: 'guerriero',
+      name: "Il Duello del Campione",
+      desc: "Il campione del regno sfida chiunque voglia guadagnare il titolo. Un'occasione unica.",
+      type: "duello",
+      approaches: [
+        { label: "Superarlo in potenza", stat: "str", dc: 17,
+          successText: "Un colpo finale impossibile da bloccare. Sei il nuovo campione.",
+          partialText: "Un duello memorabile. Perdi, ma la tua prestazione porta fama e rispetto.",
+          failText: "Il campione era di un altro livello. Sei sconfitto con disonore." },
+        { label: "Resistere e contrattaccare", stat: "con", dc: 17,
+          successText: "Incassi tutto finché non trova un'apertura. Poi lo colpisci dove fa male.",
+          partialText: "Un duello di resistenza. Alla fine non ce la fai, ma hai mostrato il tuo valore.",
+          failText: "Il campione ti supera anche in resistenza. Sconfitta totale." }
+      ],
+      rewards: { xp: 320, goldMin: 180, goldMax: 350, fameXp: 42, itemChance: 0.5, itemTier: 3 }
+    },
+    {
+      id: 412, tier: 3, minFame: 150, classMission: 'guerriero',
+      name: "L'Assedio della Fortezza",
+      desc: "Una fortezza nemica blocca il passo. Il generale ti chiede di guidare l'assalto.",
+      type: "assedio",
+      approaches: [
+        { label: "Guidare la carica attraverso le mura", stat: "str", dc: 18,
+          successText: "La tua carica sfonda il portone. La fortezza cade in un'ora.",
+          partialText: "Il portone cede, ma a un costo. Vittoria parziale con grosse perdite.",
+          failText: "Le mura erano troppo spesse. L'assalto si inceppa." },
+        { label: "Resistere al fuoco di sbarramento", stat: "con", dc: 17,
+          successText: "Avanzi tra i proiettili come se non esistessero. I tuoi uomini ti seguono.",
+          partialText: "Raggiungi le mura, ma le perdite sono elevate. Missione a metà.",
+          failText: "Il fuoco nemico è troppo intenso. Ritirata." }
+      ],
+      rewards: { xp: 350, goldMin: 220, goldMax: 420, fameXp: 45, itemChance: 0.55, itemTier: 3 }
+    },
+    {
+      id: 413, tier: 3, minFame: 150, classMission: 'guerriero',
+      name: "Il Drago della Montagna",
+      desc: "Un giovane drago ha fatto nido vicino alla città. Deve essere cacciato o ucciso.",
+      type: "caccia",
+      approaches: [
+        { label: "Affrontarlo in combattimento aperto", stat: "str", dc: 18,
+          successText: "Uno scontro di proporzioni leggendarie. Vinci. Il drago si ritira sconfitto.",
+          partialText: "Lo ferisci seriamente. Fugge ma tornerà. Ricompensa parziale.",
+          failText: "Il drago era troppo grande e potente. Fuggi bruciato." },
+        { label: "Resistere al suo alito di fuoco", stat: "con", dc: 17,
+          successText: "Sopporti le fiamme e avanzi. Il drago, incredulo, si ritira.",
+          partialText: "Reggi abbastanza da ferirlo. Si ritira, ma tornerà.",
+          failText: "Nessuno regge al fuoco di drago. Batti in ritirata ustionato." }
+      ],
+      rewards: { xp: 380, goldMin: 250, goldMax: 480, fameXp: 48, itemChance: 0.6, itemTier: 3 }
+    },
+    {
+      id: 414, tier: 3, minFame: 150, classMission: 'guerriero',
+      name: "Il Generale Traditore",
+      desc: "Un generale ha venduto segreti militari al nemico. Va fermato prima della battaglia decisiva.",
+      type: "neutralizzazione",
+      approaches: [
+        { label: "Affrontarlo e sconfiggerlo", stat: "str", dc: 17,
+          successText: "Il generale era un combattente esperto, ma non abbastanza. Catturato.",
+          partialText: "Lo ferisci gravemente. Non combatterà ma sfugge alla cattura.",
+          failText: "Il generale fugge protetto dalla sua guardia del corpo." },
+        { label: "Convincere la sua guardia a tradirlo", stat: "cha", dc: 17,
+          successText: "Le tue parole smascherano il traditore. La sua stessa guardia lo consegna.",
+          partialText: "Convinci metà della guardia. Il generale viene fermato ma con difficoltà.",
+          failText: "La guardia è troppo fedele. Non ascolteranno le tue parole." }
+      ],
+      rewards: { xp: 330, goldMin: 190, goldMax: 370, fameXp: 43, itemChance: 0.5, itemTier: 3 }
+    },
+    {
+      id: 415, tier: 3, minFame: 150, classMission: 'guerriero',
+      name: "L'Invasione degli Orchi",
+      desc: "Un esercito di orchi marcia verso la città. Sei l'unico abbastanza forte da guidare la resistenza.",
+      type: "battaglia",
+      approaches: [
+        { label: "Guidare la controffensiva", stat: "str", dc: 18,
+          successText: "Il tuo esempio trasforma la paura in furore. L'esercito degli orchi si spezza.",
+          partialText: "Respingete gli orchi, ma la città subisce danni. Vittoria a caro prezzo.",
+          failText: "L'orda era troppo numerosa. La difesa crolla." },
+        { label: "Resistere all'ultima linea", stat: "con", dc: 18,
+          successText: "Tieni la linea da solo finché non arrivano i rinforzi. Eroe della città.",
+          partialText: "Reggi abbastanza. I rinforzi arrivano tardi. Vittoria parziale.",
+          failText: "La tua resistenza cede prima dei rinforzi." }
+      ],
+      rewards: { xp: 420, goldMin: 300, goldMax: 600, fameXp: 55, itemChance: 0.65, itemTier: 3 }
+    },
+
+    /* ═══════════════  PALADINO — TIER 1 (0+ fama) ═══════════════ */
+    {
+      id: 501, tier: 1, minFame: 0, classMission: 'paladino',
+      name: "Proteggere i Pellegrini",
+      desc: "Un gruppo di pellegrini deve raggiungere un santuario attraverso strade pericolose. Hai giurato di accompagnarli.",
+      type: "scorta",
+      approaches: [
+        { label: "Guidarli con determinazione", stat: "str", dc: 11,
+          successText: "La tua presenza basta a tenere lontani i malviventi. Arrivano sani e salvi.",
+          partialText: "Un piccolo incidente sulla via, ma tutti arrivano al santuario.",
+          failText: "Un agguato divide il gruppo. Non riesci a proteggere tutti." },
+        { label: "Ispirare coraggio nei pellegrini", stat: "cha", dc: 11,
+          successText: "Le tue parole li incoraggiano. Camminano veloci e determinati, senza paura.",
+          partialText: "Li tieni uniti ma il percorso è più duro del previsto.",
+          failText: "La paura li paralizza. Non riesci a tenerli insieme." }
+      ],
+      rewards: { xp: 60, goldMin: 10, goldMax: 20, fameXp: 5, itemChance: 0.1, itemTier: 1 }
+    },
+    {
+      id: 502, tier: 1, minFame: 0, classMission: 'paladino',
+      name: "Esorcismo Minore",
+      desc: "Una casa è infestata da uno spirito malevolo. La famiglia è terrorizzata e ti chiede aiuto.",
+      type: "esorcismo",
+      approaches: [
+        { label: "Recitare il rito sacro", stat: "cha", dc: 12,
+          successText: "La tua voce risuona di fede. Lo spirito si dissolve tra grida di terrore.",
+          partialText: "Indebolisci lo spirito. Non può più nuocere, ma resta nell'ombra.",
+          failText: "Lo spirito non risponde al tuo rito. Troppo ostinato." },
+        { label: "Meditare per sentire la sua presenza", stat: "wis", dc: 11,
+          successText: "Lo trovi nel punto più buio della casa. Lo affronti e lo disperdi.",
+          partialText: "Localizzi lo spirito e lo indebolisci, ma non riesci a eliminarlo.",
+          failText: "I tuoi sensi sono ingannati. Lo spirito ti elide nel buio." }
+      ],
+      rewards: { xp: 65, goldMin: 12, goldMax: 25, fameXp: 5, itemChance: 0.1, itemTier: 1 }
+    },
+    {
+      id: 503, tier: 1, minFame: 0, classMission: 'paladino',
+      name: "Il Povero Truffato",
+      desc: "Un mercante disonesto ha derubato un anziano contadino. La legge non interviene. Tu sì.",
+      type: "giustizia",
+      approaches: [
+        { label: "Confrontarlo direttamente", stat: "cha", dc: 12,
+          successText: "Il tuo discorso sulla giustizia lo spaventa. Restituisce tutto con interessi.",
+          partialText: "Cede a metà. Il contadino recupera qualcosa.",
+          failText: "Il mercante ha buoni avvocati. Si nasconde dietro la legge." },
+        { label: "Costringerlo fisicamente", stat: "str", dc: 11,
+          successText: "Una mano sulla spalla e uno sguardo fisso. Capisce subito.",
+          partialText: "Lo intimidisci abbastanza da fargli restituire una parte.",
+          failText: "Ha delle guardie del corpo. Non puoi agire con la forza." }
+      ],
+      rewards: { xp: 55, goldMin: 10, goldMax: 18, fameXp: 4, itemChance: 0.05, itemTier: 1 }
+    },
+    {
+      id: 504, tier: 1, minFame: 0, classMission: 'paladino',
+      name: "La Bestia del Bosco",
+      desc: "Una bestia malvagia — non naturale — ha iniziato a terrorizzare i margini del bosco.",
+      type: "caccia",
+      approaches: [
+        { label: "Affrontarla con la forza", stat: "str", dc: 12,
+          successText: "Il tuo acciaio benedetto la trafigge. La bestia si dissolve in fumo nero.",
+          partialText: "La ferisci gravemente. Fugge nella foresta profonda.",
+          failText: "La bestia era più potente del previsto. Fuggi." },
+        { label: "Resistere alla sua aura di terrore", stat: "con", dc: 11,
+          successText: "La sua aura di paura non ti scalfisce. Avanzi e la elimini.",
+          partialText: "Reggi abbastanza da ferisci. Non la elimini, ma la respingi.",
+          failText: "L'aura di paura ti sopraffà. Non riesci ad avanzare." }
+      ],
+      rewards: { xp: 70, goldMin: 15, goldMax: 25, fameXp: 6, itemChance: 0.15, itemTier: 1 }
+    },
+    {
+      id: 505, tier: 1, minFame: 0, classMission: 'paladino',
+      name: "Il Malato Incurabile",
+      desc: "Un bambino è affetto da una malattia che i medici non riescono a curare. La famiglia crede che sia un male oscuro.",
+      type: "guarigione",
+      approaches: [
+        { label: "Imporre le mani con fede", stat: "cha", dc: 11,
+          successText: "La tua fede è pura e ardente. Il male abbandona il corpo del bambino.",
+          partialText: "Il bambino migliora significativamente. Non è guarito, ma la crisi è passata.",
+          failText: "Il male è troppo radicato per una guarigione semplice." },
+        { label: "Diagnosticare l'origine oscura", stat: "wis", dc: 12,
+          successText: "Individui la fonte del male: un amuleto maledetto nascosto sotto il letto. Distruggerlo guarisce il bambino.",
+          partialText: "Trovi qualcosa di sospetto, ma non riesci a eliminarlo completamente.",
+          failText: "Non riesci a identificare la causa. La malattia continua." }
+      ],
+      rewards: { xp: 60, goldMin: 8, goldMax: 20, fameXp: 5, itemChance: 0.1, itemTier: 1 }
+    },
+
+    /* ═══════════════  PALADINO — TIER 2 (50+ fama) ═══════════════ */
+    {
+      id: 506, tier: 2, minFame: 50, classMission: 'paladino',
+      name: "La Cripta Maledetta",
+      desc: "Non morti emergono ogni notte da una cripta abbandonata. Va sigillata una volta per tutte.",
+      type: "sigillo",
+      approaches: [
+        { label: "Combattere i non morti all'interno", stat: "str", dc: 14,
+          successText: "Li elimini tutti uno per uno. La cripta è pulita. La sigilli con una preghiera.",
+          partialText: "Ne elimini la maggior parte. La cripta è quasi silenziosa. Missione parziale.",
+          failText: "I non morti erano troppi e continui. Fuggi prima di essere sopraffatto." },
+        { label: "Resistere alla loro aura di morte", stat: "con", dc: 14,
+          successText: "La loro essenza corrotta non ti intacca. Avanzi e li disperdi tutti.",
+          partialText: "Reggi a lungo, ma l'aura ti indebolisce. Elimini solo il nucleo principale.",
+          failText: "L'aura di morte ti prosciuga le energie. Devi ritirar." }
+      ],
+      rewards: { xp: 150, goldMin: 50, goldMax: 85, fameXp: 14, itemChance: 0.3, itemTier: 2 }
+    },
+    {
+      id: 507, tier: 2, minFame: 50, classMission: 'paladino',
+      name: "Il Culto dell'Ombra",
+      desc: "Un culto oscuro ha infiltrato la nobiltà della città. Un informatore ha un elenco di nomi.",
+      type: "indagine",
+      approaches: [
+        { label: "Smascherarli con un discorso pubblico", stat: "cha", dc: 15,
+          successText: "La tua denuncia pubblica è impeccabile. I cultisti vengono arrestati prima di fuggire.",
+          partialText: "Alcuni scappano, ma i capi vengono fermati.",
+          failText: "Senza prove concrete, ti ignorano. I cultisti restano nell'ombra." },
+        { label: "Leggere i segni oscuri del culto", stat: "wis", dc: 14,
+          successText: "I simboli che usano ti rivelano i nomi e i luoghi. Informazioni perfette.",
+          partialText: "Identifichi metà dei cultisti. Informazioni parziali ma utili.",
+          failText: "I simboli sono troppo obliqui. Non riesci a decifrarli." }
+      ],
+      rewards: { xp: 155, goldMin: 55, goldMax: 95, fameXp: 14, itemChance: 0.3, itemTier: 2 }
+    },
+    {
+      id: 508, tier: 2, minFame: 50, classMission: 'paladino',
+      name: "Il Campione del Male",
+      desc: "Un campione al servizio di un signore oscuro sfida chiunque si opponga al suo padrone.",
+      type: "duello",
+      approaches: [
+        { label: "Affrontarlo in combattimento sacro", stat: "str", dc: 15,
+          successText: "La tua lama benedetta taglia attraverso la sua armatura maledetta. Vittoria.",
+          partialText: "Uno scontro durissimo. Alla fine cede, ma non senza lasciarti qualche ferita.",
+          failText: "Il campione era infuso di potere oscuro. Non riesci a superarlo." },
+        { label: "Resistere ai suoi colpi maledetti", stat: "con", dc: 14,
+          successText: "I suoi colpi feriscono il corpo ma non lo spirito. Tieni duro e contrattacchi.",
+          partialText: "Reggi abbastanza da farlo esaurire. Vittoria tirata.",
+          failText: "I suoi colpi portano con sé un veleno oscuro. Il corpo cede." }
+      ],
+      rewards: { xp: 160, goldMin: 60, goldMax: 100, fameXp: 15, itemChance: 0.3, itemTier: 2 }
+    },
+    {
+      id: 509, tier: 2, minFame: 50, classMission: 'paladino',
+      name: "Liberare i Prigionieri",
+      desc: "Un signore locale tiene prigionieri innocenti in un dungeon sotterraneo. Devono essere liberati.",
+      type: "liberazione",
+      approaches: [
+        { label: "Sfondare le porte del dungeon", stat: "str", dc: 14,
+          successText: "Le porte cedono sotto i tuoi pugni. I prigionieri escono liberi.",
+          partialText: "Liberi la metà dei prigionieri prima che le guardie intervengano.",
+          failText: "Le porte erano rinforzate con magia. Non cedono." },
+        { label: "Convincere le guardie ad aprire", stat: "cha", dc: 15,
+          successText: "Le tue parole sulla giustizia e la redenzione convincono anche le guardie a liberare i prigionieri.",
+          partialText: "Una guardia ti aiuta di nascosto. Metà dei prigionieri escono.",
+          failText: "Le guardie erano fanaticamente fedeli. Non cedono." }
+      ],
+      rewards: { xp: 145, goldMin: 50, goldMax: 85, fameXp: 13, itemChance: 0.25, itemTier: 2 }
+    },
+    {
+      id: 510, tier: 2, minFame: 50, classMission: 'paladino',
+      name: "Il Tempio Profanato",
+      desc: "Un tempio sacro è stato profanato da un gruppo di saccheggiatori. Deve essere purificato e i responsabili puniti.",
+      type: "purificazione",
+      approaches: [
+        { label: "Punire i saccheggiatori", stat: "str", dc: 14,
+          successText: "Li trovi ancora nel tempio. Li scacci con la forza e recuperi le reliquie.",
+          partialText: "Scacci i saccheggiatori ma alcune reliquie sono già sparite.",
+          failText: "I saccheggiatori erano pronti a combattere. Fuggi dopo uno scontro." },
+        { label: "Purificare l'energia del tempio", stat: "wis", dc: 15,
+          successText: "Con la preghiera giusta, la presenza oscura viene dissipata. Il tempio torna sacro.",
+          partialText: "Purificazione parziale. Il tempio si riprende lentamente.",
+          failText: "La profanazione era troppo profonda. La tua preghiera non basta." }
+      ],
+      rewards: { xp: 140, goldMin: 45, goldMax: 80, fameXp: 13, itemChance: 0.2, itemTier: 2 }
+    },
+
+    /* ═══════════════  PALADINO — TIER 3 (150+ fama) ═══════════════ */
+    {
+      id: 511, tier: 3, minFame: 150, classMission: 'paladino',
+      name: "Il Lich Minore",
+      desc: "Un lich di secondo grado ha risvegliato un esercito di non morti. Va fermato prima che distrugga la regione.",
+      type: "eliminazione",
+      approaches: [
+        { label: "Distruggerlo con la forza sacra", stat: "str", dc: 17,
+          successText: "La tua lama benedetta trova la sua phylactery. Il lich si dissolve per sempre.",
+          partialText: "Lo sconfiggi ma la phylactery sfugge. Il lich tornerà, ma non presto.",
+          failText: "Il lich era troppo potente. Fuggi tra i non morti." },
+        { label: "Resistere alla sua aura di terrore", stat: "con", dc: 17,
+          successText: "Il terrore emanato dal lich non ti tocca. Avanzi e lo colpisci.",
+          partialText: "Reggi abbastanza da ferirlo gravemente. Si ritira.",
+          failText: "L'aura paralizzante del lich ti immobilizza. Sconfitta." }
+      ],
+      rewards: { xp: 330, goldMin: 190, goldMax: 370, fameXp: 43, itemChance: 0.55, itemTier: 3 }
+    },
+    {
+      id: 512, tier: 3, minFame: 150, classMission: 'paladino',
+      name: "Il Piano Demoniaco",
+      desc: "Un demone maggiore è stato evocato e sta corrompendo la città. Solo una fede incrollabile può fermarlo.",
+      type: "esorcismo",
+      approaches: [
+        { label: "Sfidarlo con la parola divina", stat: "cha", dc: 18,
+          successText: "La tua fede è un'arma. Le parole divine lo bruciano dall'interno. Torna all'Abisso.",
+          partialText: "Lo indebolisci gravemente. Fugge nell'Abisso, ma non per sempre.",
+          failText: "Il demone ride delle tue parole. La tua fede vacilla." },
+        { label: "Leggere i segni del suo arrivo", stat: "wis", dc: 17,
+          successText: "Capisci il suo punto debole: un sigillo nascosto. Lo distruggi e il demone svanisce.",
+          partialText: "Trovi il sigillo ma riesci solo a danneggiarlo. Il demone si indebolisce.",
+          failText: "I suoi inganni confondono i tuoi sensi. Non trovi il sigillo." }
+      ],
+      rewards: { xp: 360, goldMin: 230, goldMax: 440, fameXp: 47, itemChance: 0.55, itemTier: 3 }
+    },
+    {
+      id: 513, tier: 3, minFame: 150, classMission: 'paladino',
+      name: "Il Signore dei Non Morti",
+      desc: "Un necromantico ha costruito un esercito di non morti e marcia sulla capitale.",
+      type: "battaglia",
+      approaches: [
+        { label: "Guidare la carica santa", stat: "str", dc: 18,
+          successText: "Il tuo esempio trascina l'esercito. Il necromantico viene sconfitto. I suoi non morti cadono.",
+          partialText: "Sconfiggi il necromantico ma l'esercito di non morti resiste ancora.",
+          failText: "La massa di non morti è soverchiante. La carica si spezza." },
+        { label: "Ispirar il coraggio nell'esercito", stat: "cha", dc: 17,
+          successText: "Il tuo discorso trasforma la paura in furore sacro. L'esercito avanza e vince.",
+          partialText: "Alcuni soldati ti seguono con fede. La battaglia è vinta a caro prezzo.",
+          failText: "La paura è troppo forte. L'esercito si sbanda." }
+      ],
+      rewards: { xp: 380, goldMin: 260, goldMax: 500, fameXp: 50, itemChance: 0.6, itemTier: 3 }
+    },
+    {
+      id: 514, tier: 3, minFame: 150, classMission: 'paladino',
+      name: "L'Eroe Caduto",
+      desc: "Un grande paladino del passato è diventato un anti-paladino. Deve essere fermato o redento.",
+      type: "duello",
+      approaches: [
+        { label: "Combatterlo e sconfiggerlo", stat: "str", dc: 17,
+          successText: "Uno scontro di leggenda. La tua spada è più giusta. Vinci.",
+          partialText: "Un duello pari. Alla fine cede, ferito ma vivo.",
+          failText: "Il suo potere oscuro era immenso. Non riesci a sconfiggerlo." },
+        { label: "Tentare la redenzione", stat: "cha", dc: 18,
+          successText: "Le tue parole toccano qualcosa che ancora esiste nell'oscurità. Si inginocchia. Redento.",
+          partialText: "Vacilla, ma il male è troppo radicato. Non è ancora pronto.",
+          failText: "Ride delle tue parole. Non c'è più nulla da redimere." }
+      ],
+      rewards: { xp: 340, goldMin: 200, goldMax: 380, fameXp: 44, itemChance: 0.55, itemTier: 3 }
+    },
+    {
+      id: 515, tier: 3, minFame: 150, classMission: 'paladino',
+      name: "La Guerra Santa",
+      desc: "Due fazioni religiose sono in guerra. Sei l'unico abbastanza rispettato da poter fermarle.",
+      type: "pace",
+      approaches: [
+        { label: "Imporre la pace con la forza", stat: "str", dc: 17,
+          successText: "Ti poni tra i due eserciti. Nessuno osa attaccare. Si ferma.",
+          partialText: "Fermi le file principali. Scontri minori continuano ai margini.",
+          failText: "Il fanatismo è troppo forte. Non ti ascoltano." },
+        { label: "Negoziare tra le fazioni", stat: "cha", dc: 18,
+          successText: "Le tue parole risuonano di verità e equità. Entrambe le fazioni depongono le armi.",
+          partialText: "Raggiungi una tregua. La guerra finisce ma la pace è fragile.",
+          failText: "Nessuna delle due fazioni vuole cedere. La guerra continua." }
+      ],
+      rewards: { xp: 400, goldMin: 280, goldMax: 550, fameXp: 52, itemChance: 0.65, itemTier: 3 }
+    },
+
+    /* ═══════════════  CHIERICO — TIER 1 (0+ fama) ═══════════════ */
+    {
+      id: 601, tier: 1, minFame: 0, classMission: 'chierico',
+      name: "Guarire il Malato",
+      desc: "Un bambino del villaggio è colpito da una febbre arcana. I medici non sanno cosa fare.",
+      type: "guarigione",
+      approaches: [
+        { label: "Pregare per la guarigione divina", stat: "wis", dc: 11,
+          successText: "La tua preghiera è ascoltata. Il bambino guarisce nel giro di ore.",
+          partialText: "La febbre scende ma non scompare del tutto. Il bambino è fuori pericolo.",
+          failText: "Il male arcano resiste alla tua preghiera." },
+        { label: "Convincere la famiglia della via giusta", stat: "cha", dc: 11,
+          successText: "Guidi la famiglia nel rituale corretto. La fede collettiva è più forte.",
+          partialText: "La famiglia collabora a metà. Il rituale funziona parzialmente.",
+          failText: "La famiglia non si fida di te. Il rituale fallisce senza il loro aiuto." }
+      ],
+      rewards: { xp: 60, goldMin: 10, goldMax: 20, fameXp: 5, itemChance: 0.1, itemTier: 1 }
+    },
+    {
+      id: 602, tier: 1, minFame: 0, classMission: 'chierico',
+      name: "Consolare i Dolenti",
+      desc: "Un lutto improvviso ha devastato una famiglia importante. Chiedono conforto spirituale.",
+      type: "supporto",
+      approaches: [
+        { label: "Offrire conforto con parole sacre", stat: "cha", dc: 11,
+          successText: "Le tue parole di fede portano pace autentica. La famiglia ti benedice.",
+          partialText: "Porti qualche conforto ma il dolore è ancora fresco.",
+          failText: "Il dolore è troppo recente. Le tue parole suonano vuote." },
+        { label: "Comprendere la profondità del dolore", stat: "wis", dc: 12,
+          successText: "Senti veramente il loro dolore. Questo li aiuta più di qualsiasi parola.",
+          partialText: "Li aiuti abbastanza da stabilizzarli.",
+          failText: "Non riesci a connetterti con la loro sofferenza." }
+      ],
+      rewards: { xp: 50, goldMin: 8, goldMax: 18, fameXp: 4, itemChance: 0.05, itemTier: 1 }
+    },
+    {
+      id: 603, tier: 1, minFame: 0, classMission: 'chierico',
+      name: "Il Simbolo Profanato",
+      desc: "Un simbolo sacro nel tempio della città è stato deturpato con segni oscuri. Va purificato.",
+      type: "purificazione",
+      approaches: [
+        { label: "Rituale di purificazione", stat: "wis", dc: 12,
+          successText: "Le preghiere risuonano nell'aria. I segni oscuri svaniscono come bruciati.",
+          partialText: "Rimuovi i segni visibili ma un'ombra residua persiste.",
+          failText: "I segni oscuri resistono al rituale. Servono componenti che non hai." },
+        { label: "Resistere all'energia maligna durante il rituale", stat: "con", dc: 11,
+          successText: "L'energia del simbolo profanato ti aggredisce, ma resisti. Il rituale si completa.",
+          partialText: "Reggi abbastanza da completare metà del rituale. Purificazione parziale.",
+          failText: "L'energia maligna ti respinge prima che tu possa finire." }
+      ],
+      rewards: { xp: 65, goldMin: 12, goldMax: 22, fameXp: 5, itemChance: 0.1, itemTier: 1 }
+    },
+    {
+      id: 604, tier: 1, minFame: 0, classMission: 'chierico',
+      name: "La Disputa tra Fedeli",
+      desc: "Una lite religiosa tra due famiglie sta degenerando. Il sacerdote anziano ti chiede di mediare.",
+      type: "mediazione",
+      approaches: [
+        { label: "Mediare con autorità spirituale", stat: "cha", dc: 12,
+          successText: "La tua autorità spirituale è indiscutibile. Entrambe le famiglie cedono.",
+          partialText: "Raggiungi una tregua temporanea. Il conflitto è attenuato.",
+          failText: "Nessuna delle due famiglie vuole cedere. La lite continua." },
+        { label: "Trovare la via spirituale corretta", stat: "wis", dc: 11,
+          successText: "Individui la radice teologica della disputa e la risolvi con un testo sacro preciso.",
+          partialText: "La tua interpretazione convince metà dei presenti.",
+          failText: "La questione è più complessa di quanto pensassi." }
+      ],
+      rewards: { xp: 55, goldMin: 8, goldMax: 18, fameXp: 4, itemChance: 0.05, itemTier: 1 }
+    },
+    {
+      id: 605, tier: 1, minFame: 0, classMission: 'chierico',
+      name: "Lo Spirito Irrequieto",
+      desc: "Lo spirito di un defunto non riesce a trovare pace. Disturba i vivi con rumori e visioni.",
+      type: "esorcismo",
+      approaches: [
+        { label: "Guidarlo verso l'aldilà", stat: "wis", dc: 11,
+          successText: "Parli allo spirito nella sua lingua. Lo accompagni in pace verso l'aldilà.",
+          partialText: "Lo calmi abbastanza da fermare le manifestazioni violente.",
+          failText: "Lo spirito non ascolta. Il suo tormento è troppo profondo." },
+        { label: "Resistere alla sua influenza perturbante", stat: "con", dc: 12,
+          successText: "La sua aura di disperazione non ti scalfisce. Puoi agire senza paura.",
+          partialText: "Reggi abbastanza da compiere un esorcismo parziale.",
+          failText: "L'aura perturbante spezza la tua concentrazione." }
+      ],
+      rewards: { xp: 60, goldMin: 10, goldMax: 20, fameXp: 5, itemChance: 0.1, itemTier: 1 }
+    },
+
+    /* ═══════════════  CHIERICO — TIER 2 (50+ fama) ═══════════════ */
+    {
+      id: 606, tier: 2, minFame: 50, classMission: 'chierico',
+      name: "La Pestilenza",
+      desc: "Una malattia arcana si diffonde nel quartiere povero. Va curata prima che diventi epidemia.",
+      type: "guarigione",
+      approaches: [
+        { label: "Canale di guarigione di massa", stat: "wis", dc: 14,
+          successText: "La tua preghiera si diffonde come luce. I malati guariscono uno dopo l'altro.",
+          partialText: "Curi i casi più gravi. La pestilenza rallenta ma non si ferma.",
+          failText: "La malattia è di origine oscura. La tua guarigione non attecchisce." },
+        { label: "Resistere alla malattia per curarli", stat: "con", dc: 14,
+          successText: "Ti esponi al contagio senza vacillare. Li curi uno per uno fino allo sfinimento.",
+          partialText: "Curi metà dei malati prima di cedere alla stanchezza.",
+          failText: "Il contagio è troppo virulento. Anche tu soccumbi parzialmente." }
+      ],
+      rewards: { xp: 155, goldMin: 55, goldMax: 90, fameXp: 14, itemChance: 0.25, itemTier: 2 }
+    },
+    {
+      id: 607, tier: 2, minFame: 50, classMission: 'chierico',
+      name: "Il Culto Oscuro nel Tempio",
+      desc: "Un culto ha infiltrato un tempio rispettato. I suoi riti oscuri corrompono i fedeli.",
+      type: "indagine",
+      approaches: [
+        { label: "Smascherarli davanti ai fedeli", stat: "cha", dc: 15,
+          successText: "La tua denuncia pubblica è devastante. I cultisti fuggono tra il disappunto della folla.",
+          partialText: "Smascherai i capi. I seguaci si disperdono.",
+          failText: "I cultisti hanno più influenza di quanto pensassi. Ti delegittimano." },
+        { label: "Leggere i segni della corruzione", stat: "wis", dc: 14,
+          successText: "I segni del culto sono ovunque per chi sa leggerli. Li documentate tutti.",
+          partialText: "Trovi prove di metà delle attività del culto.",
+          failText: "I segni sono stati nascosti con cura. Non trovi nulla di concreto." }
+      ],
+      rewards: { xp: 150, goldMin: 50, goldMax: 85, fameXp: 14, itemChance: 0.3, itemTier: 2 }
+    },
+    {
+      id: 608, tier: 2, minFame: 50, classMission: 'chierico',
+      name: "Spezzare la Maledizione",
+      desc: "Una famiglia nobile è afflitta da una maledizione generazionale. Dopo anni, vengono da te.",
+      type: "esorcismo",
+      approaches: [
+        { label: "Rituale di rottura della maledizione", stat: "wis", dc: 15,
+          successText: "Trovi il nodo arcano della maledizione e lo sciogli con un rituale di sei ore.",
+          partialText: "Indebolisci la maledizione. Non è spezzata ma gli effetti sono attenuati.",
+          failText: "La maledizione è di un ordine superiore. Il tuo rituale non basta." },
+        { label: "Persuadere la famiglia a collaborare", stat: "cha", dc: 14,
+          successText: "La loro fede collettiva moltiplica la tua. La maledizione si spezza.",
+          partialText: "Con la loro collaborazione parziale, riesci a ridurre gli effetti.",
+          failText: "La famiglia è scettica. Senza la loro fede, il rituale fallisce." }
+      ],
+      rewards: { xp: 145, goldMin: 50, goldMax: 85, fameXp: 13, itemChance: 0.25, itemTier: 2 }
+    },
+    {
+      id: 609, tier: 2, minFame: 50, classMission: 'chierico',
+      name: "Il Martire della Fede",
+      desc: "Un fedele viene condannato a morte ingiustamente per eresia. Devi intervenire.",
+      type: "giustizia",
+      approaches: [
+        { label: "Difenderlo pubblicamente", stat: "cha", dc: 14,
+          successText: "Il tuo discorso è irrefutabile. Il giudice annulla la condanna.",
+          partialText: "La condanna viene attenuata. Non morte ma esilio.",
+          failText: "Il giudice era corrotto. Le tue parole non cambiano nulla." },
+        { label: "Trovare prove teologiche della sua innocenza", stat: "wis", dc: 15,
+          successText: "I testi sacri supportano chiaramente la sua posizione. L'accusa cade.",
+          partialText: "Le prove sono inconcludenti ma bastano a rimandare la sentenza.",
+          failText: "L'interpretazione teologica è dibattuta. Non riesci a convincere." }
+      ],
+      rewards: { xp: 140, goldMin: 45, goldMax: 80, fameXp: 13, itemChance: 0.2, itemTier: 2 }
+    },
+    {
+      id: 610, tier: 2, minFame: 50, classMission: 'chierico',
+      name: "Il Demone Minore",
+      desc: "Un demone minore è stato evocato da uno stregone incompetente e ora vaga per la città.",
+      type: "esorcismo",
+      approaches: [
+        { label: "Esorcizzarlo con parole divine", stat: "cha", dc: 15,
+          successText: "Il nome divino che pronunci lo brucia nell'essenza. Torna all'Abisso urlando.",
+          partialText: "Lo indebolisci abbastanza da scacciarlo fuori città.",
+          failText: "Il demone è reticente al nome divino. Forse serviva un nome diverso." },
+        { label: "Resistere alla sua aura corruttrice", stat: "con", dc: 14,
+          successText: "La sua aura non ti tocca. Puoi agire liberamente e lo esorcizzi.",
+          partialText: "Reggi abbastanza da completare un esorcismo parziale.",
+          failText: "L'aura corruttrice ti sopraffà. Non puoi completare l'esorcismo." }
+      ],
+      rewards: { xp: 155, goldMin: 55, goldMax: 90, fameXp: 14, itemChance: 0.3, itemTier: 2 }
+    },
+
+    /* ═══════════════  CHIERICO — TIER 3 (150+ fama) ═══════════════ */
+    {
+      id: 611, tier: 3, minFame: 150, classMission: 'chierico',
+      name: "L'Epidemia Arcana",
+      desc: "Una malattia magica di origine demoniaca sta decimando la popolazione. Solo un intervento divino può fermarla.",
+      type: "guarigione",
+      approaches: [
+        { label: "Invocazione di guarigione divina di massa", stat: "wis", dc: 17,
+          successText: "La luce divina che invochi avvolge la città intera. La malattia svanisce.",
+          partialText: "La malattia rallenta drasticamente. Molti guariscono ma non tutti.",
+          failText: "La malattia è troppo oscura. La luce divina non la penetra." },
+        { label: "Resistere all'epidemia mentre curi", stat: "con", dc: 17,
+          successText: "Curi senza sosta per tre giorni, senza cedere. La malattia si ritira.",
+          partialText: "Curi i casi più critici prima di crollare. La situazione si stabilizza.",
+          failText: "L'epidemia ti sopraffà. Anche tu ti ammali." }
+      ],
+      rewards: { xp: 340, goldMin: 200, goldMax: 390, fameXp: 44, itemChance: 0.55, itemTier: 3 }
+    },
+    {
+      id: 612, tier: 3, minFame: 150, classMission: 'chierico',
+      name: "Il Concilio Demoniaco",
+      desc: "Sette demoni si sono riuniti per pianificare la corruzione di una nazione intera. Devi fermarli.",
+      type: "esorcismo",
+      approaches: [
+        { label: "Pronunciare la condanna divina", stat: "cha", dc: 18,
+          successText: "La tua voce risuona di potere divino. I sette demoni si torcono e vengono risucchiati nell'Abisso.",
+          partialText: "Ne disperdi cinque. Due fuggono prima della fine del rituale.",
+          failText: "I demoni si oppongono in coro. La tua voce si spezza." },
+        { label: "Leggere i loro nomi veri", stat: "wis", dc: 17,
+          successText: "Conosci i loro nomi veri. Li pronunci uno per uno. Cadono.",
+          partialText: "Trovi i nomi di quattro. Gli altri ti restano ignoti.",
+          failText: "I nomi veri erano nascosti in modi che non conosci." }
+      ],
+      rewards: { xp: 360, goldMin: 230, goldMax: 450, fameXp: 47, itemChance: 0.6, itemTier: 3 }
+    },
+    {
+      id: 613, tier: 3, minFame: 150, classMission: 'chierico',
+      name: "Il Sigillo del Dio Oscuro",
+      desc: "Un sigillo antico che imprigiona un dio oscuro si sta indebolendo. Va rinforzato prima che si rompa.",
+      type: "sigillo",
+      approaches: [
+        { label: "Rituale di rinforzo del sigillo", stat: "wis", dc: 18,
+          successText: "Sei ore di preghiera ininterrotta. Il sigillo torna forte come il primo giorno.",
+          partialText: "Il sigillo regge un altro anno. Non è abbastanza, ma guadagna tempo.",
+          failText: "La tua fede da sola non basta. Il sigillo continua a indebolirsi." },
+        { label: "Resistere all'influenza del dio che cerca di uscire", stat: "con", dc: 17,
+          successText: "Il dio oscuro ti assale la mente, ma non cedi. Il rituale si completa.",
+          partialText: "Reggi la maggior parte del rituale prima di essere scosso. Sigillo parzialmente rinforzato.",
+          failText: "Il dio oscuro ti spezza mentalmente prima che il rituale finisca." }
+      ],
+      rewards: { xp: 380, goldMin: 260, goldMax: 500, fameXp: 50, itemChance: 0.6, itemTier: 3 }
+    },
+    {
+      id: 614, tier: 3, minFame: 150, classMission: 'chierico',
+      name: "Il Profeta Falso",
+      desc: "Un falso profeta sta guidando migliaia di fedeli verso un sacrificio di massa. Va fermato.",
+      type: "confronto",
+      approaches: [
+        { label: "Sfidarlo in una disputa pubblica", stat: "cha", dc: 18,
+          successText: "Il tuo argomentare smontare ogni sua parola. I fedeli capiscono l'inganno.",
+          partialText: "Semini il dubbio in metà dei fedeli. La massa si dimezza.",
+          failText: "Il profeta è troppo carismatico. Le tue parole affogano nelle sue." },
+        { label: "Smascherarne la falsità con la saggezza divina", stat: "wis", dc: 17,
+          successText: "I segni divini che conosci rivelano le sue bugie chiaramente. Cade in disgrazia.",
+          partialText: "Smascherai alcune sue bugie. I fedeli più saggi ti credono.",
+          failText: "Il profeta aveva una risposta per ogni tua accusa." }
+      ],
+      rewards: { xp: 370, goldMin: 240, goldMax: 460, fameXp: 48, itemChance: 0.6, itemTier: 3 }
+    },
+    {
+      id: 615, tier: 3, minFame: 150, classMission: 'chierico',
+      name: "La Resurrezione del Male Antico",
+      desc: "Un'entità di millenni fa è vicina al risveglio. I rituali per tenerla sopita devono essere rinnovati.",
+      type: "sigillo",
+      approaches: [
+        { label: "Guidare il grande rituale di sigillatura", stat: "wis", dc: 18,
+          successText: "Guidi decine di sacerdoti in un rituale di dodici ore. Il male antico viene risigillato.",
+          partialText: "Il rituale funziona parzialmente. Il risveglio viene ritardato di decenni.",
+          failText: "Il male antico disturba il rituale. Non riesci a completarlo." },
+        { label: "Convincere i sacerdoti rivali a collaborare", stat: "cha", dc: 17,
+          successText: "Metti da parte ogni rivalità. I sacerdoti ti seguono. L'unità fa la forza.",
+          partialText: "La maggior parte collabora. Il rituale riesce a metà.",
+          failText: "Le rivalità religiose sono troppo profonde. Nessuno collabora." }
+      ],
+      rewards: { xp: 420, goldMin: 300, goldMax: 600, fameXp: 55, itemChance: 0.65, itemTier: 3 }
     }
   ],
 
@@ -1797,9 +2588,9 @@ const DB = {
       buyPrice: 300, sellPrice: 120 },
 
     { id: 404, name: "Calzoni del Vento",           slot: "legs", quality: 4, tier: 2, reqLevel: 6, reqStat: null,
-      desc: "Tessuti con fili di vento, permettono scatti sovrannaturali.",
+      desc: "Tessuti con fili di vento, permettono scatti sovrannaturali. La stamina garantisce un ingresso extra nell'Arena.",
       stats: { dex: 3, con: 2 },
-      abilities: { pickpocketBonus: 0, rerollBonus: 0, taxDiscount: 0, goldBonus: 0, xpBonus: 0 },
+      abilities: { pickpocketBonus: 0, rerollBonus: 0, taxDiscount: 0, goldBonus: 0, xpBonus: 0, arenaBonus: 1 },
       buyPrice: 750, sellPrice: 300 },
 
     { id: 405, name: "Calzoni della Notte Eterna",  slot: "legs", quality: 5, tier: 3, reqLevel: 8, reqStat: null,
@@ -1828,9 +2619,9 @@ const DB = {
       buyPrice: 390, sellPrice: 156 },
 
     { id: 504, name: "Manto dell'Eclissi",          slot: "torso", quality: 4, tier: 2, reqLevel: 6, reqStat: null,
-      desc: "Un mantello che assorbe la luce e fa scordare le tasse.",
+      desc: "Un mantello che assorbe la luce e fa scordare le tasse. La robustezza permette un round extra nell'Arena.",
       stats: { dex: 3, con: 3 },
-      abilities: { pickpocketBonus: 0, rerollBonus: 0, taxDiscount: 0.10, goldBonus: 0, xpBonus: 0 },
+      abilities: { pickpocketBonus: 0, rerollBonus: 0, taxDiscount: 0.10, goldBonus: 0, xpBonus: 0, arenaBonus: 1 },
       buyPrice: 980, sellPrice: 392 },
 
     { id: 505, name: "Mantello della Notte Eterna", slot: "torso", quality: 5, tier: 3, reqLevel: 8, reqStat: null,
@@ -1943,6 +2734,48 @@ const DB = {
       stats: { wis: 2, cha: 2 },
       abilities: { pickpocketBonus: 0, rerollBonus: 0, taxDiscount: 0, goldBonus: 0, xpBonus: 0, challengeBonus: 0, challengeRefresh: 1 },
       buyPrice: 480, sellPrice: 192 },
+
+    { id: 1001, name: "Spada dei Campioni dell'Arena", slot: "weapon", quality: 5, tier: 3, reqLevel: 9, reqStat: { key: 'str', val: 16 },
+      desc: "Forgiata per i guerrieri leggendari. Ogni fendente colpisce due volte e la resistenza garantisce un ingresso extra nell'Arena ogni giorno.",
+      stats: { str: 5, con: 3 },
+      abilities: { pickpocketBonus: 0, rerollBonus: 0, taxDiscount: 0, goldBonus: 0, xpBonus: 0, arenaBonus: 1, arenaDoubleHit: true },
+      buyPrice: 3200, sellPrice: 1280 },
+
+    { id: 1101, name: "Incensiere della Fede",    slot: "head",    quality: 2, tier: 1, reqLevel: 2, reqStat: null,
+      desc: "Il fumo sacro accelera la conversione dei fedeli vicini. +25% velocità di conversione.",
+      stats: { wis: 2, cha: 1 },
+      abilities: { pickpocketBonus: 0, rerollBonus: 0, taxDiscount: 0, goldBonus: 0, xpBonus: 0, conversionSpeed: 0.25 },
+      buyPrice: 180, sellPrice: 72 },
+
+    { id: 1102, name: "Abito del Missionario",    slot: "torso",   quality: 3, tier: 2, reqLevel: 4, reqStat: null,
+      desc: "L'abito sacro ispira una devozione aggiuntiva. Permette una missione di conversione extra al giorno.",
+      stats: { wis: 3, cha: 2 },
+      abilities: { pickpocketBonus: 0, rerollBonus: 0, taxDiscount: 0, goldBonus: 0, xpBonus: 0, conversionBonus: 1 },
+      buyPrice: 420, sellPrice: 168 },
+
+    { id: 1103, name: "Anello del Confessore",    slot: "ringLeft",quality: 3, tier: 2, reqLevel: 3, reqStat: null,
+      desc: "Inciso con preghiere antiche. Chi lo porta converte le anime con maggiore efficacia. +35% velocità.",
+      stats: { cha: 3 },
+      abilities: { pickpocketBonus: 0, rerollBonus: 0, taxDiscount: 0, goldBonus: 0, xpBonus: 0, conversionSpeed: 0.35 },
+      buyPrice: 320, sellPrice: 128 },
+
+    { id: 1104, name: "Croce Sacra",              slot: "weapon",  quality: 4, tier: 3, reqLevel: 6, reqStat: { key: 'cha', val: 14 },
+      desc: "Reliquia benedetta. Potenzia la conversione e permette una missione extra ogni giorno.",
+      stats: { wis: 3, cha: 4 },
+      abilities: { pickpocketBonus: 0, rerollBonus: 0, taxDiscount: 0, goldBonus: 0, xpBonus: 0, conversionBonus: 1, conversionSpeed: 0.20 },
+      buyPrice: 980, sellPrice: 392 },
+
+    { id: 1105, name: "Sella Incantata",          slot: "gloves",  quality: 2, tier: 1, reqLevel: 2, reqStat: null,
+      desc: "Una sella magica che facilita la cura del cavallo. Permette una sessione di stalla extra al giorno.",
+      stats: { str: 1, con: 2 },
+      abilities: { pickpocketBonus: 0, rerollBonus: 0, taxDiscount: 0, goldBonus: 0, xpBonus: 0, stableBonus: 1 },
+      buyPrice: 160, sellPrice: 64 },
+
+    { id: 1106, name: "Armatura del Cavaliere",   slot: "torso",   quality: 3, tier: 2, reqLevel: 4, reqStat: { key: 'str', val: 12 },
+      desc: "Corazza che porta fierezza e sicurezza in sella. Garantisce una sessione extra di cura della cavalcatura.",
+      stats: { str: 3, con: 3 },
+      abilities: { pickpocketBonus: 0, rerollBonus: 0, taxDiscount: 0, goldBonus: 0, xpBonus: 0, stableBonus: 1 },
+      buyPrice: 520, sellPrice: 208 },
 
     /* ── CONSUMABILI ──────────────────────────────────────── */
     // Istantanei

@@ -34,6 +34,45 @@ const App = {
   // Recipe modal
   _modalRecipeId:       null,
   _modalRecipeType:     null,
+  // Preghiera (Chierico)
+  _prayAnimFrameId:   null,
+  _prayLastFrameTs:   0,
+  _prayPhase:         'idle',
+  _prayTime:          0,
+  _prayTimeLeft:      18,
+  _prayDevotion:      0,
+  _praySphereX:       180,
+  _praySphereY:       220,
+  _prayParticles:     [],
+  _prayTrail:         [],
+  _prayGraceActive:   false,
+  _prayGraceTimer:    0,
+  _prayNextGrace:     3,
+  _prayGraceCaught:   0,
+  // Arena (Guerriero)
+  _arenaRunning:        false,
+  _arenaEnemies:        [],
+  _arenaSwings:         [],
+  _arenaParticles:      [],
+  _arenaKillCount:      0,
+  _arenaXpEarned:       0,
+  _arenaGoldEarned:     0,
+  _arenaTimeLeft:       30,
+  _arenaSpawnTimer:     0,
+  _arenaMouseX:         300,
+  _arenaMouseY:         190,
+  _arenaLastFrameTs:    0,
+  _arenaAnimFrameId:    null,
+  _arenaEnemyIdCtr:     0,
+  _arenaOver:           false,
+  _arenaDefeated:       false,
+  _ARENA_ENEMY_TYPES: [
+    { name: 'Goblin',  hp: 1,  color: '#9e9e9e', xpVal: 8,   goldVal: 3,  radius: 14, speed: 62 },
+    { name: 'Orco',    hp: 3,  color: '#4caf50', xpVal: 22,  goldVal: 9,  radius: 18, speed: 50 },
+    { name: 'Troll',   hp: 6,  color: '#2196f3', xpVal: 44,  goldVal: 20, radius: 22, speed: 38 },
+    { name: 'Drago',   hp: 9,  color: '#9c27b0', xpVal: 88,  goldVal: 42, radius: 26, speed: 28 },
+    { name: 'Lich',    hp: 12, color: '#ff9800', xpVal: 180, goldVal: 85, radius: 30, speed: 20 },
+  ],
   // Gara di Bevute (Guerriero)
   _drinkAnimFrameId:    null,
   _drinkLastTime:       null,
@@ -44,6 +83,16 @@ const App = {
     { speed: 1.2, targetSize: 0.28, label: 'Round 1 — Inizia la sfida!' },
     { speed: 1.8, targetSize: 0.20, label: 'Round 2 — Stai barcollando...' },
     { speed: 2.6, targetSize: 0.13, label: 'Finale! Concentrati!' },
+  ],
+
+  // Stalla (Paladino)
+  _stable: null,
+  _STABLE_LANES: [
+    { icon: '🌾', color: '#c9a84c', name: 'Paglia'   },
+    { icon: '🪮', color: '#52b788', name: 'Spazzola'  },
+    { icon: '🐎', color: '#e67e22', name: 'Corsa'     },
+    { icon: '🥕', color: '#e74c3c', name: 'Carote'    },
+    { icon: '💧', color: '#3498db', name: 'Acqua'     },
   ],
 
   /* ─── Bootstrap ───────────────────────────────────────── */
@@ -632,6 +681,128 @@ const App = {
     // Tab dice — render bet phase when entering
     document.querySelector('[data-bs-target="#tab-dice"]')?.addEventListener('shown.bs.tab', () => {
       if (this._dicePhase === 'bet') UI.renderDiceBetPhase();
+    });
+
+    // Prega — apri modal
+    document.getElementById('btn-prayer').addEventListener('click', () => {
+      if (!Game.state || Game.state.gameOver) return;
+      const res = Game.startPray();
+      if (!res.ok) { UI.toast(res.reason || 'Hai già pregato oggi.'); return; }
+      UI.refresh();
+      const modal = new bootstrap.Modal(document.getElementById('modal-prayer'));
+      modal.show();
+      setTimeout(() => this._startPrayerAnimation(), 300);
+    });
+
+    // Amen! — click durante la preghiera
+    document.getElementById('btn-amen').addEventListener('click', () => {
+      this._prayHandleAmen();
+    });
+
+    // Conversione — avvia gioco
+    document.getElementById('btn-conv-start').addEventListener('click', () => {
+      if (!Game.state || Game.state.gameOver) return;
+      const res = Game.startConversion();
+      if (!res.ok) { UI.toast(res.reason || 'Hai già evangelizzato oggi.'); return; }
+      UI.refresh();
+      this._startConversionGame();
+    });
+
+    // Conversione — chiudi risultato
+    document.getElementById('btn-conv-close').addEventListener('click', () => {
+      document.getElementById('conv-result').classList.add('d-none');
+      document.getElementById('conv-lobby').classList.remove('d-none');
+      UI.refresh();
+    });
+
+    // Stalla (Paladino) — apri modal
+    document.getElementById('btn-stable').addEventListener('click', () => {
+      if (!Game.state || Game.state.gameOver) return;
+      const res = Game.startStable();
+      if (!res.ok) { UI.toast(res.reason || 'Hai già accudito il cavallo oggi.'); return; }
+      UI.refresh();
+      document.getElementById('stable-game').classList.remove('d-none');
+      document.getElementById('stable-result').classList.add('d-none');
+      new bootstrap.Modal(document.getElementById('modal-stable')).show();
+      this._startStableGame();
+    });
+
+    // Stalla — chiudi modal: ferma animazione
+    document.getElementById('modal-stable').addEventListener('hidden.bs.modal', () => {
+      if (this._stable) { this._stable.running = false; cancelAnimationFrame(this._stable.rafId); }
+      UI.refresh();
+    });
+
+    // Stalla — bottoni lane
+    document.querySelectorAll('.btn-stable-lane').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const lane = parseInt(btn.dataset.lane);
+        this._stableHandleLaneClick(lane);
+      });
+    });
+
+    // Conversione — mouse sul canvas
+    document.getElementById('conv-canvas').addEventListener('mousemove', (e) => {
+      if (!this._conv || !this._conv.running) return;
+      const rect = e.target.getBoundingClientRect();
+      const scaleX = e.target.width  / rect.width;
+      const scaleY = e.target.height / rect.height;
+      this._conv.clericX = (e.clientX - rect.left) * scaleX;
+      this._conv.clericY = (e.clientY - rect.top)  * scaleY;
+    });
+    document.getElementById('conv-canvas').addEventListener('mouseleave', () => {
+      if (this._conv) { this._conv.clericX = -300; this._conv.clericY = -300; }
+    });
+
+    // Scaccia! — click durante la preghiera
+    document.getElementById('btn-scaccia').addEventListener('click', () => {
+      this._prayHandleScaccia();
+    });
+
+    // Chiusura modal preghiera
+    document.getElementById('modal-prayer').addEventListener('hidden.bs.modal', () => {
+      if (this._prayAnimFrameId) {
+        cancelAnimationFrame(this._prayAnimFrameId);
+        this._prayAnimFrameId = null;
+      }
+      this._prayPhase = 'idle';
+      document.getElementById('btn-scaccia').classList.add('d-none');
+      document.getElementById('btn-scaccia').classList.remove('demon-active');
+      UI.refresh();
+    });
+
+    // Arena — entra
+    document.getElementById('btn-arena-start').addEventListener('click', () => {
+      if (!Game.state || Game.state.gameOver) return;
+      this._startArena();
+    });
+
+    // Arena — gioca ancora
+    document.getElementById('btn-arena-again').addEventListener('click', () => {
+      document.getElementById('arena-result').classList.add('d-none');
+      document.getElementById('arena-lobby').classList.remove('d-none');
+      UI.renderArenaLobby();
+    });
+
+    // Arena — mouse tracking sul canvas
+    const arenaCanvas = document.getElementById('arena-canvas');
+    arenaCanvas.addEventListener('mousemove', (e) => {
+      const rect = arenaCanvas.getBoundingClientRect();
+      const scaleX = arenaCanvas.width  / rect.width;
+      const scaleY = arenaCanvas.height / rect.height;
+      this._arenaMouseX = (e.clientX - rect.left) * scaleX;
+      this._arenaMouseY = (e.clientY - rect.top)  * scaleY;
+    });
+
+    // Arena — click per colpire
+    arenaCanvas.addEventListener('click', (e) => {
+      if (!this._arenaRunning || this._arenaOver) return;
+      const rect = arenaCanvas.getBoundingClientRect();
+      const scaleX = arenaCanvas.width  / rect.width;
+      const scaleY = arenaCanvas.height / rect.height;
+      const cx = (e.clientX - rect.left) * scaleX;
+      const cy = (e.clientY - rect.top)  * scaleY;
+      this._arenaHandleClick(cx, cy);
     });
   },
 
@@ -1249,6 +1420,1334 @@ const App = {
         }, 800);
       }
     }
+  },
+
+  /* ─── Arena ─────────────────────────────────────────────── */
+  _startArena() {
+    const check = Game.startArena();
+    if (!check.ok) { UI.toast(check.reason || "Arena non disponibile."); return; }
+    const level = Game.state.character.level;
+    this._arenaRunning    = true;
+    this._arenaOver       = false;
+    this._arenaDefeated   = false;
+    this._arenaEnemies    = [];
+    this._arenaSwings     = [];
+    this._arenaParticles  = [];
+    this._arenaKillCount  = 0;
+    this._arenaXpEarned   = 0;
+    this._arenaGoldEarned = 0;
+    this._arenaTimeLeft   = 30 + level * 5;
+    this._arenaSpawnTimer = 0;
+    this._arenaEnemyIdCtr = 0;
+    this._arenaLastFrameTs = 0;
+
+    document.getElementById('arena-lobby').classList.add('d-none');
+    document.getElementById('arena-result').classList.add('d-none');
+    document.getElementById('arena-game-area').classList.remove('d-none');
+    this._updateArenaHUD();
+
+    if (this._arenaAnimFrameId) cancelAnimationFrame(this._arenaAnimFrameId);
+    this._arenaAnimFrameId = requestAnimationFrame((ts) => this._arenaLoop(ts));
+  },
+
+  _arenaGetSpawnPool() {
+    const k = this._arenaKillCount;
+    const all = this._ARENA_ENEMY_TYPES;
+    if (k < 5)  return all.slice(0, 1);
+    if (k < 12) return all.slice(0, 2);
+    if (k < 25) return all.slice(0, 3);
+    if (k < 45) return all.slice(0, 4);
+    return all;
+  },
+
+  _arenaSpawnEnemy() {
+    const pool = this._arenaGetSpawnPool();
+    const type = pool[Math.floor(Math.random() * pool.length)];
+    const W = 600, H = 380;
+    const side = Math.floor(Math.random() * 4);
+    let x, y;
+    if (side === 0) { x = Math.random() * W; y = -type.radius; }
+    else if (side === 1) { x = W + type.radius; y = Math.random() * H; }
+    else if (side === 2) { x = Math.random() * W; y = H + type.radius; }
+    else { x = -type.radius; y = Math.random() * H; }
+    this._arenaEnemies.push({
+      id: this._arenaEnemyIdCtr++,
+      type,
+      x, y,
+      hp: type.hp,
+      maxHp: type.hp,
+    });
+  },
+
+  _arenaLoop(ts) {
+    if (!this._arenaRunning) return;
+    const dt = this._arenaLastFrameTs ? Math.min((ts - this._arenaLastFrameTs) / 1000, 0.1) : 0.016;
+    this._arenaLastFrameTs = ts;
+
+    const W = 600, H = 380, cx = W / 2, cy = H / 2;
+
+    // Timer
+    this._arenaTimeLeft -= dt;
+    if (this._arenaTimeLeft <= 0) {
+      this._arenaTimeLeft = 0;
+      this._arenaEndGame(false);
+      return;
+    }
+
+    // Spawn — interval decreases with kills, multiple spawns at high counts
+    const spawnInterval = Math.max(0.3, 1.4 - this._arenaKillCount * 0.02);
+    this._arenaSpawnTimer += dt;
+    if (this._arenaSpawnTimer >= spawnInterval) {
+      this._arenaSpawnTimer = 0;
+      this._arenaSpawnEnemy();
+      // Extra spawn at higher kill counts
+      if (this._arenaKillCount >= 20 && Math.random() < 0.45) this._arenaSpawnEnemy();
+      if (this._arenaKillCount >= 40 && Math.random() < 0.35) this._arenaSpawnEnemy();
+    }
+
+    // Move enemies toward center
+    for (const e of this._arenaEnemies) {
+      const dx = cx - e.x, dy = cy - e.y;
+      const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+      e.x += (dx / dist) * e.type.speed * dt;
+      e.y += (dy / dist) * e.type.speed * dt;
+      // Check if reached warrior
+      if (dist < 28) {
+        this._arenaEndGame(true);
+        return;
+      }
+    }
+
+    // Update particles
+    for (const p of this._arenaParticles) {
+      p.x += p.vx * dt;
+      p.y += p.vy * dt;
+      p.life -= dt;
+    }
+    this._arenaParticles = this._arenaParticles.filter(p => p.life > 0);
+
+    // Update swings
+    for (const s of this._arenaSwings) s.life -= dt;
+    this._arenaSwings = this._arenaSwings.filter(s => s.life > 0);
+
+    this._arenaRender();
+    this._updateArenaHUD();
+    this._arenaAnimFrameId = requestAnimationFrame((ts2) => this._arenaLoop(ts2));
+  },
+
+  _arenaRender() {
+    const canvas = document.getElementById('arena-canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height;
+    const cx = W / 2, cy = H / 2;
+
+    // Background
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = '#0a0a1a';
+    ctx.fillRect(0, 0, W, H);
+
+    // Arena circle
+    const grad = ctx.createRadialGradient(cx, cy, 20, cx, cy, 200);
+    grad.addColorStop(0, 'rgba(139,69,19,0.18)');
+    grad.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, W, H);
+
+    ctx.strokeStyle = 'rgba(201,168,76,0.15)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.arc(cx, cy, 160, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Particles
+    for (const p of this._arenaParticles) {
+      ctx.globalAlpha = Math.max(0, p.life / p.maxLife);
+      ctx.fillStyle = p.color;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+
+    // Swings
+    for (const s of this._arenaSwings) {
+      const alpha = s.life / 0.25;
+      ctx.strokeStyle = `rgba(255,220,100,${alpha * 0.7})`;
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.radius, s.startAngle, s.endAngle);
+      ctx.stroke();
+    }
+
+    // Enemies
+    for (const e of this._arenaEnemies) {
+      // Outline
+      ctx.strokeStyle = e.type.color;
+      ctx.lineWidth = 3;
+      ctx.shadowColor = e.type.color;
+      ctx.shadowBlur = 10;
+      ctx.beginPath();
+      ctx.arc(e.x, e.y, e.type.radius, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+
+      // Fill
+      ctx.fillStyle = e.type.color + '33';
+      ctx.fill();
+
+      // HP dots arranged in a circle around the enemy
+      {
+        const total    = e.maxHp;
+        const dotR     = total > 6 ? 2.5 : 3;
+        const orbitR   = e.type.radius + 9;
+        const angleStep = (Math.PI * 2) / total;
+        for (let i = 0; i < total; i++) {
+          const angle = -Math.PI / 2 + i * angleStep;
+          const dx = Math.cos(angle) * orbitR;
+          const dy = Math.sin(angle) * orbitR;
+          ctx.fillStyle = i < e.hp ? e.type.color : 'rgba(40,40,40,0.8)';
+          ctx.strokeStyle = i < e.hp ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.15)';
+          ctx.lineWidth = 0.5;
+          ctx.beginPath();
+          ctx.arc(e.x + dx, e.y + dy, dotR, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+        }
+      }
+
+      // Emoji label
+      ctx.font = `${e.type.radius}px serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#fff';
+      const icons = ['👺','👹','🧌','🐲','💀'];
+      const idx = this._ARENA_ENEMY_TYPES.indexOf(e.type);
+      ctx.fillText(icons[idx] || '👹', e.x, e.y);
+    }
+
+    // Warrior at center
+    ctx.font = '28px serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('⚔️', cx, cy);
+
+    // Sword cursor
+    ctx.font = '24px serif';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'top';
+    ctx.fillText('🗡️', this._arenaMouseX - 4, this._arenaMouseY - 20);
+  },
+
+  _arenaHandleClick(cx, cy) {
+    // Find closest enemy within hit range
+    let closest = null, closestDist = Infinity;
+    for (const e of this._arenaEnemies) {
+      const dx = e.x - cx, dy = e.y - cy;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < e.type.radius + 22 && dist < closestDist) {
+        closest = e;
+        closestDist = dist;
+      }
+    }
+
+    // Swing animation
+    const isDouble = Game.getEquipmentAbilities().arenaDoubleHit;
+    this._arenaSwings.push({ x: cx, y: cy, radius: isDouble ? 48 : 36, startAngle: -0.8, endAngle: 0.8, life: 0.25, double: isDouble });
+
+    if (closest) {
+      const doubleHit = Game.getEquipmentAbilities().arenaDoubleHit;
+      closest.hp -= doubleHit ? 2 : 1;
+      if (closest.hp <= 0) {
+        // Spawn particles
+        for (let i = 0; i < 12; i++) {
+          const angle = (i / 12) * Math.PI * 2;
+          const speed = 60 + Math.random() * 80;
+          this._arenaParticles.push({
+            x: closest.x, y: closest.y,
+            vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed,
+            r: 3 + Math.random() * 3,
+            color: closest.type.color,
+            life: 0.5 + Math.random() * 0.3,
+            maxLife: 0.8,
+          });
+        }
+        this._arenaEnemies = this._arenaEnemies.filter(e => e.id !== closest.id);
+        this._arenaKillCount++;
+        this._arenaXpEarned   += closest.type.xpVal;
+        this._arenaGoldEarned += closest.type.goldVal;
+      }
+    }
+  },
+
+  _arenaEndGame(defeated) {
+    this._arenaRunning  = false;
+    this._arenaOver     = true;
+    this._arenaDefeated = defeated;
+    if (this._arenaAnimFrameId) {
+      cancelAnimationFrame(this._arenaAnimFrameId);
+      this._arenaAnimFrameId = null;
+    }
+    // Final render
+    this._arenaRender();
+
+    const result = Game.applyArenaResult(
+      this._arenaKillCount,
+      this._arenaXpEarned,
+      this._arenaGoldEarned,
+      !defeated
+    );
+
+    document.getElementById('arena-game-area').classList.add('d-none');
+    UI.showArenaResult(result);
+    UI.refresh();
+    if (result.levelUpResult) this._triggerLevelUp(result.levelUpResult);
+  },
+
+  _updateArenaHUD() {
+    const timerEl = document.getElementById('arena-hud-timer');
+    const killsEl = document.getElementById('arena-hud-kills');
+    const goldEl  = document.getElementById('arena-hud-gold');
+    if (timerEl) timerEl.textContent = Math.ceil(this._arenaTimeLeft);
+    if (killsEl) killsEl.textContent = this._arenaKillCount;
+    if (goldEl)  goldEl.textContent  = this._arenaGoldEarned;
+  },
+
+  /* ─── Conversione (Chierico) ─────────────────────────────── */
+  _startConversionGame() {
+    const canvas = document.getElementById('conv-canvas');
+    if (!canvas) return;
+    const W = canvas.width, H = canvas.height;
+    const N_FEDELI  = 26;
+    const N_DIAVOLI = 2;
+
+    // Spawn fedeli with min-distance check
+    const fedeli = [];
+    let attempts = 0;
+    while (fedeli.length < N_FEDELI && attempts < 3000) {
+      attempts++;
+      const x = 30 + Math.random() * (W - 60);
+      const y = 30 + Math.random() * (H - 60);
+      const tooClose = fedeli.some(f => Math.hypot(f.x - x, f.y - y) < 26);
+      if (!tooClose) fedeli.push({
+        x, y, conv: 0, blessed: false, blessTimer: 0, pulseT: Math.random() * Math.PI * 2,
+        superBlessed: false, fullConvTimer: 0,
+        vx: 0, vy: 0,
+      });
+    }
+
+    // Spawn diavoli at edges
+    const diavoli = [];
+    for (let i = 0; i < N_DIAVOLI; i++) {
+      const side = Math.floor(Math.random() * 4);
+      let dx, dy;
+      if (side === 0) { dx = Math.random() * W; dy = 12; }
+      else if (side === 1) { dx = W - 12; dy = Math.random() * H; }
+      else if (side === 2) { dx = Math.random() * W; dy = H - 12; }
+      else { dx = 12; dy = Math.random() * H; }
+      const angle = Math.random() * Math.PI * 2;
+      diavoli.push({ x: dx, y: dy, vx: Math.cos(angle) * 42, vy: Math.sin(angle) * 42,
+                     targetTimer: 0, pulseT: Math.random() * Math.PI * 2,
+                     convProgress: 0, convFullTimer: 0, dying: false, dyingTimer: 0 });
+    }
+
+    this._conv = {
+      running: true, time: 0, timeLeft: 30, lastTs: 0, rafId: null,
+      fedeli, diavoli, W, H,
+      clericX: -300, clericY: -300,
+      blessedCount: 0, blessCheckTimer: 0,
+      nextSpawnTimer: 10, spawnCount: 0,
+    };
+
+    document.getElementById('conv-lobby').classList.add('d-none');
+    document.getElementById('conv-result').classList.add('d-none');
+    document.getElementById('conv-game').classList.remove('d-none');
+    document.getElementById('conv-total').textContent = N_FEDELI;
+    document.getElementById('conv-timer').textContent = '30';
+    document.getElementById('conv-count').textContent = '0';
+    document.getElementById('conv-blessed').textContent = '0';
+    document.getElementById('conv-hint').textContent = 'Muovi il mouse sul canvas per guidare il Chierico';
+
+    if (this._conv.rafId) cancelAnimationFrame(this._conv.rafId);
+    this._conv.rafId = requestAnimationFrame((ts) => this._convLoop(ts));
+  },
+
+  _convLoop(ts) {
+    const c = this._conv;
+    if (!c || !c.running) return;
+    const dt = c.lastTs ? Math.min((ts - c.lastTs) / 1000, 0.1) : 0.016;
+    c.lastTs = ts;
+    c.time     += dt;
+    c.timeLeft -= dt;
+
+    if (c.timeLeft <= 0) {
+      c.timeLeft = 0;
+      this._endConversionGame();
+      return;
+    }
+
+    const { W, H, fedeli, diavoli, clericX, clericY } = c;
+    const abilSpeed  = Game.getEquipmentAbilities().conversionSpeed || 0;
+    const speedMult  = 1 + abilSpeed;
+    const CONV_R       = 62;
+    const CONV_RATE    = 0.52 * speedMult;
+    const DECAY_RATE   = 0.12;
+    const BLESS_R      = 46;
+    const BLESS_RATE   = 0.20 * speedMult;
+    const DEVIL_R      = 72;
+    const DEVIL_DRAIN  = 0.38;
+    const CLERIC_DEVIL_CONV_R    = 55;
+    const CLERIC_DEVIL_CONV_RATE = 0.28 * speedMult;
+    const DEVIL_CONV_DECAY       = 0.06;
+    const SUPER_BLESS_SPEED      = 24; // px/s slow wander
+    const FULL_CONV_THRESHOLD    = 2.0; // seconds at max before superBlessed
+
+    // Periodic enemy spawning every 10s (up to 3 extra)
+    if (c.spawnCount < 3) {
+      c.nextSpawnTimer -= dt;
+      if (c.nextSpawnTimer <= 0) {
+        c.nextSpawnTimer = 10 + Math.random() * 3;
+        c.spawnCount++;
+        const side = Math.floor(Math.random() * 4);
+        let dx, dy;
+        if (side === 0) { dx = Math.random() * W; dy = 12; }
+        else if (side === 1) { dx = W - 12; dy = Math.random() * H; }
+        else if (side === 2) { dx = Math.random() * W; dy = H - 12; }
+        else { dx = 12; dy = Math.random() * H; }
+        const angle = Math.random() * Math.PI * 2;
+        diavoli.push({ x: dx, y: dy, vx: Math.cos(angle) * 40, vy: Math.sin(angle) * 40,
+                       targetTimer: 0, pulseT: Math.random() * Math.PI * 2,
+                       convProgress: 0, convFullTimer: 0, dying: false, dyingTimer: 0 });
+        document.getElementById('conv-hint').textContent = `😈 Un nuovo demone è entrato nella piazza! (${diavoli.length} totali)`;
+        setTimeout(() => {
+          if (c.running) document.getElementById('conv-hint').textContent = '';
+        }, 1800);
+      }
+    }
+
+    // Update diavoli
+    for (let di = diavoli.length - 1; di >= 0; di--) {
+      const d = diavoli[di];
+      if (d.dying) {
+        d.dyingTimer += dt;
+        if (d.dyingTimer >= 0.6) { diavoli.splice(di, 1); continue; }
+        continue;
+      }
+      d.targetTimer += dt;
+      if (d.targetTimer > 2.0 + Math.random() * 1.5) {
+        d.targetTimer = 0;
+        const angle = Math.random() * Math.PI * 2;
+        const speed = 35 + Math.random() * 22;
+        d.vx = Math.cos(angle) * speed;
+        d.vy = Math.sin(angle) * speed;
+      }
+      d.x += d.vx * dt;
+      d.y += d.vy * dt;
+      if (d.x < 14)     { d.x = 14;     d.vx = Math.abs(d.vx); }
+      if (d.x > W - 14) { d.x = W - 14; d.vx = -Math.abs(d.vx); }
+      if (d.y < 14)     { d.y = 14;     d.vy = Math.abs(d.vy); }
+      if (d.y > H - 14) { d.y = H - 14; d.vy = -Math.abs(d.vy); }
+      d.pulseT += dt * 3.5;
+
+      // Cleric can convert devil
+      const distToCleric = Math.hypot(d.x - clericX, d.y - clericY);
+      if (distToCleric <= CLERIC_DEVIL_CONV_R) {
+        d.convProgress = Math.min(1, d.convProgress + CLERIC_DEVIL_CONV_RATE * dt);
+      } else {
+        d.convProgress = Math.max(0, d.convProgress - DEVIL_CONV_DECAY * dt);
+        d.convFullTimer = 0;
+      }
+
+      if (d.convProgress >= 1) {
+        d.convFullTimer += dt;
+        if (d.convFullTimer >= 2.0) {
+          // Devil is converted and disappears!
+          d.dying = true;
+          d.dyingTimer = 0;
+          document.getElementById('conv-hint').textContent = '✝️ Demone sconfitto dalla fede!';
+          setTimeout(() => { if (c.running) document.getElementById('conv-hint').textContent = ''; }, 1600);
+        }
+      } else {
+        d.convFullTimer = 0;
+      }
+    }
+
+    // Update fedeli
+    let convertedCount = 0;
+    for (const f of fedeli) {
+      f.pulseT += dt * 2.2;
+
+      // SuperBlessed movement (slow wander)
+      if (f.superBlessed) {
+        if (!f.vx && !f.vy) {
+          const angle = Math.random() * Math.PI * 2;
+          f.vx = Math.cos(angle) * SUPER_BLESS_SPEED;
+          f.vy = Math.sin(angle) * SUPER_BLESS_SPEED;
+        }
+        f.x += f.vx * dt;
+        f.y += f.vy * dt;
+        if (f.x < 14)     { f.x = 14;     f.vx = Math.abs(f.vx); }
+        if (f.x > W - 14) { f.x = W - 14; f.vx = -Math.abs(f.vx); }
+        if (f.y < 14)     { f.y = 14;     f.vy = Math.abs(f.vy); }
+        if (f.y > H - 14) { f.y = H - 14; f.vy = -Math.abs(f.vy); }
+        // Occasionally change direction
+        if (Math.random() < dt * 0.4) {
+          const angle = Math.random() * Math.PI * 2;
+          f.vx = Math.cos(angle) * SUPER_BLESS_SPEED;
+          f.vy = Math.sin(angle) * SUPER_BLESS_SPEED;
+        }
+        // SuperBlessed: no decay, convert neighbors
+        f.conv = 1.0;
+        for (const other of fedeli) {
+          if (other === f || other.superBlessed) continue;
+          if (Math.hypot(other.x - f.x, other.y - f.y) <= BLESS_R) {
+            other.conv = Math.min(1, other.conv + BLESS_RATE * 1.4 * dt);
+          }
+        }
+      } else {
+        const distCleric = Math.hypot(f.x - clericX, f.y - clericY);
+        if (distCleric <= CONV_R) {
+          f.conv = Math.min(1, f.conv + CONV_RATE * dt);
+        } else if (!f.blessed) {
+          f.conv = Math.max(0, f.conv - DECAY_RATE * dt);
+          f.fullConvTimer = 0;
+        }
+
+        // Track time at full conversion (near cleric)
+        if (f.conv >= 0.999 && distCleric <= CONV_R) {
+          f.fullConvTimer = (f.fullConvTimer || 0) + dt;
+          if (f.fullConvTimer >= FULL_CONV_THRESHOLD && !f.superBlessed) {
+            f.superBlessed = true;
+            f.conv = 1.0;
+            f.blessed = false; f.blessTimer = 0;
+            const angle = Math.random() * Math.PI * 2;
+            f.vx = Math.cos(angle) * SUPER_BLESS_SPEED;
+            f.vy = Math.sin(angle) * SUPER_BLESS_SPEED;
+            c.blessedCount++;
+            document.getElementById('conv-blessed').textContent = c.blessedCount;
+            document.getElementById('conv-hint').textContent = '🌟 Un fedele è stato completamente illuminato!';
+            setTimeout(() => { if (c.running) document.getElementById('conv-hint').textContent = ''; }, 1600);
+          }
+        } else if (f.conv < 0.999) {
+          f.fullConvTimer = 0;
+        }
+
+        // Blessed fedeli convert neighbours
+        if (f.blessed) {
+          for (const other of fedeli) {
+            if (other === f || other.superBlessed) continue;
+            if (Math.hypot(other.x - f.x, other.y - f.y) <= BLESS_R) {
+              other.conv = Math.min(1, other.conv + BLESS_RATE * dt);
+            }
+          }
+          f.blessTimer -= dt;
+          if (f.blessTimer <= 0) { f.blessed = false; f.blessTimer = 0; }
+        }
+      }
+
+      // Devil drain (doesn't affect superBlessed)
+      if (!f.superBlessed) {
+        for (const d of diavoli) {
+          if (d.dying) continue;
+          const distDevil = Math.hypot(f.x - d.x, f.y - d.y);
+          if (distDevil <= DEVIL_R) {
+            f.conv = Math.max(0, f.conv - DEVIL_DRAIN * dt * (1 - distDevil / DEVIL_R));
+            if (f.blessed) { f.blessed = false; f.blessTimer = 0; }
+            f.fullConvTimer = 0;
+          }
+        }
+      }
+
+      if (f.conv >= 0.65 || f.superBlessed) convertedCount++;
+    }
+
+    // Old-style blessing check (for non-super)
+    c.blessCheckTimer += dt;
+    if (c.blessCheckTimer >= 2.0) {
+      c.blessCheckTimer = 0;
+      const wellConverted = fedeli.filter(f => f.conv >= 0.85 && !f.blessed && !f.superBlessed);
+      const totalAbove    = fedeli.filter(f => f.conv >= 0.85).length;
+      if (totalAbove >= 4 && wellConverted.length > 0 && Math.random() < 0.45) {
+        const chosen = wellConverted[Math.floor(Math.random() * wellConverted.length)];
+        chosen.blessed = true;
+        chosen.blessTimer = 8;
+      }
+    }
+
+    document.getElementById('conv-count').textContent  = convertedCount;
+    document.getElementById('conv-timer').textContent  = Math.ceil(c.timeLeft);
+
+    const canvas = document.getElementById('conv-canvas');
+    this._drawConversion(canvas, c);
+    c.rafId = requestAnimationFrame((ts2) => this._convLoop(ts2));
+  },
+
+  _drawConversion(canvas, c) {
+    const ctx = canvas.getContext('2d');
+    const { W, H, fedeli, diavoli, clericX, clericY, time } = c;
+
+    ctx.fillStyle = '#080614';
+    ctx.fillRect(0, 0, W, H);
+
+    // Cobblestone grid
+    ctx.strokeStyle = 'rgba(255,255,255,0.025)';
+    ctx.lineWidth = 1;
+    for (let gx = 0; gx < W; gx += 32) { ctx.beginPath(); ctx.moveTo(gx, 0); ctx.lineTo(gx, H); ctx.stroke(); }
+    for (let gy = 0; gy < H; gy += 32) { ctx.beginPath(); ctx.moveTo(0, gy); ctx.lineTo(W, gy); ctx.stroke(); }
+
+    // Cleric aura
+    if (clericX > 0 && clericY > 0) {
+      const auraR = 62;
+      const ag = ctx.createRadialGradient(clericX, clericY, 0, clericX, clericY, auraR);
+      ag.addColorStop(0,   'rgba(201,168,76,0.14)');
+      ag.addColorStop(0.5, 'rgba(201,168,76,0.06)');
+      ag.addColorStop(1,   'rgba(201,168,76,0)');
+      ctx.fillStyle = ag;
+      ctx.beginPath(); ctx.arc(clericX, clericY, auraR, 0, Math.PI * 2); ctx.fill();
+    }
+
+    // Draw diavoli
+    for (const d of diavoli) {
+      const alpha = d.dying ? Math.max(0, 1 - d.dyingTimer / 0.6) : 1;
+      ctx.globalAlpha = alpha;
+      const pulse = 1 + 0.18 * Math.sin(d.pulseT);
+      const dr = 28 * pulse;
+      // Conversion progress tint (blue when being converted)
+      const redAmt  = 1 - d.convProgress;
+      const blueAmt = d.convProgress;
+      const dg = ctx.createRadialGradient(d.x, d.y, 0, d.x, d.y, dr);
+      dg.addColorStop(0,   `rgba(${Math.round(180*redAmt+50*blueAmt)},${Math.round(20*redAmt+120*blueAmt)},${Math.round(20*redAmt+220*blueAmt)},0.38)`);
+      dg.addColorStop(1,   'rgba(0,0,0,0)');
+      ctx.fillStyle = dg;
+      ctx.beginPath(); ctx.arc(d.x, d.y, dr, 0, Math.PI * 2); ctx.fill();
+
+      // Drain radius
+      ctx.strokeStyle = `rgba(180,20,20,${0.10 + 0.07 * Math.sin(d.pulseT)})`;
+      ctx.lineWidth = 1; ctx.setLineDash([4, 5]);
+      ctx.beginPath(); ctx.arc(d.x, d.y, 72, 0, Math.PI * 2); ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Conv progress ring on devil
+      if (d.convProgress > 0.05) {
+        ctx.strokeStyle = `rgba(150,100,255,${0.5 + d.convProgress * 0.5})`;
+        ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.arc(d.x, d.y, 18, -Math.PI / 2, -Math.PI / 2 + d.convProgress * Math.PI * 2); ctx.stroke();
+      }
+
+      ctx.font = '16px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(d.dying ? '💥' : '😈', d.x, d.y);
+      ctx.globalAlpha = 1;
+    }
+
+    // Draw fedeli
+    for (const f of fedeli) {
+      const c0 = f.conv;
+      let r, g, b;
+      if (f.superBlessed) {
+        const bPulse = 0.5 + 0.5 * Math.sin(f.pulseT * 3);
+        r = Math.round(255);
+        g = Math.round(230 + 25 * bPulse);
+        b = Math.round(150 + 105 * bPulse);
+      } else if (f.blessed) {
+        const bPulse = 0.7 + 0.3 * Math.sin(f.pulseT * 2.5);
+        r = Math.round(220 + 35 * bPulse);
+        g = Math.round(200 + 55 * bPulse);
+        b = Math.round(100 + 155 * bPulse);
+      } else {
+        r = Math.round(80  + c0 * (201 - 80));
+        g = Math.round(80  + c0 * (168 - 80));
+        b = Math.round(90  + c0 * (76  - 90));
+      }
+      const col = `rgb(${r},${g},${b})`;
+      const radius = 5.5 + c0 * 2.5;
+
+      // Glow
+      if (c0 > 0.2 || f.blessed || f.superBlessed) {
+        const glowSize = f.superBlessed ? 28 + 8 * Math.sin(f.pulseT * 3)
+                        : f.blessed ? 22 + 8 * Math.sin(f.pulseT * 2.5) : 14 * c0;
+        const fg = ctx.createRadialGradient(f.x, f.y, 0, f.x, f.y, glowSize);
+        if (f.superBlessed) {
+          fg.addColorStop(0,   'rgba(255,240,150,0.65)');
+          fg.addColorStop(0.4, 'rgba(255,200,50,0.3)');
+          fg.addColorStop(1,   'rgba(201,168,76,0)');
+        } else if (f.blessed) {
+          fg.addColorStop(0,   'rgba(255,240,180,0.45)');
+          fg.addColorStop(0.5, 'rgba(201,168,76,0.2)');
+          fg.addColorStop(1,   'rgba(201,168,76,0)');
+        } else {
+          fg.addColorStop(0,   `rgba(201,168,76,${c0 * 0.35})`);
+          fg.addColorStop(1,   'rgba(201,168,76,0)');
+        }
+        ctx.fillStyle = fg;
+        ctx.beginPath(); ctx.arc(f.x, f.y, glowSize, 0, Math.PI * 2); ctx.fill();
+      }
+
+      // SuperBlessed conversion aura ring
+      if (f.superBlessed) {
+        const bR = 46;
+        ctx.strokeStyle = `rgba(255,220,80,${0.25 + 0.15 * Math.sin(f.pulseT * 2)})`;
+        ctx.lineWidth = 2; ctx.setLineDash([3, 3]);
+        ctx.beginPath(); ctx.arc(f.x, f.y, bR, 0, Math.PI * 2); ctx.stroke();
+        ctx.setLineDash([]);
+        // Star crown above
+        ctx.font = '10px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+        ctx.fillText('⭐', f.x, f.y - radius - 2);
+      } else if (f.blessed) {
+        const bR = 46;
+        ctx.strokeStyle = `rgba(255,240,180,${0.15 + 0.1 * Math.sin(f.pulseT)})`;
+        ctx.lineWidth = 1; ctx.setLineDash([3, 4]);
+        ctx.beginPath(); ctx.arc(f.x, f.y, bR, 0, Math.PI * 2); ctx.stroke();
+        ctx.setLineDash([]);
+      }
+
+      // Body
+      ctx.fillStyle = col;
+      ctx.beginPath(); ctx.arc(f.x, f.y, radius, 0, Math.PI * 2); ctx.fill();
+
+      // Progress ring
+      if (c0 > 0.05 && !f.blessed && !f.superBlessed) {
+        ctx.strokeStyle = `rgba(201,168,76,${0.5 + c0 * 0.5})`;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(f.x, f.y, radius + 3, -Math.PI / 2, -Math.PI / 2 + c0 * Math.PI * 2);
+        ctx.stroke();
+      }
+
+      // fullConvTimer fill indicator (time bar)
+      if (f.fullConvTimer > 0 && !f.superBlessed) {
+        const frac = Math.min(1, f.fullConvTimer / 2.0);
+        ctx.strokeStyle = `rgba(255,255,100,${0.7})`;
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(f.x, f.y, radius + 6, -Math.PI / 2, -Math.PI / 2 + frac * Math.PI * 2);
+        ctx.stroke();
+      }
+    }
+
+    // Draw cleric
+    if (clericX > 0 && clericY > 0) {
+      const pulse = 1 + 0.12 * Math.sin(time * 3.5);
+      const cg = ctx.createRadialGradient(clericX, clericY, 0, clericX, clericY, 16 * pulse);
+      cg.addColorStop(0,   'rgba(255,253,210,0.9)');
+      cg.addColorStop(0.4, 'rgba(201,168,76,0.5)');
+      cg.addColorStop(1,   'rgba(201,168,76,0)');
+      ctx.fillStyle = cg;
+      ctx.beginPath(); ctx.arc(clericX, clericY, 16 * pulse, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = '#fffde7';
+      ctx.lineWidth = 2.5; ctx.lineCap = 'round';
+      const arm = 10 * pulse;
+      ctx.beginPath(); ctx.moveTo(clericX, clericY - arm); ctx.lineTo(clericX, clericY + arm); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(clericX - arm * 0.65, clericY - arm * 0.25); ctx.lineTo(clericX + arm * 0.65, clericY - arm * 0.25); ctx.stroke();
+      ctx.lineCap = 'butt';
+    }
+
+    // Timer ring
+    const remFrac = Math.max(0, c.timeLeft / 30);
+    ctx.strokeStyle = 'rgba(201,168,76,0.3)';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(W - 22, 22, 14, -Math.PI / 2, -Math.PI / 2 + remFrac * Math.PI * 2);
+    ctx.stroke();
+  },
+
+  _endConversionGame() {
+    const c = this._conv;
+    if (!c) return;
+    c.running = false;
+    cancelAnimationFrame(c.rafId);
+
+    // Compute score: weighted average conversion
+    const score = c.fedeli.reduce((sum, f) => sum + f.conv, 0) / c.fedeli.length * 100;
+    const result = Game.applyConversionResult(score, c.blessedCount);
+    UI.showConversionResult(result);
+    UI.refresh();
+    if (result.levelUpResult) this._triggerLevelUp(result.levelUpResult);
+  },
+
+  /* ─── Preghiera ─────────────────────────────────────────── */
+  _startPrayerAnimation() {
+    const canvas = document.getElementById('prayer-canvas');
+    if (!canvas) return;
+    const W = canvas.width, H = canvas.height;
+
+    this._prayTime       = 0;
+    this._prayTimeLeft   = 18;
+    this._prayDevotion   = 0;
+    this._praySphereX    = W / 2;
+    this._praySphereY    = H - 28;
+    this._prayParticles  = [];
+    this._prayTrail      = [];
+    this._prayGraceActive = false;
+    this._prayGraceTimer = 0;
+    this._prayNextGrace  = 2.5 + Math.random() * 1.5;
+    this._prayGraceCaught = 0;
+    this._prayLastFrameTs = 0;
+    this._prayPhase      = 'animating';
+    // Demon state
+    this._prayDemonActive  = false;
+    this._prayDemonTimer   = 0;
+    this._prayDemonLimit   = 2.4;
+    this._prayNextDemon    = 4.5 + Math.random() * 3.5;
+    this._prayDemonX       = 0;
+    this._prayDemonY       = 0;
+    this._prayDemonIcon    = '👿';
+    this._prayDemonsScacciati = 0;
+
+    document.getElementById('prayer-active-phase').classList.remove('d-none');
+    document.getElementById('prayer-result-phase').classList.add('d-none');
+    document.getElementById('btn-amen').disabled = false;
+    document.getElementById('btn-amen').classList.remove('grace-active');
+    document.getElementById('btn-scaccia').classList.remove('d-none');   // sempre visibile
+    document.getElementById('btn-scaccia').classList.remove('demon-active');
+    document.getElementById('prayer-hint').textContent = 'Prega con devozione… aspetta il momento di grazia';
+    this._updatePrayDevoBar();
+
+    if (this._prayAnimFrameId) cancelAnimationFrame(this._prayAnimFrameId);
+    this._prayAnimFrameId = requestAnimationFrame((ts) => this._prayerLoop(ts));
+  },
+
+  _prayerLoop(ts) {
+    if (this._prayPhase !== 'animating') return;
+    const dt = this._prayLastFrameTs ? Math.min((ts - this._prayLastFrameTs) / 1000, 0.1) : 0.016;
+    this._prayLastFrameTs = ts;
+    this._prayTime     += dt;
+    this._prayTimeLeft -= dt;
+
+    if (this._prayTimeLeft <= 0) {
+      this._endPrayer();
+      return;
+    }
+
+    const canvas = document.getElementById('prayer-canvas');
+    if (!canvas) return;
+    const W = canvas.width, H = canvas.height;
+    const t = this._prayTime;
+
+    // Sphere position: rises from bottom to top with sinusoidal drift
+    const progress = 1 - (this._prayTimeLeft / 18);
+    this._praySphereX = W / 2 + 38 * Math.sin(t * 0.65);
+    this._praySphereY = (H - 28) - progress * (H - 52) + 6 * Math.sin(t * 1.1 + 1);
+
+    // Trail
+    this._prayTrail.push({ x: this._praySphereX, y: this._praySphereY });
+    if (this._prayTrail.length > 35) this._prayTrail.shift();
+
+    // Emit particles
+    const emitRate = this._prayGraceActive ? 0.8 : 0.35;
+    if (Math.random() < emitRate) {
+      this._prayParticles.push({
+        x: this._praySphereX + (Math.random() - 0.5) * 10,
+        y: this._praySphereY + (Math.random() - 0.5) * 6,
+        vx: (Math.random() - 0.5) * 14,
+        vy: -(15 + Math.random() * 28),
+        r:  1.2 + Math.random() * 2.2,
+        maxLife: 1.0 + Math.random() * 0.8,
+        life:    1.0 + Math.random() * 0.8,
+      });
+    }
+    for (const p of this._prayParticles) {
+      p.x  += p.vx * dt;
+      p.y  += p.vy * dt;
+      p.vy *= 0.97;
+      p.vx *= 0.98;
+      p.life -= dt;
+    }
+    this._prayParticles = this._prayParticles.filter(p => p.life > 0);
+
+    // Grace timing
+    this._prayGraceTimer += dt;
+    if (!this._prayGraceActive && !this._prayDemonActive && this._prayGraceTimer >= this._prayNextGrace) {
+      this._prayGraceActive = true;
+      this._prayGraceTimer  = 0;
+      this._prayNextGrace   = 3 + Math.random() * 3;
+      document.getElementById('prayer-hint').textContent = '✨ Momento di Grazia! Clicca Amen!';
+      document.getElementById('btn-amen').classList.add('grace-active');
+    }
+    if (this._prayGraceActive && this._prayGraceTimer >= 1.3) {
+      this._prayGraceActive = false;
+      this._prayGraceTimer  = 0;
+      document.getElementById('prayer-hint').textContent = 'Prega con devozione… aspetta il momento di grazia';
+      document.getElementById('btn-amen').classList.remove('grace-active');
+    }
+
+    // Demon timing
+    this._prayDemonTimer += dt;
+    if (!this._prayDemonActive && !this._prayGraceActive && this._prayDemonTimer >= this._prayNextDemon) {
+      this._prayDemonActive = true;
+      this._prayDemonTimer  = 0;
+      this._prayNextDemon   = 4.5 + Math.random() * 3.5;
+      this._prayDemonIcon   = Math.random() < 0.5 ? '👿' : '💀';
+      // Position away from sphere, within canvas margins
+      const margin = 36;
+      this._prayDemonX = margin + Math.random() * (W - margin * 2);
+      this._prayDemonY = margin + Math.random() * (H - margin * 2);
+      document.getElementById('btn-scaccia').classList.add('demon-active');
+      document.getElementById('prayer-hint').textContent = this._prayDemonIcon === '💀' ? '💀 Non morto! Scaccialo!' : '👿 Demone! Scaccialo!';
+    }
+    if (this._prayDemonActive && this._prayDemonTimer >= this._prayDemonLimit) {
+      // Demon escaped — penalize devotion
+      this._prayDemonActive = false;
+      this._prayDemonTimer  = 0;
+      this._prayDevotion    = Math.max(0, this._prayDevotion - 20);
+      this._updatePrayDevoBar();
+      document.getElementById('btn-scaccia').classList.remove('demon-active');
+      document.getElementById('prayer-hint').textContent = '💔 La preghiera si disperde…';
+      setTimeout(() => {
+        if (this._prayPhase === 'animating')
+          document.getElementById('prayer-hint').textContent = 'Prega con devozione… aspetta il momento di grazia';
+      }, 1200);
+    }
+
+    // Passive devotion
+    this._prayDevotion = Math.min(100, this._prayDevotion + dt * 3.2);
+    // Drain attivo durante grazia e demone — bisogna reagire in fretta
+    if (this._prayGraceActive) this._prayDevotion = Math.max(0, this._prayDevotion - dt * 8);
+    if (this._prayDemonActive) this._prayDevotion = Math.max(0, this._prayDevotion - dt * 10);
+    this._updatePrayDevoBar();
+
+    this._drawPrayer(canvas);
+    this._prayAnimFrameId = requestAnimationFrame((ts2) => this._prayerLoop(ts2));
+  },
+
+  _drawPrayer(canvas) {
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height;
+    const t  = this._prayTime;
+    const sx = this._praySphereX;
+    const sy = this._praySphereY;
+    const grace = this._prayGraceActive;
+    const pulse = 1 + 0.14 * Math.sin(t * 2.8);
+    const gScale = grace ? 1.45 + 0.2 * Math.sin(t * 7) : 1;
+
+    // Fade background (creates incense-smoke trail)
+    ctx.fillStyle = 'rgba(4, 2, 14, 0.22)';
+    ctx.fillRect(0, 0, W, H);
+
+    // Trail
+    for (let i = 0; i < this._prayTrail.length; i++) {
+      const pt  = this._prayTrail[i];
+      const prog = i / this._prayTrail.length;
+      ctx.globalAlpha = prog * 0.18;
+      const r = 3 + prog * 5;
+      const tg = ctx.createRadialGradient(pt.x, pt.y, 0, pt.x, pt.y, r);
+      tg.addColorStop(0, '#fff8e1');
+      tg.addColorStop(1, 'rgba(201,168,76,0)');
+      ctx.fillStyle = tg;
+      ctx.beginPath(); ctx.arc(pt.x, pt.y, r, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+
+    // Particles
+    for (const p of this._prayParticles) {
+      const a = Math.max(0, p.life / p.maxLife);
+      ctx.globalAlpha = a * 0.75;
+      const pg = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r);
+      pg.addColorStop(0, '#fffde7');
+      pg.addColorStop(0.5, 'rgba(201,168,76,0.55)');
+      pg.addColorStop(1, 'rgba(255,248,150,0)');
+      ctx.fillStyle = pg;
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+
+    // Outer aura
+    const auraR = (32 + 7 * Math.sin(t * 1.8)) * pulse * gScale;
+    const ag = ctx.createRadialGradient(sx, sy, 0, sx, sy, auraR);
+    ag.addColorStop(0, grace ? 'rgba(255,255,255,0.18)' : 'rgba(255,255,255,0.09)');
+    ag.addColorStop(0.45, `rgba(201,168,76,${grace ? 0.12 : 0.06})`);
+    ag.addColorStop(1, 'rgba(255,248,150,0)');
+    ctx.fillStyle = ag;
+    ctx.beginPath(); ctx.arc(sx, sy, auraR, 0, Math.PI * 2); ctx.fill();
+
+    // Mid glow
+    const glowR = (16 + 3.5 * Math.sin(t * 2.2)) * pulse * gScale;
+    const gg = ctx.createRadialGradient(sx, sy, 0, sx, sy, glowR);
+    const ga = grace ? 0.62 : 0.28;
+    gg.addColorStop(0, `rgba(255,253,210,${ga + 0.1})`);
+    gg.addColorStop(0.5, `rgba(201,168,76,${ga * 0.5})`);
+    gg.addColorStop(1, 'rgba(201,168,76,0)');
+    ctx.fillStyle = gg;
+    ctx.beginPath(); ctx.arc(sx, sy, glowR, 0, Math.PI * 2); ctx.fill();
+
+    // Core
+    const coreR = (6.5 + 1.8 * Math.sin(t * 2.8)) * pulse * gScale;
+    const cg = ctx.createRadialGradient(sx - 1, sy - 1, 0, sx, sy, coreR);
+    cg.addColorStop(0, '#ffffff');
+    cg.addColorStop(0.35, '#fff9c4');
+    cg.addColorStop(0.7, 'rgba(201,168,76,0.92)');
+    cg.addColorStop(1, 'rgba(201,168,76,0)');
+    ctx.fillStyle = cg;
+    ctx.beginPath(); ctx.arc(sx, sy, coreR, 0, Math.PI * 2); ctx.fill();
+
+    // Grace sparkles
+    if (grace) {
+      for (let i = 0; i < 6; i++) {
+        const angle = (i / 6) * Math.PI * 2 + t * 1.8;
+        const dist  = 20 + 4 * Math.sin(t * 4 + i);
+        ctx.globalAlpha = 0.55 + 0.35 * Math.sin(t * 6 + i);
+        ctx.fillStyle = '#fffde7';
+        ctx.beginPath();
+        ctx.arc(sx + Math.cos(angle) * dist, sy + Math.sin(angle) * dist, 2.2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 0.8;
+      ctx.font = '11px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#fffde7';
+      ctx.fillText('✨ Grazia! ✨', sx, sy - 42);
+      ctx.globalAlpha = 1;
+    }
+
+    // Timer ring (top-right corner)
+    const rem = Math.max(0, this._prayTimeLeft / 18);
+    ctx.strokeStyle = 'rgba(201,168,76,0.3)';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(W - 22, 22, 13, -Math.PI / 2, -Math.PI / 2 + rem * Math.PI * 2);
+    ctx.stroke();
+
+    // Demon / undead entity
+    if (this._prayDemonActive) {
+      const dx = this._prayDemonX;
+      const dy = this._prayDemonY;
+      const dFract = Math.max(0, 1 - (this._prayDemonTimer / this._prayDemonLimit));
+
+      // Pulsing dark aura
+      const dAura = 26 + 7 * Math.sin(t * 9);
+      const dg = ctx.createRadialGradient(dx, dy, 0, dx, dy, dAura);
+      dg.addColorStop(0,   `rgba(180,20,20,${0.45 * dFract})`);
+      dg.addColorStop(0.5, `rgba(120,0,60,${0.28 * dFract})`);
+      dg.addColorStop(1,   'rgba(80,0,40,0)');
+      ctx.fillStyle = dg;
+      ctx.beginPath(); ctx.arc(dx, dy, dAura, 0, Math.PI * 2); ctx.fill();
+
+      // Icon
+      ctx.globalAlpha = 0.2 + 0.8 * dFract;
+      ctx.font = '20px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(this._prayDemonIcon, dx, dy);
+      ctx.textBaseline = 'alphabetic';
+      ctx.globalAlpha = 1;
+
+      // Countdown ring (shrinking arc, clockwise from top)
+      ctx.strokeStyle = `rgba(220,50,50,${0.35 + 0.55 * dFract})`;
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.arc(dx, dy, 20, -Math.PI / 2, -Math.PI / 2 + dFract * Math.PI * 2);
+      ctx.stroke();
+    }
+  },
+
+  _prayHandleScaccia() {
+    if (this._prayPhase !== 'animating') return;
+    if (this._prayDemonActive) {
+      // Scacciato con successo
+      this._prayDemonActive = false;
+      this._prayDemonTimer  = 0;
+      this._prayDemonsScacciati++;
+      this._prayDevotion = Math.min(100, this._prayDevotion + 14);
+      this._updatePrayDevoBar();
+      document.getElementById('btn-scaccia').classList.remove('demon-active');
+      document.getElementById('prayer-hint').textContent = '☩ Scacciato con fede!';
+      setTimeout(() => {
+        if (this._prayPhase === 'animating')
+          document.getElementById('prayer-hint').textContent = 'Prega con devozione… aspetta il momento di grazia';
+      }, 950);
+    } else {
+      // Falso allarme — grossa penalità per distrazione
+      this._prayDevotion = Math.max(0, this._prayDevotion - 18);
+      this._updatePrayDevoBar();
+      document.getElementById('prayer-hint').textContent = '⚠️ Concentrati! Nessun demone presente!';
+      setTimeout(() => {
+        if (this._prayPhase === 'animating')
+          document.getElementById('prayer-hint').textContent = 'Prega con devozione… aspetta il momento di grazia';
+      }, 900);
+    }
+  },
+
+  _prayHandleAmen() {
+    if (this._prayPhase !== 'animating') return;
+    if (this._prayGraceActive) {
+      this._prayDevotion = Math.min(100, this._prayDevotion + 23);
+      this._prayGraceActive = false;
+      this._prayGraceTimer  = 0;
+      this._prayGraceCaught++;
+      document.getElementById('prayer-hint').textContent = '🙏 Grazia raccolta!';
+      document.getElementById('btn-amen').classList.remove('grace-active');
+      setTimeout(() => {
+        if (this._prayPhase === 'animating')
+          document.getElementById('prayer-hint').textContent = 'Prega con devozione… aspetta il momento di grazia';
+      }, 900);
+    } else {
+      // Click a vuoto — grossa penalità
+      this._prayDevotion = Math.max(0, this._prayDevotion - 18);
+      document.getElementById('prayer-hint').textContent = '⚠️ Concentrati! Non è il momento!';
+      setTimeout(() => {
+        if (this._prayPhase === 'animating')
+          document.getElementById('prayer-hint').textContent = 'Prega con devozione… aspetta il momento di grazia';
+      }, 900);
+    }
+    this._updatePrayDevoBar();
+  },
+
+  _updatePrayDevoBar() {
+    const fill = document.getElementById('prayer-devo-fill');
+    const pct  = document.getElementById('prayer-devo-pct');
+    if (fill) fill.style.width = `${this._prayDevotion}%`;
+    if (pct)  pct.textContent  = `${Math.floor(this._prayDevotion)}%`;
+  },
+
+  /* ─── Stalla / Guitar Hero (Paladino) ──────────────────── */
+  _startStableGame() {
+    const canvas = document.getElementById('stable-canvas');
+    if (!canvas) return;
+    const W = canvas.width, H = canvas.height;
+    const HITLINE_Y = H - 50;
+    const N_LANES = 5;
+    const LANE_W  = W / N_LANES;
+
+    this._stable = {
+      running: true, time: 0, timeLeft: 40, lastTs: 0, rafId: null,
+      W, H, HITLINE_Y, N_LANES, LANE_W,
+      notes: [],         // {id, lane, y, hit, missed}
+      noteIdCtr: 0,
+      spawnTimer: 0,
+      spawnInterval: 1.1,
+      noteSpeed: 140,    // px/s
+      health:    0,
+      happiness: 0,
+      hits: 0,
+      misses: 0,
+      hitFlashes: [],    // {lane, t, success}
+    };
+
+    document.getElementById('stable-game').classList.remove('d-none');
+    document.getElementById('stable-result').classList.add('d-none');
+    document.getElementById('stable-health').textContent    = '0';
+    document.getElementById('stable-happiness').textContent = '0';
+    document.getElementById('stable-timer').textContent     = '40';
+    document.getElementById('stable-hint').textContent      = 'Premi il bottone quando l\'icona raggiunge la riga!';
+
+    if (this._stable.rafId) cancelAnimationFrame(this._stable.rafId);
+    this._stable.rafId = requestAnimationFrame((ts) => this._stableLoop(ts));
+  },
+
+  _stableLoop(ts) {
+    const s = this._stable;
+    if (!s || !s.running) return;
+    const dt = s.lastTs ? Math.min((ts - s.lastTs) / 1000, 0.1) : 0.016;
+    s.lastTs = ts;
+    s.time     += dt;
+    s.timeLeft -= dt;
+
+    if (s.timeLeft <= 0) {
+      s.timeLeft = 0;
+      this._endStableGame();
+      return;
+    }
+
+    // Spawn notes
+    s.spawnTimer += dt;
+    if (s.spawnTimer >= s.spawnInterval) {
+      s.spawnTimer = 0;
+      s.spawnInterval = 0.9 + Math.random() * 0.5;
+      const lane = Math.floor(Math.random() * s.N_LANES);
+      s.notes.push({ id: s.noteIdCtr++, lane, y: 70, hit: false, missed: false });
+    }
+
+    // Move notes
+    for (const n of s.notes) {
+      n.y += s.noteSpeed * dt;
+      if (!n.hit && !n.missed && n.y > s.HITLINE_Y + 40) {
+        n.missed = true;
+      }
+    }
+
+    // Remove old notes
+    s.notes = s.notes.filter(n => n.y < s.H + 40);
+
+    // Decay hit flashes
+    s.hitFlashes = s.hitFlashes.filter(f => { f.t -= dt; return f.t > 0; });
+
+    // Update UI
+    document.getElementById('stable-health').textContent    = Math.floor(s.health);
+    document.getElementById('stable-happiness').textContent = Math.floor(s.happiness);
+    document.getElementById('stable-timer').textContent     = Math.ceil(s.timeLeft);
+
+    const canvas = document.getElementById('stable-canvas');
+    this._drawStable(canvas, s);
+    s.rafId = requestAnimationFrame((ts2) => this._stableLoop(ts2));
+  },
+
+  _stableHandleLaneClick(lane) {
+    const s = this._stable;
+    if (!s || !s.running) return;
+    const HIT_WINDOW = 38;
+
+    // Find the closest note in this lane near hitline
+    let bestNote = null;
+    let bestDist = Infinity;
+    for (const n of s.notes) {
+      if (n.lane !== lane || n.hit || n.missed) continue;
+      const dist = Math.abs(n.y - s.HITLINE_Y);
+      if (dist < bestDist) { bestDist = dist; bestNote = n; }
+    }
+
+    if (bestNote && bestDist <= HIT_WINDOW) {
+      // Hit!
+      bestNote.hit = true;
+      s.hits++;
+      s.health    = Math.min(100, s.health    + 5);
+      s.happiness = Math.min(100, s.happiness + 4);
+      s.hitFlashes.push({ lane, t: 0.35, success: true });
+      // Hint messages occasionally
+      if (s.hits % 5 === 0) {
+        const msgs = ['🐎 Il cavallo nitrisce di gioia!', '✨ Ottima cura!', '🌟 Il cavallo è felice!'];
+        document.getElementById('stable-hint').textContent = msgs[Math.floor(Math.random() * msgs.length)];
+        setTimeout(() => {
+          if (s.running) document.getElementById('stable-hint').textContent = 'Premi il bottone quando l\'icona raggiunge la riga!';
+        }, 1200);
+      }
+    } else {
+      // Miss or wrong timing
+      s.hitFlashes.push({ lane, t: 0.28, success: false });
+    }
+  },
+
+  _drawStable(canvas, s) {
+    const ctx = canvas.getContext('2d');
+    const { W, H, HITLINE_Y, N_LANES, LANE_W, notes, hitFlashes, time } = s;
+    const LANES = this._STABLE_LANES;
+    const NOTE_R = 26;
+
+    // Background
+    ctx.fillStyle = '#0a0a18';
+    ctx.fillRect(0, 0, W, H);
+
+    // Horse area (top)
+    // Health bar
+    ctx.fillStyle = 'rgba(255,255,255,0.06)';
+    ctx.fillRect(10, 10, W - 20, 14);
+    ctx.fillStyle = `hsl(${s.health}, 70%, 50%)`;
+    ctx.fillRect(10, 10, (W - 20) * s.health / 100, 14);
+    ctx.fillStyle = '#ffffff55';
+    ctx.font = '10px sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+    ctx.fillText('❤️', 14, 17);
+
+    // Happiness bar
+    ctx.fillStyle = 'rgba(255,255,255,0.06)';
+    ctx.fillRect(10, 28, W - 20, 14);
+    ctx.fillStyle = '#f9ca24';
+    ctx.fillRect(10, 28, (W - 20) * s.happiness / 100, 14);
+    ctx.fillText('😊', 14, 35);
+
+    // Horse emoji (center top)
+    ctx.font = '40px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    const bounce = Math.sin(time * 3) * 2;
+    ctx.fillText('🐴', W / 2, 54 + bounce);
+
+    // Lane backgrounds
+    for (let i = 0; i < N_LANES; i++) {
+      const x = i * LANE_W;
+      // Alternating subtle bg
+      ctx.fillStyle = i % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.04)';
+      ctx.fillRect(x, 70, LANE_W, H - 70);
+
+      // Lane separator
+      ctx.strokeStyle = 'rgba(255,255,255,0.07)';
+      ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(x, 70); ctx.lineTo(x, H); ctx.stroke();
+    }
+
+    // Hit-line glow
+    ctx.strokeStyle = 'rgba(201,168,76,0.9)';
+    ctx.lineWidth = 3;
+    ctx.shadowColor = '#c9a84c';
+    ctx.shadowBlur = 12;
+    ctx.beginPath(); ctx.moveTo(0, HITLINE_Y); ctx.lineTo(W, HITLINE_Y); ctx.stroke();
+    ctx.shadowBlur = 0;
+
+    // Lane icons (at hit line level, dimly)
+    ctx.font = '18px sans-serif'; ctx.textBaseline = 'middle';
+    for (let i = 0; i < N_LANES; i++) {
+      ctx.globalAlpha = 0.3;
+      ctx.textAlign = 'center';
+      ctx.fillText(LANES[i].icon, i * LANE_W + LANE_W / 2, HITLINE_Y);
+    }
+    ctx.globalAlpha = 1;
+
+    // Hit flashes
+    for (const f of hitFlashes) {
+      const alpha = f.t / 0.35;
+      const x = f.lane * LANE_W;
+      ctx.fillStyle = f.success ? `rgba(201,168,76,${alpha * 0.35})` : `rgba(231,76,60,${alpha * 0.25})`;
+      ctx.fillRect(x, 70, LANE_W, H - 70);
+    }
+
+    // Draw notes
+    for (const n of notes) {
+      if (n.hit) continue;
+      const cx = n.lane * LANE_W + LANE_W / 2;
+      const lane = LANES[n.lane];
+      const distFromHit = Math.abs(n.y - HITLINE_Y);
+      const inWindow = distFromHit <= 38;
+
+      // Glow when near hit line
+      if (inWindow) {
+        ctx.shadowColor = lane.color;
+        ctx.shadowBlur  = 16;
+      }
+
+      // Circle
+      ctx.beginPath();
+      ctx.fillStyle = n.missed ? 'rgba(80,80,80,0.5)' : lane.color + (inWindow ? 'ff' : 'cc');
+      ctx.arc(cx, n.y, NOTE_R, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.strokeStyle = n.missed ? '#555' : '#ffffff55';
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(cx, n.y, NOTE_R, 0, Math.PI * 2); ctx.stroke();
+
+      ctx.shadowBlur = 0;
+
+      // Icon
+      ctx.font = '18px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.globalAlpha = n.missed ? 0.3 : 1;
+      ctx.fillText(lane.icon, cx, n.y);
+      ctx.globalAlpha = 1;
+    }
+
+    // Timer arc (top-right)
+    const remFrac = Math.max(0, s.timeLeft / 40);
+    ctx.strokeStyle = 'rgba(201,168,76,0.4)';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(W - 22, 22, 14, -Math.PI / 2, -Math.PI / 2 + remFrac * Math.PI * 2);
+    ctx.stroke();
+  },
+
+  _endStableGame() {
+    const s = this._stable;
+    if (!s) return;
+    s.running = false;
+    cancelAnimationFrame(s.rafId);
+
+    const score = (s.health + s.happiness) / 2;
+    const result = Game.applyStableResult(score);
+    UI.showStableResult(result);
+    UI.refresh();
+    if (result.levelUpResult) this._triggerLevelUp(result.levelUpResult);
+  },
+
+  _endPrayer() {
+    this._prayPhase = 'result';
+    cancelAnimationFrame(this._prayAnimFrameId);
+    this._prayAnimFrameId = null;
+    const result = Game.applyPrayResult(this._prayDevotion);
+    UI.showPrayerResult(result);
+    UI.refresh();
+    if (result.levelUpResult) this._triggerLevelUp(result.levelUpResult);
   },
 
 };
