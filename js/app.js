@@ -187,6 +187,21 @@ const App = {
       UI.showRollStep(this._rolledValues);
     });
 
+    // Creazione PG — assegna casualmente
+    document.getElementById('btn-random-assign').addEventListener('click', () => {
+      if (!this._rolledValues || !this._rolledValues.length) return;
+      // Shuffle indices 0..5
+      const indices = this._rolledValues.map((_, i) => i);
+      for (let i = indices.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [indices[i], indices[j]] = [indices[j], indices[i]];
+      }
+      const selects = document.querySelectorAll('.stat-assign');
+      selects.forEach((sel, i) => { sel.value = String(indices[i]); });
+      UI._updateRolledPills(this._rolledValues);
+      UI._updateConfirmBtn();
+    });
+
     // Creazione PG — conferma
     document.getElementById('btn-confirm-create').addEventListener('click', () => {
       const stats   = UI.getStatAssignments(this._rolledValues);
