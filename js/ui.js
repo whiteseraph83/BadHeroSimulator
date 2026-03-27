@@ -1360,8 +1360,10 @@ const UI = {
           <div class="class-card-profs">
             <i class="bi bi-patch-check-fill text-green"></i>
             ${cls.proficiencies.map(k => profAbbr[k]).join(' · ')}
-            ${cls.hasPickpocket ? '<span class="ms-1 text-warning" title="Ha il borseggio"><i class="bi bi-hand-index-thumb"></i></span>' : ''}
-            ${cls.hasDiceGame   ? '<span class="ms-1 text-info"    title="Ha il gioco dei dadi"><i class="bi bi-dice-5"></i></span>' : ''}
+            ${cls.hasPickpocket  ? '<span class="ms-1 text-warning" title="Ha il borseggio"><i class="bi bi-mask"></i></span>' : ''}
+            ${cls.hasDiceGame    ? '<span class="ms-1 text-info"    title="Ha il gioco dei dadi"><i class="bi bi-dice-5"></i></span>' : ''}
+            ${cls.hasPotioniTab  ? '<span class="ms-1 text-success" title="Alchimia: prepara pozioni"><i class="bi bi-flask"></i></span>' : ''}
+            ${cls.hasSpellTab    ? '<span class="ms-1 text-info"    title="Grimorio: lancia incantesimi"><i class="bi bi-stars"></i></span>' : ''}
           </div>
         </div>
       </div>`).join('');
