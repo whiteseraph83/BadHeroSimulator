@@ -762,11 +762,13 @@ const UI = {
     });
   },
 
-  /* ─── Mercato Nero ──────────────────────────────────────── */
+  /* ─── Mercato ──────────────────────────────────────────── */
   renderMarket() {
-    const container  = document.getElementById('market-container');
+    const container   = document.getElementById('market-container');
     const marketItems = Game.state.marketItems;
     const char        = Game.state.character;
+    const isLadro     = Game.getClasse().id === 'ladro';
+    const stealBanned = !!Game.state.marketStealBanned;
 
     document.getElementById('market-count').textContent =
       `${marketItems.length} oggett${marketItems.length === 1 ? 'o' : 'i'} disponibil${marketItems.length === 1 ? 'e' : 'i'}`;
@@ -776,7 +778,16 @@ const UI = {
       return;
     }
 
-    container.innerHTML = marketItems.map(entry => {
+    const bannedBanner = stealBanned
+      ? `<div class="col-12 mb-2">
+           <div class="alert alert-danger py-2 px-3 d-flex align-items-center gap-2 mb-0" style="font-size:.85rem;">
+             <i class="bi bi-exclamation-octagon-fill"></i>
+             <span>Il mercante ti ha riconosciuto — <strong>non puoi più comprare né rubare oggi.</strong></span>
+           </div>
+         </div>`
+      : '';
+
+    container.innerHTML = bannedBanner + marketItems.map(entry => {
       const item       = DB.items.find(i => i.id === entry.itemId);
       if (!item) return '';
       const qd         = QUALITY[item.quality];
@@ -784,7 +795,7 @@ const UI = {
       const canAfford  = char.gold >= entry.buyPrice;
       const levelOk    = char.level >= (item.reqLevel || 1);
       const statOk     = !item.reqStat || Game.effectiveStat(item.reqStat.key) >= item.reqStat.val;
-      const canBuy     = canAfford && levelOk;
+      const canBuy     = canAfford && levelOk && !stealBanned;
 
       const statsHtml = Object.entries(item.stats)
         .filter(([, v]) => v > 0)
@@ -796,6 +807,15 @@ const UI = {
       let warningHtml = '';
       if (!levelOk) warningHtml += `<div class="small text-warning mt-1"><i class="bi bi-exclamation-triangle"></i> Richiede Lv.${item.reqLevel}</div>`;
       if (!statOk)  warningHtml += `<div class="small text-warning mt-1"><i class="bi bi-exclamation-triangle"></i> ${Game.statLabel(item.reqStat.key)} ${item.reqStat.val} richiesta</div>`;
+
+      const stealDc  = 16 + (item.quality - 1) * 2;
+      const stealBtn = isLadro
+        ? `<button class="btn btn-sm btn-steal-item" data-itemid="${item.id}"
+              title="Prova DES vs DC ${stealDc} — fallimento: -oro, -fama, +taglia, ban giornaliero"
+              ${stealBanned ? 'disabled' : ''}>
+             <i class="bi bi-scissors"></i> Ruba
+           </button>`
+        : '';
 
       return `<div class="col-md-6 col-lg-4">
         <div class="item-card market-card${!levelOk || !statOk ? ' item-req-fail' : ''}">
@@ -815,10 +835,11 @@ const UI = {
                 ${!item.consumable ? `<button class="btn btn-sm btn-outline-secondary btn-compare-item" data-itemid="${item.id}" title="Confronta con equipaggiamento">
                   <i class="bi bi-arrow-left-right"></i>
                 </button>` : ''}
+                ${stealBtn}
                 <button class="btn btn-sm ${canBuy ? 'btn-gold' : 'btn-outline-secondary'} btn-buy-item"
                   data-itemid="${item.id}"
                   ${!canBuy ? 'disabled' : ''}>
-                  ${canAfford ? (levelOk ? 'Acquista' : 'Liv. basso') : 'Oro insuff.'}
+                  ${stealBanned ? 'Vietato' : canAfford ? (levelOk ? 'Acquista' : 'Liv. basso') : 'Oro insuff.'}
                 </button>
               </div>
             </div>
@@ -832,6 +853,9 @@ const UI = {
     });
     container.querySelectorAll('.btn-compare-item').forEach(btn => {
       btn.addEventListener('click', () => this.showCompareModal(parseInt(btn.dataset.itemid)));
+    });
+    container.querySelectorAll('.btn-steal-item').forEach(btn => {
+      btn.addEventListener('click', () => App.stealItem(parseInt(btn.dataset.itemid)));
     });
   },
 

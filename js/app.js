@@ -1289,6 +1289,21 @@ const App = {
     this.buyItem(itemId);
   },
 
+  stealItem(itemId) {
+    if (!Game.state) return;
+    const result = Game.stealItem(itemId);
+    if (!result.ok) { UI.toast(result.reason); return; }
+
+    const rollStr = `D20(${result.roll}) + DES(${result.dexMod >= 0 ? '+' : ''}${result.dexMod}) = ${result.total} vs DC${result.dc}`;
+    if (result.success) {
+      const item = DB.items.find(i => i.id === itemId);
+      UI.toast(`🗝️ Furto riuscito! ${item ? item.name : 'oggetto'} rubato. (${rollStr})`, 'success');
+    } else {
+      UI.toast(`❌ Furto fallito! ${rollStr} — -${result.goldLost} mo, -${result.fameLost} fama, +${result.wantedGain} taglia. Il mercante ti ha bandito per oggi.`, 'danger');
+    }
+    UI.refresh();
+  },
+
   /* ─── Oggetti (inventario) ────────────────────────────── */
   equipItemFromModal() {
     const itemId = parseInt(document.getElementById('item-modal-itemid').value);

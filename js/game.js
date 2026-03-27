@@ -46,6 +46,7 @@ const Game = {
           if (this.state.arenaHighScore === undefined)         this.state.arenaHighScore = 0;
           if (this.state.stableUsed === undefined)  this.state.stableUsed = 0;
           if (this.state.rescueUsed === undefined)  this.state.rescueUsed = 0;
+          if (this.state.marketStealBanned === undefined) this.state.marketStealBanned = false;
           if (this.state.character.equipment.shield === undefined) this.state.character.equipment.shield = null;
           return true;
         }
@@ -85,6 +86,7 @@ const Game = {
       challengeRefreshUsed: 0,
       pickpocketsUsed: 0,
       rerollsUsed: 0,
+      marketStealBanned: false,
       wantedMissionPending: false,
       wantedMissionCompleted: false,
       thiefAttackPending: false,
@@ -944,6 +946,47 @@ const Game = {
     return { ok: true, completedChallenges };
   },
 
+  /* ─── Furto al mercato (solo Ladro) ────────────────────── */
+  stealItem(itemId) {
+    const char = this.state.character;
+    if (this.getClasse().id !== 'ladro') return { ok: false, reason: 'Solo il Ladro può rubare.' };
+    if (this.state.marketStealBanned) return { ok: false, reason: 'Il mercante ti ha riconosciuto — non puoi più comprare né rubare oggi.' };
+
+    const marketEntry = this.state.marketItems.find(m => m.itemId === itemId);
+    if (!marketEntry) return { ok: false, reason: 'Oggetto non disponibile.' };
+    const item = DB.items.find(i => i.id === itemId);
+    if (!item) return { ok: false, reason: 'Oggetto non trovato.' };
+
+    // DC: base 16, +2 per ogni livello di qualità sopra 1
+    const dc = 16 + (item.quality - 1) * 2;
+    const dexMod = this.modifier(char.stats.dex || 10);
+    const roll = this.rollD20();
+    const total = roll + dexMod;
+    const success = total >= dc;
+
+    if (success) {
+      char.inventory.push(itemId);
+      this.state.marketItems = this.state.marketItems.filter(m => m.itemId !== itemId);
+      const logText = `Rubato "${item.name}" dal mercato (${roll}+${dexMod}=${total} vs DC${dc}).`;
+      char.log.unshift({ day: char.day, text: logText, type: 'success' });
+      this.save();
+      return { ok: true, success: true, roll, dexMod, total, dc, item };
+    } else {
+      // Penalità: perdi oro, fama, aumenta taglia, vietato dal mercato
+      const goldLost  = Math.max(5, Math.round(marketEntry.buyPrice * 0.20));
+      const fameLost  = 6 + item.quality * 2;
+      const wantedGain = 12 + item.quality * 4;
+      char.gold  = Math.max(0, char.gold - goldLost);
+      char.fame  = Math.max(0, char.fame - fameLost);
+      char.wanted = (char.wanted || 0) + wantedGain;
+      this.state.marketStealBanned = true;
+      const logText = `Furto fallito al mercato (${roll}+${dexMod}=${total} vs DC${dc}). -${goldLost} mo, -${fameLost} fama, +${wantedGain} taglia.`;
+      char.log.unshift({ day: char.day, text: logText, type: 'danger' });
+      this.save();
+      return { ok: true, success: false, roll, dexMod, total, dc, goldLost, fameLost, wantedGain };
+    }
+  },
+
   /* ─── Borseggio (Pickpocket) ────────────────────────────── */
   startPickpocket() {
     if (this.pickpocketsRemaining() <= 0) {
@@ -1132,6 +1175,7 @@ const Game = {
     this.state.rescueUsed             = 0;
     this.state.wantedMissionCompleted = false;
     this.state.thiefAttackCompleted   = false;
+    this.state.marketStealBanned      = false;
 
     // Decrementa boost attivi
     this.state.activeBoosts = (this.state.activeBoosts || [])
