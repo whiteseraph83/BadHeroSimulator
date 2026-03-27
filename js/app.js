@@ -2955,35 +2955,40 @@ const App = {
     for (const id in s.hitCooldown) s.hitCooldown[id] = Math.max(0, s.hitCooldown[id] - dt);
     s.particles = s.particles.filter(p => { p.t = Math.max(0, p.t - dt); return p.t > 0; });
 
-    // Holy Power
-    if (s.holyPowerActive) {
-      s.holyPowerDuration = Math.max(0, s.holyPowerDuration - dt);
-      s.holyPowerDmgTimer = Math.max(0, s.holyPowerDmgTimer - dt);
-      if (s.holyPowerDmgTimer <= 0) {
-        s.holyPowerDmgTimer = 0.5;
-        const dmg = Math.max(1, 1 + Math.floor(s.savedCount / 2));
-        for (const camp of s.camps) {
-          for (const en of camp.enemies) {
-            if (!en.alive) continue;
-            if (Math.hypot(pal.x - en.x, pal.y - en.y) < 85) {
-              en.hp = Math.max(0, en.hp - dmg); en.flashT = 0.15;
-              s.particles.push({ x: en.x, y: en.y - 20, t: 0.5, maxT: 0.5, type: 'holy_hit', txt: '-' + dmg });
-              if (en.hp <= 0) {
-                en.alive = false;
-                for (let i = 0; i < 6; i++) {
-                  const a = Math.random()*Math.PI*2;
-                  s.particles.push({ x: en.x, y: en.y, vx: Math.cos(a)*55, vy: Math.sin(a)*55, t: 0.5, maxT: 0.5, type: 'spark' });
-                }
+    // Auto aura damage (every 0.5s, x2 during Giusto Potere)
+    s.auraDmgTimer = Math.max(0, (s.auraDmgTimer || 0) - dt);
+    if (s.auraDmgTimer <= 0) {
+      s.auraDmgTimer = 0.5;
+      const auraR = 52;
+      const baseDmg = Math.max(1, 1 + Math.floor(s.savedCount / 2));
+      const dmg = s.holyPowerActive ? baseDmg * 2 : baseDmg;
+      const pType = s.holyPowerActive ? 'holy_hit' : 'hit';
+      for (const camp of s.camps) {
+        for (const en of camp.enemies) {
+          if (!en.alive) continue;
+          if (Math.hypot(pal.x - en.x, pal.y - en.y) < auraR) {
+            en.hp = Math.max(0, en.hp - dmg); en.flashT = 0.15;
+            s.particles.push({ x: en.x, y: en.y - 14, t: 0.5, maxT: 0.5, type: pType, txt: '-' + dmg });
+            if (en.hp <= 0) {
+              en.alive = false;
+              for (let i = 0; i < 6; i++) {
+                const a = Math.random()*Math.PI*2, sp = 30+Math.random()*50;
+                s.particles.push({ x: en.x, y: en.y, vx: Math.cos(a)*sp, vy: Math.sin(a)*sp, t: 0.5, maxT: 0.5, type: 'spark' });
               }
             }
           }
         }
-        if (s.boss && s.boss.alive && Math.hypot(pal.x - s.boss.x, pal.y - s.boss.y) < 90) {
-          s.boss.hp = Math.max(0, s.boss.hp - dmg); s.boss.flashT = 0.15;
-          s.particles.push({ x: s.boss.x, y: s.boss.y - 35, t: 0.5, maxT: 0.5, type: 'holy_hit', txt: '-' + dmg });
-          if (s.boss.hp <= 0) s.boss.alive = false;
-        }
       }
+      if (s.boss && s.boss.alive && Math.hypot(pal.x - s.boss.x, pal.y - s.boss.y) < auraR) {
+        s.boss.hp = Math.max(0, s.boss.hp - dmg); s.boss.flashT = 0.15;
+        s.particles.push({ x: s.boss.x, y: s.boss.y - 22, t: 0.5, maxT: 0.5, type: pType, txt: '-' + dmg });
+        if (s.boss.hp <= 0) s.boss.alive = false;
+      }
+    }
+
+    // Holy Power timer
+    if (s.holyPowerActive) {
+      s.holyPowerDuration = Math.max(0, s.holyPowerDuration - dt);
       if (s.holyPowerDuration <= 0) {
         s.holyPowerActive = false; s.holyPowerTimer = 6;
         const lbl = document.getElementById('rescue-hud-holylabel');
@@ -2992,7 +2997,7 @@ const App = {
     } else {
       s.holyPowerTimer = Math.max(0, s.holyPowerTimer - dt);
       if (s.holyPowerTimer <= 0) {
-        s.holyPowerActive = true; s.holyPowerDuration = 3; s.holyPowerDmgTimer = 0; s.holyTextT = 2.8;
+        s.holyPowerActive = true; s.holyPowerDuration = 3; s.holyTextT = 2.8;
         const lbl = document.getElementById('rescue-hud-holylabel');
         if (lbl) lbl.style.opacity = '1';
         for (let i = 0; i < 12; i++) {
@@ -3043,59 +3048,9 @@ const App = {
   _rescueHandleClick(mx, my, canvas) {
     const s = this._rescue;
     if (!s || !s.running) return;
-    let attacked = false;
-    const dmg = Math.max(1, 1 + Math.floor(s.savedCount / 2));
-
-    for (const camp of s.camps) {
-      for (const en of camp.enemies) {
-        if (!en.alive) continue;
-        if (Math.hypot(mx - en.x, my - en.y) <= 13) {
-          const pd = Math.hypot(s.paladin.x - en.x, s.paladin.y - en.y);
-          if (pd <= 70) {
-            if (!(s.hitCooldown[en.id] > 0)) {
-              en.hp = Math.max(0, en.hp - dmg); en.flashT = 0.18; s.hitCooldown[en.id] = 0.18;
-              s.particles.push({ x: en.x, y: en.y - 16, t: 0.65, maxT: 0.65, type: 'hit', txt: '-' + dmg });
-              if (en.hp <= 0) {
-                en.alive = false;
-                for (let i = 0; i < 7; i++) {
-                  const a = Math.random()*Math.PI*2, sp = 30+Math.random()*55;
-                  s.particles.push({ x: en.x, y: en.y, vx: Math.cos(a)*sp, vy: Math.sin(a)*sp, t: 0.55, maxT: 0.55, type: 'spark' });
-                }
-              }
-            }
-            attacked = true;
-          } else { s.paladin.destX = en.x; s.paladin.destY = en.y; attacked = true; /* out of range */}
-          break;
-        }
-      }
-      if (attacked) break;
-    }
-
-    if (!attacked && s.boss && s.boss.alive) {
-      if (Math.hypot(mx - s.boss.x, my - s.boss.y) <= 20) {
-        const pd = Math.hypot(s.paladin.x - s.boss.x, s.paladin.y - s.boss.y);
-        if (pd <= 80) {
-          if (!(s.hitCooldown['boss'] > 0)) {
-            s.boss.hp = Math.max(0, s.boss.hp - dmg); s.boss.flashT = 0.18; s.hitCooldown['boss'] = 0.18;
-            s.particles.push({ x: s.boss.x, y: s.boss.y - 28, t: 0.65, maxT: 0.65, type: 'hit', txt: '-' + dmg });
-            if (s.boss.hp <= 0) {
-              s.boss.alive = false;
-              for (let i = 0; i < 14; i++) {
-                const a = Math.random()*Math.PI*2, sp = 50+Math.random()*80;
-                s.particles.push({ x: s.boss.x, y: s.boss.y, vx: Math.cos(a)*sp, vy: Math.sin(a)*sp, t: 0.8, maxT: 0.8, type: 'boss_spark' });
-              }
-            }
-          }
-          attacked = true;
-        } else { s.paladin.destX = s.boss.x; s.paladin.destY = s.boss.y; attacked = true; }
-      }
-    }
-
-    if (!attacked) {
-      const m = 22;
-      s.paladin.destX = Math.max(m, Math.min(canvas.width  - m, mx));
-      s.paladin.destY = Math.max(m, Math.min(canvas.height - m, my));
-    }
+    const m = 22;
+    s.paladin.destX = Math.max(m, Math.min(canvas.width  - m, mx));
+    s.paladin.destY = Math.max(m, Math.min(canvas.height - m, my));
   },
 
   _drawRescue(canvas, s) {
@@ -3112,13 +3067,13 @@ const App = {
     for (const camp of s.camps) {
       const cleared = camp.enemies.every(e => !e.alive);
       ctx.save();
-      const g = ctx.createRadialGradient(camp.cx, camp.cy, 0, camp.cx, camp.cy, 28);
+      const g = ctx.createRadialGradient(camp.cx, camp.cy, 0, camp.cx, camp.cy, 32);
       g.addColorStop(0, cleared ? 'rgba(46,204,113,0.10)' : 'rgba(155,89,182,0.08)');
       g.addColorStop(1, 'rgba(0,0,0,0)');
-      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(camp.cx, camp.cy, 28, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(camp.cx, camp.cy, 32, 0, Math.PI*2); ctx.fill();
       ctx.strokeStyle = cleared ? 'rgba(46,204,113,0.22)' : 'rgba(155,89,182,0.15)';
       ctx.lineWidth = 1; ctx.setLineDash([3,4]);
-      ctx.beginPath(); ctx.arc(camp.cx, camp.cy, 28, 0, Math.PI*2); ctx.stroke();
+      ctx.beginPath(); ctx.arc(camp.cx, camp.cy, 32, 0, Math.PI*2); ctx.stroke();
       ctx.setLineDash([]); ctx.restore();
     }
 
@@ -3126,9 +3081,9 @@ const App = {
     if (s.bossSpawned && s.boss && s.boss.alive) {
       const pulse = 0.5 + 0.5*Math.sin(now/250);
       ctx.save();
-      const bg = ctx.createRadialGradient(W/2, H/2, 0, W/2, H/2, 40);
+      const bg = ctx.createRadialGradient(W/2, H/2, 0, W/2, H/2, 46);
       bg.addColorStop(0, 'rgba(180,0,200,' + (0.13*pulse) + ')'); bg.addColorStop(1, 'rgba(0,0,0,0)');
-      ctx.fillStyle = bg; ctx.beginPath(); ctx.arc(W/2, H/2, 40, 0, Math.PI*2); ctx.fill(); ctx.restore();
+      ctx.fillStyle = bg; ctx.beginPath(); ctx.arc(W/2, H/2, 46, 0, Math.PI*2); ctx.fill(); ctx.restore();
     }
 
     // Particles
@@ -3166,18 +3121,18 @@ const App = {
         const { x, y } = pris;
         const pulse = 0.55 + 0.45*Math.sin(now/550+x);
         ctx.save();
-        const glow = ctx.createRadialGradient(x,y,0,x,y,10);
+        const glow = ctx.createRadialGradient(x,y,0,x,y,12);
         glow.addColorStop(0, pris.state==='freed' ? 'rgba(46,204,113,' + (0.38*pulse) + ')' : 'rgba(130,200,240,' + (0.35*pulse) + ')');
         glow.addColorStop(1, 'rgba(0,0,0,0)');
-        ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(x,y,10,0,Math.PI*2); ctx.fill();
+        ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(x,y,12,0,Math.PI*2); ctx.fill();
         ctx.fillStyle = pris.state==='freed' ? '#2ecc71' : '#7ec8e3';
         ctx.strokeStyle = 'rgba(255,255,255,0.75)'; ctx.lineWidth = 1;
-        ctx.beginPath(); ctx.arc(x,y,5,0,Math.PI*2); ctx.fill(); ctx.stroke();
+        ctx.beginPath(); ctx.arc(x,y,6,0,Math.PI*2); ctx.fill(); ctx.stroke();
         ctx.fillStyle = pris.state==='freed' ? '#1a7a4a' : '#2c6a80';
-        ctx.beginPath(); ctx.arc(x,y-2,1.5,0,Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(x,y-2.3,1.8,0,Math.PI*2); ctx.fill();
         ctx.strokeStyle = pris.state==='freed' ? '#1a7a4a' : '#2c6a80'; ctx.lineWidth = 1;
-        ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x,y+3); ctx.stroke();
-        if (pris.state==='guarded') { ctx.strokeStyle='rgba(200,200,200,0.5)'; ctx.lineWidth=1; ctx.beginPath(); ctx.arc(x+3,y+1,1.4,0,Math.PI*2); ctx.stroke(); }
+        ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x,y+3.5); ctx.stroke();
+        if (pris.state==='guarded') { ctx.strokeStyle='rgba(200,200,200,0.5)'; ctx.lineWidth=1; ctx.beginPath(); ctx.arc(x+3.5,y+1,1.6,0,Math.PI*2); ctx.stroke(); }
         ctx.restore();
       }
     }
@@ -3190,25 +3145,23 @@ const App = {
         const isNear = Math.hypot(s.paladin.x-x, s.paladin.y-y) < 50;
         const pulse  = 0.5+0.5*Math.sin(now/220+x);
         ctx.save();
-        const aura = ctx.createRadialGradient(x,y,0,x,y,12);
+        const aura = ctx.createRadialGradient(x,y,0,x,y,14);
         aura.addColorStop(0, 'rgba(155,89,182,' + (isNear ? 0.28*pulse : 0.10) + ')');
         aura.addColorStop(1, 'rgba(0,0,0,0)');
-        ctx.fillStyle = aura; ctx.beginPath(); ctx.arc(x,y,12,0,Math.PI*2); ctx.fill();
-        if (en.flashT > 0) { ctx.fillStyle='rgba(255,100,100,' + (en.flashT/0.18) + ')'; ctx.beginPath(); ctx.arc(x,y,9,0,Math.PI*2); ctx.fill(); }
+        ctx.fillStyle = aura; ctx.beginPath(); ctx.arc(x,y,14,0,Math.PI*2); ctx.fill();
+        if (en.flashT > 0) { ctx.fillStyle='rgba(255,100,100,' + (en.flashT/0.18) + ')'; ctx.beginPath(); ctx.arc(x,y,10,0,Math.PI*2); ctx.fill(); }
         ctx.fillStyle='#3d0a55'; ctx.strokeStyle='#9b59b6'; ctx.lineWidth=1;
         ctx.beginPath();
-        for (let i=0; i<6; i++) { const a=(i/6)*Math.PI*2-Math.PI/6; i===0?ctx.moveTo(x+Math.cos(a)*8,y+Math.sin(a)*8):ctx.lineTo(x+Math.cos(a)*8,y+Math.sin(a)*8); }
+        for (let i=0; i<6; i++) { const a=(i/6)*Math.PI*2-Math.PI/6; i===0?ctx.moveTo(x+Math.cos(a)*9,y+Math.sin(a)*9):ctx.lineTo(x+Math.cos(a)*9,y+Math.sin(a)*9); }
         ctx.closePath(); ctx.fill(); ctx.stroke();
-        ctx.fillStyle='#6c2e88'; ctx.beginPath(); ctx.arc(x,y,5,0,Math.PI*2); ctx.fill();
+        ctx.fillStyle='#6c2e88'; ctx.beginPath(); ctx.arc(x,y,6,0,Math.PI*2); ctx.fill();
         ctx.fillStyle='#e74c3c';
-        ctx.beginPath(); ctx.arc(x-2.5,y-1.2,1.4,0,Math.PI*2); ctx.fill();
-        ctx.beginPath(); ctx.arc(x+2.5,y-1.2,1.4,0,Math.PI*2); ctx.fill();
-        const bw=16, bh=3, bx=x-bw/2, by=y-15;
+        ctx.beginPath(); ctx.arc(x-2.8,y-1.4,1.6,0,Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(x+2.8,y-1.4,1.6,0,Math.PI*2); ctx.fill();
+        const bw=18, bh=3, bx=x-bw/2, by=y-17;
         ctx.fillStyle='rgba(0,0,0,0.5)'; ctx.beginPath(); ctx.roundRect(bx-1,by-1,bw+2,bh+2,2); ctx.fill();
         const hp=en.hp/en.maxHp; ctx.fillStyle=hp>0.6?'#2ecc71':hp>0.3?'#f39c12':'#e74c3c';
         ctx.beginPath(); ctx.roundRect(bx,by,bw*hp,bh,2); ctx.fill();
-        ctx.fillStyle='rgba(255,255,255,0.75)'; ctx.font='7px monospace'; ctx.textAlign='center'; ctx.textBaseline='middle';
-        ctx.fillText(en.hp + '/' + en.maxHp, x, by+bh/2);
         ctx.restore();
       }
     }
@@ -3219,26 +3172,26 @@ const App = {
       const isNear = Math.hypot(s.paladin.x-x, s.paladin.y-y) < 65;
       const pulse  = 0.5+0.5*Math.sin(now/180);
       ctx.save();
-      const aura = ctx.createRadialGradient(x,y,0,x,y,28);
+      const aura = ctx.createRadialGradient(x,y,0,x,y,32);
       aura.addColorStop(0, 'rgba(200,0,220,' + (isNear ? 0.30*pulse : 0.16) + ')');
       aura.addColorStop(1, 'rgba(0,0,0,0)');
-      ctx.fillStyle=aura; ctx.beginPath(); ctx.arc(x,y,28,0,Math.PI*2); ctx.fill();
-      if (flashT>0) { ctx.fillStyle='rgba(255,120,120,' + (flashT/0.18) + ')'; ctx.beginPath(); ctx.arc(x,y,17,0,Math.PI*2); ctx.fill(); }
+      ctx.fillStyle=aura; ctx.beginPath(); ctx.arc(x,y,32,0,Math.PI*2); ctx.fill();
+      if (flashT>0) { ctx.fillStyle='rgba(255,120,120,' + (flashT/0.18) + ')'; ctx.beginPath(); ctx.arc(x,y,20,0,Math.PI*2); ctx.fill(); }
       ctx.fillStyle='#2d0040'; ctx.strokeStyle='#cc22cc'; ctx.lineWidth=1.5;
       ctx.beginPath();
-      for (let i=0; i<8; i++) { const a=(i/8)*Math.PI*2-Math.PI/8; i===0?ctx.moveTo(x+Math.cos(a)*15,y+Math.sin(a)*15):ctx.lineTo(x+Math.cos(a)*15,y+Math.sin(a)*15); }
+      for (let i=0; i<8; i++) { const a=(i/8)*Math.PI*2-Math.PI/8; i===0?ctx.moveTo(x+Math.cos(a)*17,y+Math.sin(a)*17):ctx.lineTo(x+Math.cos(a)*17,y+Math.sin(a)*17); }
       ctx.closePath(); ctx.fill(); ctx.stroke();
-      ctx.fillStyle='#880099'; ctx.beginPath(); ctx.arc(x,y,9,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle='#880099'; ctx.beginPath(); ctx.arc(x,y,10,0,Math.PI*2); ctx.fill();
       ctx.fillStyle='#c9a84c';
-      ctx.beginPath(); ctx.moveTo(x-5.5,y-11); ctx.lineTo(x-5.5,y-18); ctx.lineTo(x-2.5,y-15); ctx.lineTo(x,y-20); ctx.lineTo(x+2.5,y-15); ctx.lineTo(x+5.5,y-18); ctx.lineTo(x+5.5,y-11); ctx.closePath(); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(x-6.3,y-12.6); ctx.lineTo(x-6.3,y-20.7); ctx.lineTo(x-2.9,y-17.3); ctx.lineTo(x,y-23); ctx.lineTo(x+2.9,y-17.3); ctx.lineTo(x+6.3,y-20.7); ctx.lineTo(x+6.3,y-12.6); ctx.closePath(); ctx.fill();
       ctx.fillStyle='#ff0000';
-      ctx.beginPath(); ctx.arc(x-4,y-1.2,2,0,Math.PI*2); ctx.fill();
-      ctx.beginPath(); ctx.arc(x+4,y-1.2,2,0,Math.PI*2); ctx.fill();
-      ctx.beginPath(); ctx.arc(x,y-5,1.4,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(x-4.6,y-1.4,2.3,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(x+4.6,y-1.4,2.3,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(x,y-5.8,1.6,0,Math.PI*2); ctx.fill();
       ctx.fillStyle='#ff6666';
-      ctx.beginPath(); ctx.arc(x-4,y-2,0.8,0,Math.PI*2); ctx.fill();
-      ctx.beginPath(); ctx.arc(x+4,y-2,0.8,0,Math.PI*2); ctx.fill();
-      const bw=30, bh=4, bx=x-bw/2, by=y-26;
+      ctx.beginPath(); ctx.arc(x-4.6,y-2.3,0.9,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(x+4.6,y-2.3,0.9,0,Math.PI*2); ctx.fill();
+      const bw=35, bh=4, bx=x-bw/2, by=y-30;
       ctx.fillStyle='rgba(0,0,0,0.6)'; ctx.beginPath(); ctx.roundRect(bx-1,by-1,bw+2,bh+2,3); ctx.fill();
       const hpPct=hp/maxHp; ctx.fillStyle=hpPct>0.6?'#aa00cc':hpPct>0.3?'#cc3300':'#ff0000';
       ctx.beginPath(); ctx.roundRect(bx,by,bw*hpPct,bh,3); ctx.fill();
@@ -3247,15 +3200,38 @@ const App = {
       ctx.restore();
     }
 
+    // Paladin combat aura (damage zone, radius 52)
+    {
+      const px = s.paladin.x, py = s.paladin.y;
+      const pulse = 0.5 + 0.5*Math.sin(now/400);
+      ctx.save();
+      if (s.holyPowerActive) {
+        const g = ctx.createRadialGradient(px,py,0,px,py,52);
+        g.addColorStop(0, 'rgba(255,230,30,' + (0.22+0.12*pulse) + ')');
+        g.addColorStop(0.6, 'rgba(255,200,0,' + (0.10+0.06*pulse) + ')');
+        g.addColorStop(1, 'rgba(255,200,0,0)');
+        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(px,py,52,0,Math.PI*2); ctx.fill();
+        ctx.strokeStyle = 'rgba(255,230,30,' + (0.65+0.25*pulse) + ')';
+        ctx.lineWidth = 1.5;
+      } else {
+        const g = ctx.createRadialGradient(px,py,0,px,py,52);
+        g.addColorStop(0, 'rgba(201,168,76,' + (0.12+0.06*pulse) + ')');
+        g.addColorStop(0.6, 'rgba(201,168,76,' + (0.06+0.03*pulse) + ')');
+        g.addColorStop(1, 'rgba(201,168,76,0)');
+        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(px,py,52,0,Math.PI*2); ctx.fill();
+        ctx.strokeStyle = 'rgba(201,168,76,' + (0.35+0.15*pulse) + ')';
+        ctx.lineWidth = 1;
+      }
+      ctx.setLineDash([4,5]);
+      ctx.beginPath(); ctx.arc(px,py,52,0,Math.PI*2); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.restore();
+    }
+
     // Paladin
     this._drawRescuePaladin(ctx, s.paladin.x, s.paladin.y, s.strength, s.strengthBase, now);
 
-    // Attack range ring
-    ctx.save(); ctx.strokeStyle='rgba(201,168,76,0.10)'; ctx.lineWidth=1; ctx.setLineDash([2,5]);
-    ctx.beginPath(); ctx.arc(s.paladin.x, s.paladin.y, 52, 0, Math.PI*2); ctx.stroke();
-    ctx.setLineDash([]); ctx.restore();
-
-    // Holy Power recharge arc
+    // Holy Power recharge arc (small indicator around paladin)
     if (!s.holyPowerActive) {
       const pct = 1 - s.holyPowerTimer / 6;
       ctx.save(); ctx.strokeStyle='rgba(240,220,60,0.55)'; ctx.lineWidth=2;
@@ -3264,6 +3240,22 @@ const App = {
       const pulse = 0.5+0.5*Math.sin(now/80);
       ctx.save(); ctx.strokeStyle='rgba(255,230,30,' + (0.5+0.4*pulse) + ')'; ctx.lineWidth=2.5;
       ctx.beginPath(); ctx.arc(s.paladin.x, s.paladin.y, 24, 0, Math.PI*2); ctx.stroke(); ctx.restore();
+    }
+
+    // Strength number — large, above paladin (unscaled)
+    {
+      const px = s.paladin.x, py = s.paladin.y;
+      const strLow = s.strength < 5, strHigh = s.strength > s.strengthBase * 1.4;
+      const col = strLow ? '#e74c3c' : strHigh ? '#2ecc71' : '#c9a84c';
+      ctx.save();
+      ctx.shadowColor = col; ctx.shadowBlur = 10;
+      ctx.fillStyle = 'rgba(0,0,0,0.6)';
+      ctx.beginPath(); ctx.roundRect(px-22, py-50, 44, 22, 5); ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = col; ctx.font = 'bold 16px monospace';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText('\u26A1 ' + Math.ceil(s.strength), px, py-39);
+      ctx.restore();
     }
 
     // "Giusto Potere!" text overlay
@@ -3299,7 +3291,7 @@ const App = {
 
   _drawRescuePaladin(ctx, x, y, strength, strengthBase, now) {
     ctx.save();
-    ctx.translate(x, y); ctx.scale(0.48, 0.48); ctx.translate(-x, -y);
+    ctx.translate(x, y); ctx.scale(0.55, 0.55); ctx.translate(-x, -y);
 
     const auraR = 26 + (strength/Math.max(strengthBase,1))*8;
     const auraA = 0.15 + 0.10*Math.sin(now/600);
@@ -3353,14 +3345,6 @@ const App = {
     ctx.strokeStyle='#c9a84c'; ctx.lineWidth=3;
     ctx.beginPath(); ctx.moveTo(x+10,y-17); ctx.lineTo(x+18,y-17); ctx.stroke();
     ctx.fillStyle='#c9a84c'; ctx.beginPath(); ctx.arc(x+16,y-9,3,0,Math.PI*2); ctx.fill();
-
-    // Strength badge
-    const strLow=strength<5, strHigh=strength>strengthBase*1.4;
-    const bc=strLow?'#e74c3c':strHigh?'#2ecc71':'#c9a84c';
-    ctx.fillStyle='rgba(0,0,0,0.72)'; ctx.strokeStyle=bc; ctx.lineWidth=1.5;
-    ctx.beginPath(); ctx.roundRect(x-20,y-72,42,18,5); ctx.fill(); ctx.stroke();
-    ctx.fillStyle=bc; ctx.font='bold 12px monospace'; ctx.textAlign='center'; ctx.textBaseline='middle';
-    ctx.fillText('\u26A1 ' + Math.ceil(strength), x+1, y-63);
 
     ctx.restore();
   },
