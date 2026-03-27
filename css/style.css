@@ -653,7 +653,9 @@ body {
   color: var(--green-light);
   vertical-align: middle;
   margin-left: 1px;
+  display: none;
 }
+.stat-box.proficient .prof-icon { display: inline; }
 
 /* ── Outcome boxes ── */
 .mission-outcome {
