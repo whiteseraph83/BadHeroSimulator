@@ -120,6 +120,7 @@ const CLASSES = [
     avatar: 'guerriero.svg',
     hasPickpocket: false,
     hasDiceGame: true,
+    hasDrinkingGame: true,
     startingGold: 50,
   },
   {

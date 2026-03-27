@@ -1025,6 +1025,117 @@ body {
 }
 
 /* ═══════════════════════════════════════════════════════════
+   GUERRIERO — Gara di Bevute
+   ═══════════════════════════════════════════════════════════ */
+
+/* Bottone sidebar */
+.btn-drinking {
+  background: linear-gradient(135deg, #3d1a00, #7a3510);
+  color: #f5c842;
+  border: 1px solid rgba(160,80,20,.6);
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  letter-spacing: .04em;
+  transition: all .2s;
+}
+.btn-drinking:hover:not(:disabled) {
+  background: linear-gradient(135deg, #5a2800, #9e4a18);
+  border-color: #d4a017;
+  color: #ffe066;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(212,160,23,.35);
+}
+.btn-drinking:disabled { opacity: .4; cursor: not-allowed; }
+
+/* Round dots */
+.drinking-round-dot {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  border: 2px solid #5a3a10;
+  color: #5a3a10;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: .85rem;
+  transition: all .25s;
+}
+.drinking-round-dot.active { border-color: #d4a017; color: #d4a017; }
+.drinking-round-dot.won    { border-color: #52b788; color: #52b788; background: rgba(82,183,136,.12); }
+.drinking-round-dot.lost   { border-color: #e74c3c; color: #e74c3c; background: rgba(231,76,60,.12); }
+
+/* Boccale */
+.drinking-mug-container {
+  display: flex; justify-content: center; padding: 8px 0;
+}
+.drinking-mug {
+  position: relative;
+  width: 110px; height: 200px;
+  border: 3px solid #8b4513;
+  border-top: none;
+  border-radius: 0 0 14px 14px;
+  background: rgba(15,8,2,.85);
+  overflow: hidden;
+  transition: border-color .3s;
+}
+.drinking-target-zone {
+  position: absolute; left: 0; right: 0;
+  background: rgba(212,160,23,.22);
+  border-top: 2px dashed rgba(212,160,23,.7);
+  border-bottom: 2px dashed rgba(212,160,23,.7);
+  z-index: 2;
+  transition: bottom .1s, height .1s;
+}
+.drinking-liquid {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: linear-gradient(180deg, rgba(212,160,23,.85) 0%, rgba(140,90,5,.95) 100%);
+  z-index: 1;
+}
+.drinking-foam {
+  position: absolute; left: 0; right: 0; height: 10px;
+  background: rgba(255,255,255,.55);
+  border-radius: 50% 50% 0 0 / 6px 6px 0 0;
+  z-index: 3;
+  transform: translateY(-2px);
+}
+
+/* Bottone Bevi! */
+.btn-drinking-action {
+  background: linear-gradient(135deg, #7a3510, #d4a017);
+  color: #fff;
+  border: none;
+  padding: 10px 40px;
+  font-family: 'Cinzel', serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  border-radius: 8px;
+  letter-spacing: .05em;
+  transition: all .15s;
+  box-shadow: 0 4px 16px rgba(212,160,23,.3);
+}
+.btn-drinking-action:hover {
+  background: linear-gradient(135deg, #9e4a18, #e8b820);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(212,160,23,.45);
+}
+.btn-drinking-action:active { transform: translateY(0); }
+
+/* Tema chiaro */
+[data-theme="light"] .btn-drinking {
+  background: linear-gradient(135deg, #ffe4b5, #f5c842);
+  color: #5a2800; border-color: #c08010;
+}
+[data-theme="light"] .btn-drinking:hover:not(:disabled) {
+  background: linear-gradient(135deg, #ffd080, #e8b020);
+  color: #3d1a00; border-color: #9a6000;
+}
+[data-theme="light"] .drinking-round-dot { border-color: #c8a870; color: #7a5a3c; }
+[data-theme="light"] .drinking-round-dot.active { border-color: #7a5a00; color: #7a5a00; }
+[data-theme="light"] .drinking-mug { background: rgba(250,240,220,.6); border-color: #7a3510; }
+[data-theme="light"] .drinking-target-zone {
+  background: rgba(122,90,0,.18);
+  border-top-color: rgba(122,90,0,.6);
+  border-bottom-color: rgba(122,90,0,.6);
+}
+
+/* ═══════════════════════════════════════════════════════════
    MAGO — Studio (Memory Game) + Alchimia
    ═══════════════════════════════════════════════════════════ */
 

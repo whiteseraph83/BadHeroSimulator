@@ -123,6 +123,59 @@ const UI = {
     btn.disabled = remaining <= 0 || Game.state.gameOver;
   },
 
+  /* ─── Gara di Bevute btn (Guerriero) ───────────────────── */
+  renderDrinkingBtn() {
+    const btn   = document.getElementById('btn-drinking-game');
+    const badge = document.getElementById('drinking-badge');
+    if (!btn) return;
+    const remaining = Game.drinkingGameRemaining();
+    badge.textContent = remaining;
+    btn.disabled = remaining <= 0 || Game.state.gameOver;
+  },
+
+  openDrinkingGame() {
+    document.getElementById('drinking-game-phase').classList.remove('d-none');
+    document.getElementById('drinking-result-phase').classList.add('d-none');
+    document.getElementById('btn-drinking-close').classList.add('d-none');
+    document.getElementById('drinking-instruction').textContent = 'Pronto? Bevi quando il livello è nella zona dorata!';
+    document.getElementById('drunk-bar-fill').style.width = '0%';
+    document.getElementById('drunk-level-text').textContent = 'Sobrio';
+    ['drinking-dot-1','drinking-dot-2','drinking-dot-3'].forEach((id, i) => {
+      const d = document.getElementById(id);
+      d.className = 'drinking-round-dot' + (i === 0 ? ' active' : '');
+    });
+    bootstrap.Modal.getOrCreateInstance(document.getElementById('modal-drinking')).show();
+  },
+
+  updateDrinkingDot(roundIdx, won) {
+    const dot = document.getElementById(`drinking-dot-${roundIdx + 1}`);
+    dot.classList.remove('active');
+    dot.classList.add(won ? 'won' : 'lost');
+    const next = document.getElementById(`drinking-dot-${roundIdx + 2}`);
+    if (next) next.classList.add('active');
+  },
+
+  showDrinkingResult(result) {
+    document.getElementById('drinking-game-phase').classList.add('d-none');
+    document.getElementById('drinking-result-phase').classList.remove('d-none');
+    document.getElementById('btn-drinking-close').classList.remove('d-none');
+    const outcomeEl = document.getElementById('drinking-outcome');
+    outcomeEl.className = `mission-outcome ${result.won ? 'outcome-success' : 'outcome-failure'}`;
+    outcomeEl.textContent = result.won
+      ? (result.check.result === 'nat20' ? '🍺 Leggenda della Taverna! Un eroe senza pari!' : '🍺 Vittoria! Nessuno regge il confronto con te.')
+      : '😵 Sconfitto! Cadi dal sgabello tra le risate degli avventori.';
+    const rewardEl = document.getElementById('drinking-rewards');
+    rewardEl.classList.remove('d-none');
+    const rows = [];
+    if (result.xp  > 0) rows.push(`<div class="reward-row"><span class="reward-icon">⭐</span> +${result.xp} PE</div>`);
+    if (result.gold > 0) rows.push(`<div class="reward-row"><span class="reward-icon">💰</span> +${result.gold} mo</div>`);
+    if (result.gold < 0) rows.push(`<div class="reward-row text-danger"><span class="reward-icon">💰</span> ${result.gold} mo</div>`);
+    if (result.fame > 0) rows.push(`<div class="reward-row"><span class="reward-icon">👁️</span> +${result.fame} fama</div>`);
+    const checkLabel = { nat20:'CRITICO 🎯', success:'Superato', partial:'Parziale', failure:'Fallito', nat1:'CRITICO 1' };
+    rows.push(`<div class="reward-row text-muted small"><span class="reward-icon">🎲</span> Tiro CON: ${result.check.roll}+${result.check.bonus}=${result.check.total} — ${checkLabel[result.check.result] || result.check.result}</div>`);
+    rewardEl.innerHTML = rows.join('');
+  },
+
   /* ─── Tab Pozioni (solo Druido) ────────────────────────────── */
   renderPozioniTab() {
     const ingInv    = Game.state.ingredientInventory || [];
@@ -1293,6 +1346,7 @@ const UI = {
     this.renderCharacter();
     this.renderPickpocketBtn();
     this.renderStudyBtn();
+    this.renderDrinkingBtn();
     this.renderPozioniTab();
     this.renderIncantesimiTab();
     this.renderCraftSlots();
@@ -1330,6 +1384,9 @@ const UI = {
     // Tab Incantesimi (solo Mago)
     document.getElementById('tab-incantesimi-nav').classList.toggle('d-none', !cls.hasSpellTab);
 
+    // Gara di Bevute (solo Guerriero)
+    document.getElementById('drinking-wrapper').classList.toggle('d-none', !cls.hasDrinkingGame);
+
     // Classe sotto il nome
     document.getElementById('char-class').textContent = cls.name;
 
@@ -1360,10 +1417,11 @@ const UI = {
           <div class="class-card-profs">
             <i class="bi bi-patch-check-fill text-green"></i>
             ${cls.proficiencies.map(k => profAbbr[k]).join(' · ')}
-            ${cls.hasPickpocket  ? '<span class="ms-1 text-warning" title="Ha il borseggio"><i class="bi bi-mask"></i></span>' : ''}
-            ${cls.hasDiceGame    ? '<span class="ms-1 text-info"    title="Ha il gioco dei dadi"><i class="bi bi-dice-5"></i></span>' : ''}
-            ${cls.hasPotioniTab  ? '<span class="ms-1 text-success" title="Alchimia: prepara pozioni"><i class="bi bi-flask"></i></span>' : ''}
-            ${cls.hasSpellTab    ? '<span class="ms-1 text-info"    title="Grimorio: lancia incantesimi"><i class="bi bi-stars"></i></span>' : ''}
+            ${cls.hasPickpocket   ? '<span class="ms-1 text-warning" title="Ha il borseggio"><i class="bi bi-mask"></i></span>' : ''}
+            ${cls.hasDiceGame     ? '<span class="ms-1 text-info"    title="Ha il gioco dei dadi"><i class="bi bi-dice-5"></i></span>' : ''}
+            ${cls.hasDrinkingGame ? '<span class="ms-1 text-warning" title="Gara di bevute"><i class="bi bi-cup-hot-fill"></i></span>' : ''}
+            ${cls.hasPotioniTab   ? '<span class="ms-1 text-success" title="Alchimia: prepara pozioni"><i class="bi bi-flask"></i></span>' : ''}
+            ${cls.hasSpellTab     ? '<span class="ms-1 text-info"    title="Grimorio: lancia incantesimi"><i class="bi bi-stars"></i></span>' : ''}
           </div>
         </div>
       </div>`).join('');

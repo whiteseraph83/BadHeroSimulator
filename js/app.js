@@ -34,6 +34,17 @@ const App = {
   // Recipe modal
   _modalRecipeId:       null,
   _modalRecipeType:     null,
+  // Gara di Bevute (Guerriero)
+  _drinkAnimFrameId:    null,
+  _drinkLastTime:       null,
+  _drinkCurrentLevel:   0.5,
+  _drinkingRoundsWon:   0,
+  _drinkingRoundIdx:    0,
+  _drinkRoundConfigs: [
+    { speed: 1.2, targetSize: 0.28, label: 'Round 1 — Inizia la sfida!' },
+    { speed: 1.8, targetSize: 0.20, label: 'Round 2 — Stai barcollando...' },
+    { speed: 2.6, targetSize: 0.13, label: 'Finale! Concentrati!' },
+  ],
 
   /* ─── Bootstrap ───────────────────────────────────────── */
   init() {
@@ -208,6 +219,73 @@ const App = {
       }
       UI.openPickpocketGame();
       this._startPickpocketGame(start.speed);
+    });
+
+    // Gara di Bevute — apre minigioco
+    document.getElementById('btn-drinking-game').addEventListener('click', () => {
+      if (!Game.state || Game.state.gameOver) return;
+      const result = Game.startDrinkingGame();
+      if (!result.ok) { UI.toast(result.reason || 'Già sfidato oggi.'); return; }
+      this._drinkingRoundsWon = 0;
+      this._drinkingRoundIdx  = 0;
+      UI.openDrinkingGame();
+      setTimeout(() => this._startDrinkingRound(0), 300);
+      UI.refresh();
+    });
+
+    // Bevi! — click durante il minigioco
+    document.getElementById('btn-drink').addEventListener('click', () => {
+      if (this._drinkAnimFrameId === null) return;
+      cancelAnimationFrame(this._drinkAnimFrameId);
+      this._drinkAnimFrameId = null;
+      this._drinkLastTime    = null;
+
+      const config     = this._drinkRoundConfigs[this._drinkingRoundIdx];
+      const targetBot  = 0.5 - config.targetSize / 2;
+      const targetTop  = 0.5 + config.targetSize / 2;
+      const hit        = this._drinkCurrentLevel >= targetBot && this._drinkCurrentLevel <= targetTop;
+
+      UI.updateDrinkingDot(this._drinkingRoundIdx, hit);
+      if (hit) this._drinkingRoundsWon++;
+
+      // Flash feedback sul boccale
+      const mug = document.getElementById('drinking-mug');
+      mug.style.borderColor = hit ? '#52b788' : '#e74c3c';
+      setTimeout(() => { mug.style.borderColor = ''; }, 400);
+
+      this._drinkingRoundIdx++;
+      const roundsDone = this._drinkingRoundIdx;
+      const won  = this._drinkingRoundsWon >= 2;
+      const lost = (roundsDone - this._drinkingRoundsWon) >= 2;
+
+      if (won || lost || roundsDone >= 3) {
+        const result = Game.applyDrinkingResult(this._drinkingRoundsWon);
+        UI.showDrinkingResult(result);
+        UI.refresh();
+        this._handleChallenges(result.completedChallenges);
+        if (result.levelUpResult) {
+          setTimeout(() => {
+            UI.showLevelUpModal(result.levelUpResult.newLevel, (choices) => {
+              Game.applyLevelUp(choices);
+              UI.refresh();
+              UI.toast(`Livello ${Game.state.character.level} raggiunto!`);
+            });
+          }, 1800);
+        }
+      } else {
+        // Prossimo round dopo breve pausa
+        const drunkTexts = ['Sobrio', 'Alticcio', 'Ubriaco', 'Completamente sbronzo'];
+        document.getElementById('drunk-bar-fill').style.width = `${this._drinkingRoundIdx * 33}%`;
+        document.getElementById('drunk-level-text').textContent = drunkTexts[this._drinkingRoundIdx] || 'Ubriaco';
+        setTimeout(() => this._startDrinkingRound(this._drinkingRoundIdx), 600);
+      }
+    });
+
+    // Chiusura modal bevute — ferma animazione
+    document.getElementById('modal-drinking').addEventListener('hidden.bs.modal', () => {
+      cancelAnimationFrame(this._drinkAnimFrameId);
+      this._drinkAnimFrameId = null;
+      this._drinkLastTime    = null;
     });
 
     // Studia — apre memory game
@@ -806,6 +884,33 @@ const App = {
       // Prova 1 superata — mostra feedback e riparte
       UI.showWantedRoundFeedback(true, () => this._startWantedGame());
     }
+  },
+
+  /* ─── Gara di Bevute ────────────────────────────────────── */
+  _startDrinkingRound(roundIdx) {
+    const config = this._drinkRoundConfigs[roundIdx];
+    document.getElementById('drinking-instruction').textContent = config.label;
+
+    // Imposta zona target (centrata al 50%, altezza = targetSize)
+    const tz = document.getElementById('drinking-target-zone');
+    tz.style.bottom = `${(0.5 - config.targetSize / 2) * 100}%`;
+    tz.style.height = `${config.targetSize * 100}%`;
+
+    // Ripristina colore boccale
+    document.getElementById('drinking-mug').style.borderColor = '';
+
+    const tick = (ts) => {
+      if (!this._drinkLastTime) this._drinkLastTime = ts;
+      const dt = (ts - this._drinkLastTime) / 1000;
+      this._drinkLastTime = ts;
+      this._drinkCurrentLevel = 0.5 + 0.45 * Math.sin(ts / 1000 * config.speed);
+      document.getElementById('drinking-liquid').style.height = `${this._drinkCurrentLevel * 100}%`;
+      document.getElementById('drinking-foam').style.bottom   = `${this._drinkCurrentLevel * 100}%`;
+      this._drinkAnimFrameId = requestAnimationFrame(tick);
+    };
+    cancelAnimationFrame(this._drinkAnimFrameId);
+    this._drinkLastTime    = null;
+    this._drinkAnimFrameId = requestAnimationFrame(tick);
   },
 
   _applyAndShowDiceResult(result) {

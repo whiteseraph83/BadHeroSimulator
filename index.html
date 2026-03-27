@@ -144,6 +144,14 @@
             </button>
           </div>
 
+          <!-- Gara di Bevute button (solo Guerriero) -->
+          <div class="mb-2 d-none" id="drinking-wrapper">
+            <button class="btn btn-drinking w-100" id="btn-drinking-game">
+              <i class="bi bi-cup-hot-fill"></i> Gara di Bevute
+              <span class="badge bg-dark ms-1" id="drinking-badge">1</span>
+            </button>
+          </div>
+
           <!-- Guild tax info -->
           <div class="tax-info" id="guild-tax-info">
             <div class="d-flex justify-content-between align-items-center">
@@ -774,6 +782,62 @@
           <i class="bi bi-arrow-repeat"></i> Usa Rilancio (<span id="pp-rerolls-remaining">0</span> rimasti)
         </button>
         <button class="btn btn-outline-gold" data-bs-dismiss="modal">Chiudi</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ===== MODAL: GARA DI BEVUTE ===== -->
+<div class="modal fade" id="modal-drinking" data-bs-backdrop="static" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content modal-dark" style="border:1px solid #8b4513;">
+      <div class="modal-header" style="border-bottom:1px solid rgba(139,69,19,0.4);background:rgba(139,69,19,0.12);">
+        <h5 class="modal-title" style="color:#d4a017;"><i class="bi bi-cup-hot-fill"></i> Gara di Bevute</h5>
+      </div>
+      <div class="modal-body">
+        <!-- Round dots -->
+        <div class="d-flex justify-content-center gap-3 mb-3">
+          <div class="drinking-round-dot" id="drinking-dot-1">1</div>
+          <div class="drinking-round-dot" id="drinking-dot-2">2</div>
+          <div class="drinking-round-dot" id="drinking-dot-3">3</div>
+        </div>
+        <!-- Game phase -->
+        <div id="drinking-game-phase">
+          <p class="text-center small mb-3" id="drinking-instruction" style="color:#aaa;">Pronto? Bevi quando il livello è nella zona dorata!</p>
+          <!-- Mug -->
+          <div class="drinking-mug-container">
+            <div class="drinking-mug" id="drinking-mug">
+              <div class="drinking-target-zone" id="drinking-target-zone"></div>
+              <div class="drinking-liquid" id="drinking-liquid"></div>
+              <div class="drinking-foam" id="drinking-foam"></div>
+            </div>
+          </div>
+          <!-- Ubriachezza bar -->
+          <div class="mt-3 px-2">
+            <div class="d-flex justify-content-between small mb-1">
+              <span style="color:#aaa;"><i class="bi bi-stars"></i> Ubriachezza</span>
+              <span id="drunk-level-text" style="color:#d4a017;">Sobrio</span>
+            </div>
+            <div class="progress" style="height:6px;background:rgba(255,255,255,.08);border-radius:4px;">
+              <div id="drunk-bar-fill" class="progress-bar" style="width:0%;background:linear-gradient(90deg,#d4a017,#e67e22);transition:width 0.6s;border-radius:4px;"></div>
+            </div>
+          </div>
+          <!-- Bottone bevi -->
+          <div class="text-center mt-4">
+            <button class="btn btn-drinking-action" id="btn-drink">
+              <i class="bi bi-cup-fill"></i> Bevi!
+            </button>
+          </div>
+        </div>
+        <!-- Result phase -->
+        <div id="drinking-result-phase" class="d-none text-center py-2">
+          <div id="drinking-outcome" class="mission-outcome mb-3"></div>
+          <div id="drinking-rewards" class="mission-rewards d-none mb-2 text-start"></div>
+        </div>
+      </div>
+      <div class="modal-footer" style="border-top:1px solid rgba(139,69,19,0.4);">
+        <button class="btn btn-warning d-none" id="btn-drinking-close" data-bs-dismiss="modal">Chiudi</button>
       </div>
     </div>
   </div>

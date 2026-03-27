@@ -39,6 +39,7 @@ const Game = {
           if (!this.state.knownSpells)                        this.state.knownSpells = [];
           if (this.state.thiefAttackPending === undefined)    this.state.thiefAttackPending = false;
           if (this.state.thiefAttackCompleted === undefined)  this.state.thiefAttackCompleted = false;
+          if (this.state.drinkingGameUsed === undefined)      this.state.drinkingGameUsed = 0;
           return true;
         }
       } catch (e) {
@@ -92,6 +93,7 @@ const Game = {
       knownRecipes: [],
       knownSpells: [],
       studyUsed: 0,
+      drinkingGameUsed: 0,
       gameOver: false
     };
     this.generateDailyMissions();
@@ -976,6 +978,53 @@ const Game = {
     return { success: false, reward: null, outcomeText: 'Le dita non erano abbastanza veloci. Niente da fare.' };
   },
 
+  /* ─── Gara di Bevute (Guerriero) ───────────────────────── */
+  drinkingGameRemaining() {
+    return this.state.drinkingGameUsed > 0 ? 0 : 1;
+  },
+
+  startDrinkingGame() {
+    if (this.drinkingGameRemaining() <= 0) return { ok: false, reason: 'Già sfidato oggi.' };
+    this.state.drinkingGameUsed = 1;
+    this.save();
+    return { ok: true };
+  },
+
+  applyDrinkingResult(roundsWon) {
+    const char  = this.state.character;
+    const check = this.resolveCheck('con', 12);
+    const isNat20   = check.result === 'nat20';
+    const isSuccess = isNat20 || check.result === 'success';
+    const bet = 15 + char.level * 5;
+    let xp = 0, gold = 0, fame = 0, logText = '', won = roundsWon >= 2;
+    if (won) {
+      if (isNat20) {
+        xp = 150 + char.level * 20; gold = bet * 4; fame = 8 + char.level;
+        logText = `🍺 Leggenda della taverna! CON critico! +${xp} PE, +${gold} mo, +${fame} fama`;
+      } else if (isSuccess) {
+        xp = 80 + char.level * 15; gold = bet * 2; fame = 4;
+        logText = `🍺 Gara di bevute vinta! +${xp} PE, +${gold} mo, +${fame} fama`;
+      } else {
+        xp = 50 + char.level * 10; gold = bet; fame = 2;
+        logText = `🍺 Vinto barcollando! +${xp} PE, +${gold} mo`;
+      }
+      char.xp   += xp;
+      char.gold += gold;
+      char.fame  = Math.max(0, char.fame + fame);
+    } else {
+      const goldLost = Math.min(bet, char.gold);
+      char.gold = Math.max(0, char.gold - goldLost);
+      gold = -goldLost;
+      logText = `🍺 Gara di bevute persa! -${goldLost} mo`;
+    }
+    char.log.unshift({ day: char.day, text: logText, type: won ? 'success' : 'fail' });
+    if (char.log.length > 500) char.log.pop();
+    const completedChallenges = this.checkChallenges('passive');
+    const levelUpResult = this.checkLevelUp();
+    this.save();
+    return { won, roundsWon, check, xp, gold, fame, completedChallenges, levelUpResult };
+  },
+
   /* ─── Tassa della Gilda ─────────────────────────────────── */
   guildTax() {
     const char = this.state.character;
@@ -1029,6 +1078,7 @@ const Game = {
     this.state.rerollsUsed            = 0;
     this.state.diceRerollsUsed        = 0;
     this.state.studyUsed              = 0;
+    this.state.drinkingGameUsed       = 0;
     this.state.wantedMissionCompleted = false;
     this.state.thiefAttackCompleted   = false;
 
