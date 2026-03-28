@@ -372,11 +372,48 @@ const App = {
       setTimeout(() => this._startWantedGame(), 400);
     });
 
-    // Salva manuale
+    // Salva — esporta il salvataggio su file JSON
     document.getElementById('btn-save').addEventListener('click', () => {
       if (!Game.state) return;
-      Game.save();
-      UI.toast('Partita salvata!');
+      Game.save(); // assicura che lo stato sia aggiornato
+      const json = JSON.stringify(Game.state, null, 2);
+      const blob = new Blob([json], { type: 'application/json' });
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      const date = new Date().toISOString().slice(0, 10);
+      a.href     = url;
+      a.download = `badhero_${date}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      UI.toast('💾 Salvataggio esportato!');
+    });
+
+    // Carica — importa salvataggio da file JSON
+    document.getElementById('btn-load').addEventListener('click', () => {
+      document.getElementById('input-load-file').click();
+    });
+    document.getElementById('input-load-file').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        try {
+          const parsed = JSON.parse(ev.target.result);
+          if (parsed.version !== SAVE_VERSION) {
+            UI.toast('⚠️ File non compatibile con questa versione.', 'danger');
+            return;
+          }
+          localStorage.setItem(SAVE_KEY, JSON.stringify(parsed));
+          UI.toast('✅ Salvataggio caricato! Riavvio in corso...');
+          setTimeout(() => location.reload(), 900);
+        } catch {
+          UI.toast('⚠️ File non valido o corrotto.', 'danger');
+        }
+      };
+      reader.readAsText(file);
+      e.target.value = ''; // reset per permettere di ricaricare lo stesso file
     });
 
     // Nuova partita — apre conferma

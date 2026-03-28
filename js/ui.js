@@ -1278,9 +1278,22 @@ const UI = {
   },
 
   /* ─── Toast ────────────────────────────────────────────── */
-  toast(msg, delay = 2800) {
-    document.getElementById('toast-body').textContent = msg;
-    const t = new bootstrap.Toast(document.getElementById('toast-main'), { delay });
+  toast(msg, type = 'default', delay = 2800) {
+    const el = document.getElementById('toast-main');
+    const body = document.getElementById('toast-body');
+    body.textContent = msg;
+    // Reset tutte le classi colore/bordo
+    el.classList.remove('text-bg-dark', 'text-bg-success', 'text-bg-danger', 'text-bg-warning', 'border-gold', 'border-success', 'border-danger');
+    if (type === 'success') {
+      el.classList.add('text-bg-success', 'border-success');
+    } else if (type === 'danger') {
+      el.classList.add('text-bg-danger', 'border-danger');
+    } else if (type === 'warning') {
+      el.classList.add('text-bg-warning');
+    } else {
+      el.classList.add('text-bg-dark', 'border-gold');
+    }
+    const t = new bootstrap.Toast(el, { delay });
     t.show();
   },
 

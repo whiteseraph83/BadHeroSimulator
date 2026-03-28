@@ -16,7 +16,9 @@
   <span class="navbar-brand fw-bold"><i class="bi bi-gem"></i> BadHeroSimulator</span>
   <div class="d-flex gap-2 align-items-center">
     <button class="btn btn-sm btn-outline-secondary" id="btn-theme-toggle" title="Cambia tema">☀️</button>
-    <button class="btn btn-sm btn-outline-gold" id="btn-save"><i class="bi bi-floppy"></i> Salva</button>
+    <button class="btn btn-sm btn-outline-gold" id="btn-save" title="Esporta salvataggio su file"><i class="bi bi-download"></i> Salva</button>
+    <button class="btn btn-sm btn-outline-info" id="btn-load" title="Importa salvataggio da file"><i class="bi bi-upload"></i> Carica</button>
+    <input type="file" id="input-load-file" accept=".json" style="display:none">
     <button class="btn btn-sm btn-outline-danger" id="btn-newgame"><i class="bi bi-arrow-counterclockwise"></i> Nuova Partita</button>
   </div>
 </nav>
