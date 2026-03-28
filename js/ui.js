@@ -1547,8 +1547,11 @@ const UI = {
             ${cls.hasDrinkingGame ? '<span class="ms-1" title="Gara di bevute">🍺</span>' : ''}
             ${cls.hasArena        ? '<span class="ms-1" title="Arena: combatti ondate di nemici">⚔️</span>' : ''}
             ${cls.hasPrayer       ? '<span class="ms-1" title="Preghiera: chiedi la grazia divina">🙏</span>' : ''}
+            ${cls.hasConversionTab? '<span class="ms-1" title="Conversione: converti i fedeli alla tua causa">✝️</span>' : ''}
             ${cls.hasNatureTab    ? '<span class="ms-1" title="Equilibrio della Natura: riporta armonia alla foresta">🌿</span>' : ''}
+            ${cls.hasStudy && cls.hasNatureTab ? '<span class="ms-1" title="Studia la Foresta: impara i segreti della natura">🌲</span>' : ''}
             ${cls.hasSpellTab     ? '<span class="ms-1 text-info"    title="Grimorio: lancia incantesimi"><i class="bi bi-stars"></i></span>' : ''}
+            ${cls.hasStudy && cls.hasSpellTab ? '<span class="ms-1" title="Studia: espandi la tua conoscenza arcana">📖</span>' : ''}
             ${cls.hasStableTab  ? '<span class="ms-1" title="Cavalcatura: accudisci il tuo cavallo">🐎</span>' : ''}
             ${cls.hasRescueTab  ? '<span class="ms-1" title="Salva i Prigionieri: libera i captivi e combatti i nemici">🛡️</span>' : ''}
           </div>
