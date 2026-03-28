@@ -772,22 +772,49 @@ const App = {
       // Disabilita tutti i bottoni
       document.querySelectorAll('#thief-approaches button').forEach(b => b.disabled = true);
 
-      // Mostra risultato inline
-      const resEl = document.getElementById('thief-result');
-      resEl.classList.remove('d-none');
-      const statLabel = { str:'FOR', dex:'DES', wis:'SAG', int:'INT', cha:'CAR', con:'COS' };
-      const rollInfo  = `(${result.check.roll}+${result.check.bonus}=${result.check.total} vs DC ${result.check.dc} ${statLabel[stat]})`;
-      if (result.ok) {
-        const partial = result.partial;
-        resEl.className = 'small rounded p-2 mt-2 bg-success bg-opacity-10 border border-success text-success';
-        let txt = partial
-          ? `⚠️ ${rollInfo} — Il ladro fugge parzialmente. +${result.xp} PE, +${result.fame} fama`
-          : `✅ ${rollInfo} — Il ladro è sconfitto! +${result.xp} PE, +${result.fame} fama`;
-        if (result.goldGained) txt += `, +${result.goldGained} mo`;
-        resEl.textContent = txt;
-      } else {
-        resEl.className = 'small rounded p-2 mt-2 bg-danger bg-opacity-10 border border-danger text-danger';
-        resEl.textContent = `❌ ${rollInfo} — Il ladro ti ha derubato. -${result.goldLost} mo`;
+      // Mostra risultato in modal
+      const statLabel = { str:'Forza', dex:'Destrezza', wis:'Saggezza', int:'Intelligenza', cha:'Carisma', con:'Costituzione' };
+      const statAbr   = { str:'FOR', dex:'DES', wis:'SAG', int:'INT', cha:'CAR', con:'COS' };
+      const isCrit    = result.check.result === 'nat20';
+      const isCritFail= result.check.result === 'nat1';
+      const rollLine  = `D20 (${result.check.roll}) ${result.check.bonus >= 0 ? '+' : ''}${result.check.bonus} ${statAbr[stat]} = <strong>${result.check.total}</strong> vs DC ${result.check.dc}`;
+
+      const modalEl = document.getElementById('modal-thief-result');
+      if (modalEl) {
+        if (result.ok) {
+          const partial = result.partial;
+          document.getElementById('thief-result-modal-title').innerHTML     = partial ? '⚠️ Ladro in fuga' : '✅ Ladro sconfitto!';
+          document.getElementById('thief-result-modal-title').className     = 'modal-title ' + (partial ? 'text-warning' : 'text-success');
+          document.getElementById('thief-result-modal-icon').textContent    = isCrit ? '🎉' : partial ? '😤' : '💪';
+          document.getElementById('thief-result-modal-outcome').textContent = isCrit
+            ? 'Colpo critico! Il ladro non aveva scampo.'
+            : partial ? 'Riesci a respingerlo, ma non senza fatica.'
+            : `Hai usato ${statLabel[stat]} per sventare l'attacco.`;
+          document.getElementById('thief-result-modal-outcome').className   = 'fs-5 fw-bold ' + (partial ? 'text-warning' : 'text-success');
+          document.getElementById('thief-result-modal-roll').innerHTML      = rollLine;
+          document.getElementById('thief-result-modal-rewards').innerHTML   =
+            `<div class="d-flex flex-column gap-1">` +
+            `<div class="text-success">+${result.xp} PE</div>` +
+            `<div class="text-success">+${result.fame} fama</div>` +
+            (result.goldGained ? `<div class="text-warning">+${result.goldGained} mo (presi al ladro)</div>` : '') +
+            `<div class="text-info small">👁️ Visibilità −${result.visReduction}</div>` +
+            `</div>`;
+        } else {
+          document.getElementById('thief-result-modal-title').innerHTML     = isCritFail ? '💀 Fallimento critico!' : '❌ Sei stato derubato';
+          document.getElementById('thief-result-modal-title').className     = 'modal-title text-danger';
+          document.getElementById('thief-result-modal-icon').textContent    = isCritFail ? '😱' : '😔';
+          document.getElementById('thief-result-modal-outcome').textContent = isCritFail
+            ? 'Il ladro ti ha colpito e ferito prima di fuggire.'
+            : 'Il ladro è stato più veloce. La borsa è alleggerita.';
+          document.getElementById('thief-result-modal-outcome').className   = 'fs-5 fw-bold text-danger';
+          document.getElementById('thief-result-modal-roll').innerHTML      = rollLine;
+          document.getElementById('thief-result-modal-rewards').innerHTML   =
+            `<div class="d-flex flex-column gap-1">` +
+            `<div class="text-danger">−${result.goldLost} mo</div>` +
+            `<div class="text-info small">👁️ Visibilità −${result.visReduction} (stai più basso di profilo)</div>` +
+            `</div>`;
+        }
+        bootstrap.Modal.getOrCreateInstance(modalEl).show();
       }
 
       UI.refresh();
