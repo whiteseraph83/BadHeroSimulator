@@ -28,15 +28,11 @@ const Game = {
           if (!this.state.activeBoosts)                        this.state.activeBoosts = [];
           if (this.state.diceRerollsUsed === undefined)        this.state.diceRerollsUsed = 0;
           if (!this.state.character.classe)                    this.state.character.classe = 'ladro';
-          if (!this.state.ingredientInventory)                this.state.ingredientInventory = [];
-          if (!this.state.potionInventory)                    this.state.potionInventory = [];
-          if (!this.state.potionRequests)                     this.state.potionRequests = [];
           if (this.state.studyUsed === undefined)              this.state.studyUsed = 0;
           if (this.state.freeSpellUsed === undefined)          this.state.freeSpellUsed = 0;
           if (!this.state.componentInventory)                 this.state.componentInventory = [];
           if (!this.state.spellInventory)                     this.state.spellInventory = [];
           if (!this.state.spellRequests)                      this.state.spellRequests = [];
-          if (!this.state.knownRecipes)                       this.state.knownRecipes = [];
           if (!this.state.knownSpells)                        this.state.knownSpells = [];
           if (this.state.thiefAttackPending === undefined)    this.state.thiefAttackPending = false;
           if (this.state.thiefAttackCompleted === undefined)  this.state.thiefAttackCompleted = false;
@@ -94,13 +90,9 @@ const Game = {
       thiefAttackCompleted: false,
       activeBoosts: [],
       diceRerollsUsed: 0,
-      ingredientInventory: [],
-      potionInventory: [],
-      potionRequests: [],
       componentInventory: [],
       spellInventory: [],
       spellRequests: [],
-      knownRecipes: [],
       knownSpells: [],
       studyUsed: 0,
       drinkingGameUsed: 0,
@@ -115,7 +107,6 @@ const Game = {
     this.generateDailyMissions();
     this.generateMarketItems();
     this.generateDailyChallenges();
-    if (cls.hasPotioniTab) this.generatePotionRequests();
     if (cls.hasSpellTab)   this.generateSpellRequests();
     this.save();
   },
@@ -301,23 +292,13 @@ const Game = {
     const xp = 15;
     char.xp += xp;
     let ingredient = null;
-    if (Math.random() < 0.35) {
-      if (cls.hasSpellTab) {
-        if (!this.state.componentInventory) this.state.componentInventory = [];
-        const pool = SPELL_COMPONENTS.filter(c => c.quality === 1);
-        if (pool.length) {
-          const comp = pool[Math.floor(Math.random() * pool.length)];
-          this.state.componentInventory.push(comp.id);
-          ingredient = comp;
-        }
-      } else {
-        if (!this.state.ingredientInventory) this.state.ingredientInventory = [];
-        const pool = INGREDIENTS.filter(ing => ing.quality === 1);
-        if (pool.length) {
-          const ing = pool[Math.floor(Math.random() * pool.length)];
-          this.state.ingredientInventory.push(ing.id);
-          ingredient = ing;
-        }
+    if (Math.random() < 0.35 && cls.hasSpellTab) {
+      if (!this.state.componentInventory) this.state.componentInventory = [];
+      const pool = SPELL_COMPONENTS.filter(c => c.quality === 1);
+      if (pool.length) {
+        const comp = pool[Math.floor(Math.random() * pool.length)];
+        this.state.componentInventory.push(comp.id);
+        ingredient = comp;
       }
     }
     const levelUpResult = this.checkLevelUp();
@@ -346,38 +327,18 @@ const Game = {
         this.state.componentInventory.push(comp.id);
         awarded.push(comp);
       }
-    } else {
-      if (!this.state.ingredientInventory) this.state.ingredientInventory = [];
-      for (let i = 0; i < itemCount; i++) {
-        const pool = INGREDIENTS.filter(ing => ing.quality <= itemTierMax);
-        const ing  = pool[Math.floor(Math.random() * pool.length)];
-        this.state.ingredientInventory.push(ing.id);
-        awarded.push(ing);
-      }
     }
 
-    // 40% possibilità di sbloccare una ricetta
+    // 40% possibilità di sbloccare un incantesimo (solo Mago)
     let unlockedRecipe = null;
-    if (Math.random() < 0.40) {
-      if (isMago) {
-        if (!this.state.knownSpells) this.state.knownSpells = [];
-        const unknown = SPELL_RECIPES.filter(r => !this.state.knownSpells.includes(r.id));
-        if (unknown.length) {
-          // Peso verso qualità basse
-          const weighted = unknown.flatMap(r => Array(Math.max(1, 6 - r.quality)).fill(r));
-          const pick = weighted[Math.floor(Math.random() * weighted.length)];
-          this.state.knownSpells.push(pick.id);
-          unlockedRecipe = pick;
-        }
-      } else {
-        if (!this.state.knownRecipes) this.state.knownRecipes = [];
-        const unknown = POTION_RECIPES.filter(r => !this.state.knownRecipes.includes(r.id));
-        if (unknown.length) {
-          const weighted = unknown.flatMap(r => Array(Math.max(1, 6 - r.quality)).fill(r));
-          const pick = weighted[Math.floor(Math.random() * weighted.length)];
-          this.state.knownRecipes.push(pick.id);
-          unlockedRecipe = pick;
-        }
+    if (isMago && Math.random() < 0.40) {
+      if (!this.state.knownSpells) this.state.knownSpells = [];
+      const unknown = SPELL_RECIPES.filter(r => !this.state.knownSpells.includes(r.id));
+      if (unknown.length) {
+        const weighted = unknown.flatMap(r => Array(Math.max(1, 6 - r.quality)).fill(r));
+        const pick = weighted[Math.floor(Math.random() * weighted.length)];
+        this.state.knownSpells.push(pick.id);
+        unlockedRecipe = pick;
       }
     }
 
@@ -389,89 +350,49 @@ const Game = {
     return { ok: true, xp, gold, ingredients: awarded, unlockedRecipe, completedChallenges, levelUpResult };
   },
 
-  /* ─── Alchimia (solo Mago) ──────────────────────────── */
-  craftPotion(selectedIngredientIds) {
-    if (!this.state.ingredientInventory) this.state.ingredientInventory = [];
-    const inv = [...this.state.ingredientInventory];
-    for (const id of selectedIngredientIds) {
-      const idx = inv.indexOf(id);
-      if (idx === -1) return { ok: false, reason: 'Ingrediente mancante.' };
-      inv.splice(idx, 1);
-    }
-    const sorted = [...selectedIngredientIds].sort((a, b) => a - b);
-    const recipe = POTION_RECIPES.find(r => {
-      const rs = [...r.ingredients].sort((a, b) => a - b);
-      return rs.length === sorted.length && rs.every((v, i) => v === sorted[i]);
-    });
+  /* ─── Equilibrio della Natura (solo Druido) ─────────── */
+  startNatureBalance() {
+    return { ok: true };
+  },
+
+  applyNatureBalanceResult(win, movesLeft) {
     const char = this.state.character;
-    if (recipe) {
-      this.state.ingredientInventory = inv;
-      if (!this.state.potionInventory) this.state.potionInventory = [];
-      this.state.potionInventory.push(recipe.id);
-      char.xp   += recipe.reward.xp;
-      char.gold += recipe.reward.gold;
-      const logEntry = { day: char.day, text: `Pozione creata: ${recipe.name} (+${recipe.reward.xp} PE)`, type: 'success' };
-      char.log.unshift(logEntry); if (char.log.length > 500) char.log.pop();
-      const completedChallenges = this.checkChallenges('passive');
-      const levelUpResult = this.checkLevelUp();
-      this.save();
-      return { ok: true, recipe, completedChallenges, levelUpResult };
+    let xp, gold;
+    if (win) {
+      xp   = 80 + movesLeft * 15;
+      gold = 30 + movesLeft * 8;
     } else {
-      // Prova di Saggezza DC 13: successo = ingredienti restituiti
-      const check = this.resolveCheck('wis', 13);
-      const saved = check.result === 'nat20' || check.result === 'success';
-      if (saved) {
-        // Ingredienti non consumati
-        char.xp += 10;
-        this.save();
-        return { ok: false, saved: true, check, reason: `Prova SAG ${check.result === 'nat20' ? 'critica' : 'superata'} (${check.roll}+${check.bonus}=${check.total} vs DC 13) — ingredienti recuperati. +10 PE.` };
-      } else {
-        // Ingredienti persi
-        this.state.ingredientInventory = inv;
-        char.xp += 15;
-        this.save();
-        return { ok: false, saved: false, check, reason: `Prova SAG fallita (${check.roll}+${check.bonus}=${check.total} vs DC 13) — ingredienti persi. +15 PE per la sperimentazione.` };
-      }
+      xp   = 20;
+      gold = 0;
     }
-  },
-
-  generatePotionRequests() {
-    const char = this.state.character;
-    const count = 2 + Math.floor(char.level / 2);
-    const CLIENT_NAMES = [
-      'Mercante Hado', 'Guaritrice Syla', 'Lord Arenthis',
-      'Alchimista Bryn', 'Cuoca Mira', 'Capitano Vexx', 'Nobildonna Ferith',
-      'Bardo Tenzo', 'Strega Olara', 'Monaco Derris'
-    ];
-    const shuffled = [...POTION_RECIPES].sort(() => Math.random() - 0.5);
-    this.state.potionRequests = shuffled.slice(0, count).map((r, i) => ({
-      id: `req_${Date.now()}_${i}`,
-      recipeId: r.id,
-      clientName: CLIENT_NAMES[i % CLIENT_NAMES.length],
-      reward: { gold: r.clientGold, fame: Math.ceil(r.quality * 2), xp: Math.ceil(r.reward.xp * 0.5) }
-    }));
+    char.xp   += xp;
+    char.gold += gold;
+    const logText = win
+      ? `Equilibrio della Natura completato — +${xp} PE, +${gold} mo`
+      : 'Equilibrio della Natura fallito — +20 PE';
+    char.log.unshift({ day: char.day, text: logText, type: win ? 'success' : 'info' });
+    if (char.log.length > 500) char.log.pop();
+    const completedChallenges = this.checkChallenges('passive');
+    const levelUpResult = this.checkLevelUp();
     this.save();
+    return { ok: true, win, xp, gold, completedChallenges, levelUpResult };
   },
 
-  completePotionRequest(requestId) {
-    if (!this.state.potionRequests) return { ok: false, reason: 'Nessuna richiesta.' };
-    const req = this.state.potionRequests.find(r => r.id === requestId);
-    if (!req) return { ok: false, reason: 'Richiesta non trovata.' };
-    if (!this.state.potionInventory) this.state.potionInventory = [];
-    const potIdx = this.state.potionInventory.indexOf(req.recipeId);
-    if (potIdx === -1) return { ok: false, reason: 'Pozione non nell\'inventario.' };
-    this.state.potionInventory.splice(potIdx, 1);
-    this.state.potionRequests = this.state.potionRequests.filter(r => r.id !== requestId);
+  /* ─── Studio la Foresta (solo Druido) ───────────────── */
+  applyForestStudyReward(timeLeft, errors) {
+    let xp, gold;
+    if (timeLeft > 45 && errors === 0)     { xp = 180; gold = 100; }
+    else if (timeLeft > 20 && errors <= 2) { xp = 100; gold =  55; }
+    else                                   { xp =  50; gold =  25; }
     const char = this.state.character;
-    char.gold += req.reward.gold;
-    char.fame += req.reward.fame;
-    char.xp   += req.reward.xp;
-    const logEntry = { day: char.day, text: `Richiesta completata: ${req.clientName} (+${req.reward.gold} mo)`, type: 'success' };
+    char.xp   += xp;
+    char.gold += gold;
+    const logEntry = { day: char.day, text: `Studio della Foresta completato — +${xp} PE, +${gold} mo`, type: 'success' };
     char.log.unshift(logEntry); if (char.log.length > 500) char.log.pop();
     const completedChallenges = this.checkChallenges('passive');
     const levelUpResult = this.checkLevelUp();
     this.save();
-    return { ok: true, reward: req.reward, completedChallenges, levelUpResult };
+    return { ok: true, xp, gold, completedChallenges, levelUpResult };
   },
 
   /* ─── Incantesimi (solo Mago) ──────────────────────────── */
@@ -765,14 +686,6 @@ const Game = {
           const comp = pool[Math.floor(Math.random() * pool.length)];
           this.state.componentInventory.push(comp.id);
           rewards.ingredient = comp;
-        }
-      } else if (char.classe === 'druido') {
-        if (!this.state.ingredientInventory) this.state.ingredientInventory = [];
-        const pool = INGREDIENTS.filter(ing => ing.quality <= tierMax);
-        if (pool.length) {
-          const ing = pool[Math.floor(Math.random() * pool.length)];
-          this.state.ingredientInventory.push(ing.id);
-          rewards.ingredient = ing;
         }
       }
     }
@@ -1271,7 +1184,6 @@ const Game = {
     this.generateDailyMissions();
     this.generateMarketItems();
     this.refreshDailyChallenges();
-    if (this.getClasse().hasPotioniTab) this.generatePotionRequests();
     if (this.getClasse().hasSpellTab)   this.generateSpellRequests();
 
     // Visibilità passiva giornaliera per classi non-Ladro

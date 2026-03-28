@@ -362,129 +362,13 @@ const UI = {
     document.getElementById('arena-result-rewards').innerHTML = rows.join('');
   },
 
-  /* ─── Tab Pozioni (solo Druido) ────────────────────────────── */
-  renderPozioniTab() {
-    const ingInv    = Game.state.ingredientInventory || [];
-    const potInv    = Game.state.potionInventory     || [];
-    const requests  = Game.state.potionRequests      || [];
-
-    // Badge contatori
-    document.getElementById('ingredient-count').textContent = ingInv.length;
-    document.getElementById('potion-count').textContent     = potInv.length;
-
-    // Ingredienti raggruppati per ID
-    this._renderIngredientInventory(ingInv);
-    this._renderPotionInventory(potInv);
-    this._renderPotionRequests(requests);
+  /* ─── Tab Foresta (solo Druido) ───────────────────── */
+  renderNatureTab() {
+    // Il minigioco Equilibrio della Natura è gestito interamente da App.
+    // Questa funzione è un no-op: lo stato del gioco è mantenuto in App._nb*.
   },
 
-  _renderIngredientInventory(ingInv) {
-    const el = document.getElementById('ingredient-inventory');
-    if (!el) return;
-    if (ingInv.length === 0) {
-      el.innerHTML = '<p class="text-muted small fst-italic">Nessun ingrediente.</p>';
-      return;
-    }
-    // Raggruppa per ID
-    const counts = {};
-    ingInv.forEach(id => { counts[id] = (counts[id] || 0) + 1; });
-    const uniqueIds = Object.keys(counts).map(Number).sort((a, b) => {
-      const ia = INGREDIENTS.find(x => x.id === a);
-      const ib = INGREDIENTS.find(x => x.id === b);
-      return (ia?.quality || 0) - (ib?.quality || 0);
-    });
-    el.innerHTML = uniqueIds.map(id => {
-      const ing = INGREDIENTS.find(x => x.id === id);
-      if (!ing) return '';
-      const qty = counts[id];
-      const qCls = QUALITY[ing.quality]?.cls || '';
-      const selected = (App._craftSelected || []).filter(x => x === id).length;
-      const isSelected = selected > 0;
-      return `<div class="ingredient-card ${isSelected ? 'selected' : ''}" data-ing-id="${id}" title="${ing.desc}">
-        <span>${ing.icon}</span>
-        <span class="${qCls}" style="flex:1">${ing.name}</span>
-        <span class="ingredient-qty">×${qty}</span>
-      </div>`;
-    }).join('');
-  },
-
-  _renderPotionInventory(potInv) {
-    const el = document.getElementById('potion-inventory');
-    if (!el) return;
-    if (potInv.length === 0) {
-      el.innerHTML = '<p class="text-muted small fst-italic">Nessuna pozione.</p>';
-      return;
-    }
-    const counts = {};
-    potInv.forEach(id => { counts[id] = (counts[id] || 0) + 1; });
-    el.innerHTML = Object.keys(counts).map(id => {
-      const recipe = POTION_RECIPES.find(r => r.id === id);
-      if (!recipe) return '';
-      const qCls = QUALITY[recipe.quality]?.cls || '';
-      return `<div class="potion-card">
-        <span>${recipe.icon}</span>
-        <span class="${qCls}" style="flex:1">${recipe.name}</span>
-        <span class="ingredient-qty">×${counts[id]}</span>
-      </div>`;
-    }).join('');
-  },
-
-  _renderPotionRequests(requests) {
-    const el = document.getElementById('potion-requests');
-    if (!el) return;
-    if (requests.length === 0) {
-      el.innerHTML = '<p class="text-muted small fst-italic">Nessuna richiesta oggi.</p>';
-      return;
-    }
-    el.innerHTML = requests.map(req => {
-      const recipe = POTION_RECIPES.find(r => r.id === req.recipeId);
-      if (!recipe) return '';
-      const potInv = Game.state.potionInventory || [];
-      const hasPotion = potInv.includes(req.recipeId);
-      const qCls = QUALITY[recipe.quality]?.cls || '';
-      return `<div class="potion-request-card mb-2">
-        <div class="d-flex align-items-center gap-2 mb-1">
-          <span class="fw-bold text-gold">${req.clientName}</span>
-          <span class="text-muted small">vuole</span>
-          <span>${recipe.icon} <span class="${qCls}">${recipe.name}</span></span>
-        </div>
-        <div class="d-flex justify-content-between align-items-center">
-          <div class="small text-muted">
-            💰 ${req.reward.gold} mo &nbsp; ⭐ ${req.reward.fame} fama &nbsp; 📚 ${req.reward.xp} PE
-          </div>
-          <button class="btn btn-sm ${hasPotion ? 'btn-gold' : 'btn-outline-secondary'}"
-            ${hasPotion ? '' : 'disabled'}
-            data-request-id="${req.id}">
-            <i class="bi bi-box-arrow-right"></i> Consegna
-          </button>
-        </div>
-      </div>`;
-    }).join('');
-  },
-
-  renderCraftSlots() {
-    const el = document.getElementById('craft-ingredient-slots');
-    if (!el) return;
-    const selected = App._craftSelected || [];
-    const MAX = 3;
-    let html = selected.map((id, i) => {
-      const ing = INGREDIENTS.find(x => x.id === id);
-      return `<div class="craft-slot filled" data-slot-index="${i}" title="Clicca per rimuovere">
-        ${ing ? ing.icon : '?'} <span class="small">${ing ? ing.name : '?'}</span>
-        <span class="craft-slot-remove">×</span>
-      </div>`;
-    }).join('');
-    for (let i = selected.length; i < MAX; i++) {
-      html += `<div class="craft-slot empty"><span class="text-muted small">Slot ${i+1}</span></div>`;
-    }
-    el.innerHTML = html;
-    const btn = document.getElementById('btn-craft-potion');
-    if (btn) btn.disabled = selected.length < 2 || selected.length > MAX;
-  },
-
-  /* ─── Tab Pozioni comment update ───────────────────────── */
-
-  /* ─── Tab Incantesimi (solo Mago) ───────────────────────── */
+    /* ─── Tab Incantesimi (solo Mago) ───────────────────────── */
   renderIncantesimiTab() {
     const compInv   = Game.state.componentInventory || [];
     const spellInv  = Game.state.spellInventory     || [];
@@ -514,11 +398,6 @@ const UI = {
       freeUses.className   = 'small mt-1 ' + (usedToday >= maxFreeSpells ? 'text-muted' : 'text-success');
     }
 
-    // Anche aggiorna il Ricettario del Druido se visibile
-    const knownRecipes = Game.state.knownRecipes || [];
-    const krCountEl = document.getElementById('known-recipes-count');
-    if (krCountEl) krCountEl.textContent = knownRecipes.length;
-    this._renderKnownRecipes(knownRecipes);
   },
 
   _renderComponentInventory(compInv) {
@@ -627,25 +506,6 @@ const UI = {
     }).join('');
   },
 
-  _renderKnownRecipes(known) {
-    const el = document.getElementById('known-recipes-list');
-    if (!el) return;
-    if (known.length === 0) {
-      el.innerHTML = '<p class="text-muted small fst-italic">Nessuna ricetta conosciuta. Studia per scoprirle!</p>';
-      return;
-    }
-    el.innerHTML = known.map(id => {
-      const r = POTION_RECIPES.find(x => x.id === id);
-      if (!r) return '';
-      const qCls = QUALITY[r.quality]?.cls || '';
-      return `<div class="recipe-card" data-recipe-id="${r.id}" data-recipe-type="potion">
-        <span>${r.icon}</span>
-        <span class="${qCls}" style="flex:1">${r.name}</span>
-        <span class="badge" style="background:${QUALITY[r.quality]?.color || '#999'};color:#000;font-size:.65rem">Q${r.quality}</span>
-      </div>`;
-    }).join('');
-  },
-
   renderSpellCraftSlots() {
     const el = document.getElementById('craft-spell-slots');
     if (!el) return;
@@ -667,11 +527,10 @@ const UI = {
   },
 
   openRecipeModal(recipeId, type) {
-    const r = type === 'spell'
-      ? SPELL_RECIPES.find(x => x.id === recipeId)
-      : POTION_RECIPES.find(x => x.id === recipeId);
+    if (type !== 'spell') return; // Solo il Mago ha ancora ricette
+    const r = SPELL_RECIPES.find(x => x.id === recipeId);
     if (!r) return;
-    const isSpell = type === 'spell';
+    const isSpell = true;
     document.getElementById('modal-recipe-title').textContent = r.name;
     document.getElementById('modal-recipe-icon').textContent  = r.icon;
     document.getElementById('modal-recipe-desc').textContent  = r.desc;
@@ -680,9 +539,9 @@ const UI = {
     qBadge.textContent = qData?.name || '';
     qBadge.style.background = qData?.color || '#999';
     qBadge.style.color = '#000';
-    const items = isSpell ? r.components : r.ingredients;
-    const itemData = isSpell ? SPELL_COMPONENTS : INGREDIENTS;
-    const inv = isSpell ? (Game.state.componentInventory || []) : (Game.state.ingredientInventory || []);
+    const items = r.components;
+    const itemData = SPELL_COMPONENTS;
+    const inv = Game.state.componentInventory || [];
     document.getElementById('modal-recipe-ingredients').innerHTML = items.map(id => {
       const item = itemData.find(x => x.id === id);
       if (!item) return '';
@@ -1578,9 +1437,8 @@ const UI = {
     this.renderStableLobby();
     this.renderRescueLobby();
     this.renderArenaLobby();
-    this.renderPozioniTab();
+    this.renderNatureTab();
     this.renderIncantesimiTab();
-    this.renderCraftSlots();
     this.renderSpellCraftSlots();
     this.renderGuildTaxInfo();
     this.renderActiveBoosts();
@@ -1609,8 +1467,8 @@ const UI = {
     // Studio (Mago e Druido)
     document.getElementById('study-wrapper').classList.toggle('d-none', !cls.hasStudy);
 
-    // Tab Pozioni (solo Druido)
-    document.getElementById('tab-pozioni-nav').classList.toggle('d-none', !cls.hasPotioniTab);
+    // Tab Foresta (solo Druido)
+    document.getElementById('tab-pozioni-nav').classList.toggle('d-none', !cls.hasNatureTab);
 
     // Tab Incantesimi (solo Mago)
     document.getElementById('tab-incantesimi-nav').classList.toggle('d-none', !cls.hasSpellTab);
@@ -1668,7 +1526,7 @@ const UI = {
             ${cls.hasDrinkingGame ? '<span class="ms-1" title="Gara di bevute">🍺</span>' : ''}
             ${cls.hasArena        ? '<span class="ms-1" title="Arena: combatti ondate di nemici">⚔️</span>' : ''}
             ${cls.hasPrayer       ? '<span class="ms-1" title="Preghiera: chiedi la grazia divina">🙏</span>' : ''}
-            ${cls.hasPotioniTab   ? '<span class="ms-1" title="Alchimia: prepara pozioni">🌿</span>' : ''}
+            ${cls.hasNatureTab    ? '<span class="ms-1" title="Equilibrio della Natura: riporta armonia alla foresta">🌿</span>' : ''}
             ${cls.hasSpellTab     ? '<span class="ms-1 text-info"    title="Grimorio: lancia incantesimi"><i class="bi bi-stars"></i></span>' : ''}
             ${cls.hasStableTab  ? '<span class="ms-1" title="Cavalcatura: accudisci il tuo cavallo">🐎</span>' : ''}
             ${cls.hasRescueTab  ? '<span class="ms-1" title="Salva i Prigionieri: libera i captivi e combatti i nemici">🛡️</span>' : ''}
@@ -1751,6 +1609,42 @@ const UI = {
       titleEl.innerHTML = '<span class="text-danger">Fallimento!</span>';
       rewardEl.textContent = 'Nessuna ricompensa.';
       ingEl.textContent = '';
+    }
+  },
+
+  /* ─── Modal Studia la Foresta (Druido) ─────────────────── */
+  openForestStudyModal() {
+    document.getElementById('forest-timer-label').textContent = '60';
+    document.getElementById('forest-timer-bar').style.width  = '100%';
+    document.getElementById('forest-errors').textContent     = '0';
+    document.getElementById('forest-pairs').textContent      = '0';
+    document.getElementById('forest-col-left').innerHTML     = '';
+    document.getElementById('forest-col-right').innerHTML    = '';
+    document.getElementById('forest-result').classList.add('d-none');
+    document.getElementById('forest-study-game').classList.remove('d-none');
+    const modal = new bootstrap.Modal(document.getElementById('modal-forest-study'));
+    modal.show();
+  },
+
+  showForestStudyResult(win, timeLeft, errors) {
+    document.getElementById('forest-study-game').classList.add('d-none');
+    const resultEl  = document.getElementById('forest-result');
+    const titleEl   = document.getElementById('forest-result-title');
+    const rewardEl  = document.getElementById('forest-result-rewards');
+    resultEl.classList.remove('d-none');
+    if (win) {
+      let tier;
+      if (timeLeft > 45 && errors === 0)      tier = '🌟 Maestro della Foresta';
+      else if (timeLeft > 20 && errors <= 2)  tier = '✅ Buona Conoscenza';
+      else                                    tier = '🌿 Sufficiente';
+      titleEl.innerHTML = `<span class="text-gold">${tier}</span>`;
+      const result = Game.applyForestStudyReward(timeLeft, errors);
+      rewardEl.textContent = `+${result.xp} PE   +${result.gold} mo`;
+      this.refresh();
+      if (result.levelUpResult) App._triggerLevelUp(result.levelUpResult);
+    } else {
+      titleEl.innerHTML = '<span class="text-danger">Il tempo è scaduto!</span>';
+      rewardEl.textContent = 'Nessuna ricompensa.';
     }
   },
 

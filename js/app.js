@@ -27,8 +27,20 @@ const App = {
   _memoryTimeLeft:      60,
   _memoryLockBoard:     false,
   _memoryMaxErrors:     8,
-  // Crafting pozioni (Druido)
-  _craftSelected:       [],
+  // Nature Balance (Druido)
+  _nbGrid:          null,
+  _nbMovesLeft:     10,
+  _nbSelectedCard:  null,
+  _nbHand:          [],
+  // Forest Study (Druido)
+  _forestTimerInterval: null,
+  _fsPairs:         [],
+  _fsRightOrder:    [],
+  _fsLeftSel:       null,
+  _fsErrors:        0,
+  _fsPairsFound:    0,
+  _fsTimeLeft:      60,
+  _fsTimerMax:      60,
   // Crafting incantesimi (Mago)
   _spellCraftSelected:  [],
   // Recipe modal
@@ -107,7 +119,7 @@ const App = {
       const classRows = {
         ladro:    row('🎲', 'Ladro', 'Guadagni PE anche borseggiando, rubando al mercato e giocando ai dadi. Più rischi prendi, più cresci in fretta.'),
         mago:     row('✨', 'Mago', 'Ottieni PE craftando incantesimi, canalizzando magia senza componenti, studiando e consegnando commissioni.'),
-        druido:   row('🌿', 'Druido', 'Ottieni PE preparando pozioni, studiando ricette naturali e completando missioni con la natura.'),
+        druido:   row('🌿', 'Druido', 'Ottieni PE con l\'Equilibrio della Natura, studiando la foresta e completando missioni naturali.'),
         guerriero:row('⚔️', 'Guerriero', 'Ottieni PE vincendo all\'arena, nelle gare di bevute e completando missioni di combattimento.'),
         paladino: row('🛡️', 'Paladino', 'Ottieni PE salvando prigionieri, addestrando il tuo destriero e completando missioni di protezione.'),
         chierico: row('🙏', 'Chierico', 'Ottieni PE pregando, convertendo fedeli e superando prove di devozione divina.'),
@@ -128,7 +140,7 @@ const App = {
       const classRows = {
         ladro:    row('⚠️', 'Attenzione', 'Troppa fama come Ladro aumenta anche la tua <strong>Taglia</strong>: più sei noto, più sei un bersaglio ambito.'),
         mago:     row('📜', 'Mago', 'Una fama alta attira clienti con commissioni di incantesimi più preziose e rare.'),
-        druido:   row('🌱', 'Druido', 'La fama apre l\'accesso a richieste di pozioni rare e missioni con ricompense naturali esclusive.'),
+        druido:   row('🌿', 'Druido', 'Una fama alta sblocca missioni naturali esclusive con ricompense rare.'),
         guerriero:row('🏆', 'Guerriero', 'La fama dell\'arena attira avversari più forti — e premi molto più ricchi.'),
         paladino: row('⚔️', 'Paladino', 'La fama da eroe sblocca missioni di protezione ad alto rischio con grandi ricompense in oro e PE.'),
         chierico: row('✝️', 'Chierico', 'Una fama elevata attira fedeli più devoti e aumenta il guadagno dalla conversione e dalle offerte.'),
@@ -463,17 +475,22 @@ const App = {
       this._drinkLastTime    = null;
     });
 
-    // Studia — apre memory game
+    // Studia — apre minigioco in base alla classe
     document.getElementById('btn-study').addEventListener('click', () => {
       if (!Game.state || Game.state.gameOver) return;
       const result = Game.startStudy();
       if (!result.ok) { UI.toast(result.reason || 'Nessuno studio disponibile oggi.'); return; }
       UI.refresh();
-      UI.openStudyModal();
-      this._startMemoryGame();
+      if (Game.getClasse().id === 'druido') {
+        UI.openForestStudyModal();
+        this._startForestStudyGame();
+      } else {
+        UI.openStudyModal();
+        this._startMemoryGame();
+      }
     });
 
-    // Chiusura modal studia — ferma timer
+    // Chiusura modal studia (Mago) — ferma timer
     document.getElementById('modal-studia').addEventListener('hidden.bs.modal', () => {
       if (this._memoryTimerInterval) {
         clearInterval(this._memoryTimerInterval);
@@ -482,79 +499,25 @@ const App = {
       UI.refresh();
     });
 
-    // Pulsante chiudi memory result
-    document.getElementById('btn-close-memory').addEventListener('click', () => {
-      // Modal si chiude da data-bs-dismiss
-    });
-
-    // Crafting: mescola
-    document.getElementById('btn-craft-potion').addEventListener('click', () => {
-      if (!Game.state || Game.state.gameOver) return;
-      const result = Game.craftPotion(this._craftSelected);
-      if (result.ok) {
-        UI.toast(`✅ ${result.recipe.name} creata! +${result.recipe.reward.xp} PE`, 3000);
-      } else if (result.saved) {
-        UI.toast(`🧠 ${result.reason}`, 4000);
-        // Ingredienti salvati: non svuotiamo la selezione
-        UI.refresh();
-        return;
-      } else {
-        UI.toast(`💥 ${result.reason}`, 4000);
+    // Chiusura modal forest study (Druido) — ferma timer
+    document.getElementById('modal-forest-study').addEventListener('hidden.bs.modal', () => {
+      if (this._forestTimerInterval) {
+        clearInterval(this._forestTimerInterval);
+        this._forestTimerInterval = null;
       }
-      this._craftSelected = [];
       UI.refresh();
-      if (result.ok && result.levelUpResult) this._triggerLevelUp(result.levelUpResult);
     });
 
-    // Crafting: svuota slot
-    document.getElementById('btn-clear-craft').addEventListener('click', () => {
-      this._craftSelected = [];
-      UI.renderCraftSlots();
-      UI.renderPozioniTab();
+    // Pulsante avvia Nature Balance
+    document.getElementById('btn-start-nature').addEventListener('click', () => {
+      if (!Game.state || Game.state.gameOver) return;
+      this._startNatureBalance();
     });
 
-    // Crafting: click su slot rimuove ingrediente
-    document.getElementById('craft-ingredient-slots').addEventListener('click', (e) => {
-      const slot = e.target.closest('.craft-slot.filled');
-      if (!slot) return;
-      const idx = parseInt(slot.dataset.slotIndex);
-      if (!isNaN(idx)) {
-        this._craftSelected.splice(idx, 1);
-        UI.renderCraftSlots();
-        UI.renderPozioniTab();
-      }
-    });
-
-    // Ingredienti: click aggiunge al craft
-    document.getElementById('ingredient-inventory').addEventListener('click', (e) => {
-      const card = e.target.closest('.ingredient-card');
-      if (!card) return;
-      const id = parseInt(card.dataset.ingId);
-      if (isNaN(id)) return;
-      if (this._craftSelected.length >= 3) { UI.toast('Slot pieno. Rimuovi un ingrediente prima.'); return; }
-      // Controlla che non sia già selezionato più volte di quante ne abbia
-      const ingInv = Game.state.ingredientInventory || [];
-      const countInInv  = ingInv.filter(x => x === id).length;
-      const countSelected = this._craftSelected.filter(x => x === id).length;
-      if (countSelected >= countInInv) { UI.toast('Non hai altri di questo ingrediente.'); return; }
-      this._craftSelected.push(id);
-      UI.renderCraftSlots();
-      UI.renderPozioniTab();
-    });
-
-    // Richieste pozioni: consegna
-    document.getElementById('potion-requests').addEventListener('click', (e) => {
-      const btn = e.target.closest('[data-request-id]');
-      if (!btn) return;
-      const reqId = btn.dataset.requestId;
-      const result = Game.completePotionRequest(reqId);
-      if (result.ok) {
-        UI.toast(`✅ Consegnata! +${result.reward.gold} mo, +${result.reward.fame} fama`);
-        UI.refresh();
-        if (result.levelUpResult) this._triggerLevelUp(result.levelUpResult);
-      } else {
-        UI.toast(result.reason);
-      }
+    // Pulsante riprova Nature Balance
+    document.getElementById('btn-nature-retry').addEventListener('click', () => {
+      if (!Game.state || Game.state.gameOver) return;
+      this._startNatureBalance();
     });
 
     // ── Incantesimi (Mago) ──────────────────────────────────
@@ -718,23 +681,6 @@ const App = {
         if (tab) new bootstrap.Tab(tab).show();
         UI.renderSpellCraftSlots();
         UI.renderIncantesimiTab();
-      } else {
-        const recipe = POTION_RECIPES.find(r => r.id === recipeId);
-        if (!recipe) return;
-        this._craftSelected = [];
-        const ingInv = [...(Game.state.ingredientInventory || [])];
-        for (const ingId of recipe.ingredients) {
-          const idx = ingInv.indexOf(ingId);
-          if (idx !== -1) {
-            this._craftSelected.push(ingId);
-            ingInv.splice(idx, 1);
-          }
-        }
-        bootstrap.Modal.getInstance(document.getElementById('modal-recipe'))?.hide();
-        const tab = document.querySelector('[data-bs-target="#tab-pozioni"]');
-        if (tab) new bootstrap.Tab(tab).show();
-        UI.renderCraftSlots();
-        UI.renderPozioniTab();
       }
     });
 
@@ -1602,116 +1548,259 @@ const App = {
     }, 400);
   },
 
-  /* ─── Memory Game ─────────────────────────────────────── */
-  _startMemoryGame() {
-    const SYMBOLS = ['Ψ','Ω','Φ','Δ','Λ','Θ','Ξ','Π','∞','⊕','☿','♄'];
-    // 6 coppie = 12 carte (griglia 4×3) — difficoltà ridotta
-    const shuffledSymbols = [...SYMBOLS].sort(() => Math.random() - 0.5).slice(0, 6);
-    const cards = [...shuffledSymbols, ...shuffledSymbols]
-      .sort(() => Math.random() - 0.5)
-      .map((symbol, i) => ({ id: i, symbol, flipped: false, matched: false }));
+  /* ─── Helper per Nature Balance ────────────────── */
+  _nbCards: [
+    { id:'ruscello', name:'Ruscello',    icon:'🌊', desc:'+2 cella, +1 adiacenti',
+      apply(g,r,c){ _nbCell(g,r,c,+2); _nbAdj(r,c,(ar,ac)=>_nbCell(g,ar,ac,+1)); }
+    },
+    { id:'lupo',     name:'Lupo',        icon:'🐺', desc:'-2 cella, -1 adiacenti',
+      apply(g,r,c){ _nbCell(g,r,c,-2); _nbAdj(r,c,(ar,ac)=>_nbCell(g,ar,ac,-1)); }
+    },
+    { id:'fungo',    name:'Fungo',       icon:'🍄', desc:'+1 tutta la riga, +1 cella',
+      apply(g,r,c){ for(let cc=0;cc<5;cc++) _nbCell(g,r,cc,+1); _nbCell(g,r,c,+1); }
+    },
+    { id:'quercia',  name:'Quercia',     icon:'🌳', desc:'+3 cella, -1 adiacenti',
+      apply(g,r,c){ _nbCell(g,r,c,+3); _nbAdj(r,c,(ar,ac)=>_nbCell(g,ar,ac,-1)); }
+    },
+    { id:'cervo',    name:'Cervo',       icon:'🦌', desc:'+1 cella e adiacenti',
+      apply(g,r,c){ _nbCell(g,r,c,+1); _nbAdj(r,c,(ar,ac)=>_nbCell(g,ar,ac,+1)); }
+    },
+    { id:'vento',    name:'Vento',       icon:'💨', desc:'+1 riga e colonna',
+      apply(g,r,c){ for(let cc=0;cc<5;cc++) _nbCell(g,r,cc,+1); for(let rr=0;rr<5;rr++) _nbCell(g,rr,c,+1); }
+    },
+    { id:'fuoco',    name:'Fuoco Sacro', icon:'🔥', desc:'-2 cella, +1 adiacenti',
+      apply(g,r,c){ _nbCell(g,r,c,-2); _nbAdj(r,c,(ar,ac)=>_nbCell(g,ar,ac,+1)); }
+    },
+    { id:'muschio',  name:'Muschio',     icon:'🌱', desc:'+1 tutta la colonna, +1 cella',
+      apply(g,r,c){ for(let rr=0;rr<5;rr++) _nbCell(g,rr,c,+1); _nbCell(g,r,c,+1); }
+    },
+  ],
 
-    this._memoryCards     = cards;
-    this._memoryFlipped   = [];
-    this._memoryErrors    = 0;
-    this._memoryPairs     = 0;
-    this._memoryTimeLeft  = 90;   // 90 secondi
-    this._memoryMaxErrors = 8;    // 8 errori massimi
-    this._memoryLockBoard = false;
+  _startNatureBalance() {
+    this._nbGrid = Array.from({length:5}, () =>
+      Array.from({length:5}, () => 1 + Math.floor(Math.random() * 9))
+    );
+    this._nbMovesLeft    = 10;
+    this._nbSelectedCard = null;
+    this._nbHand         = this._drawNatureHand();
 
-    this._renderMemoryGrid();
+    document.getElementById('nature-lobby').classList.add('d-none');
+    document.getElementById('nature-result').classList.add('d-none');
+    document.getElementById('nature-game').classList.remove('d-none');
+    this._renderNatureGrid();
+    this._renderNatureHand();
+    document.getElementById('nature-moves').textContent = this._nbMovesLeft;
+  },
 
-    // Avvia timer
-    if (this._memoryTimerInterval) clearInterval(this._memoryTimerInterval);
-    this._memoryTimerInterval = setInterval(() => {
-      this._memoryTimeLeft--;
-      const timerEl = document.getElementById('memory-timer');
-      if (timerEl) timerEl.textContent = this._memoryTimeLeft;
-      if (this._memoryTimeLeft <= 0) {
-        clearInterval(this._memoryTimerInterval);
-        this._memoryTimerInterval = null;
-        this._memoryLockBoard = true;
-        UI.showMemoryResult(false, 0, this._memoryErrors, []);
+  _drawNatureHand() {
+    return Array.from({length:5}, () =>
+      this._nbCards[Math.floor(Math.random() * this._nbCards.length)]
+    );
+  },
+
+  _renderNatureGrid() {
+    const grid = document.getElementById('nature-grid');
+    if (!grid) return;
+    grid.innerHTML = this._nbGrid.map((row, r) =>
+      row.map((val, c) => {
+        const cls = val < 4 ? 'low' : val <= 7 ? 'ok' : 'high';
+        return `<div class="nature-cell ${cls}" data-nr="${r}" data-nc="${c}">${val}</div>`;
+      }).join('')
+    ).join('');
+    grid.querySelectorAll('.nature-cell').forEach(el => {
+      el.addEventListener('click', () =>
+        this._onNatureCellClick(parseInt(el.dataset.nr), parseInt(el.dataset.nc))
+      );
+    });
+  },
+
+  _renderNatureHand() {
+    const hand = document.getElementById('nature-hand');
+    if (!hand) return;
+    hand.innerHTML = this._nbHand.map((card, i) => {
+      const sel = this._nbSelectedCard === i ? 'selected' : '';
+      return `<div class="nature-card ${sel}" data-card-idx="${i}">
+        <span class="card-icon">${card.icon}</span>
+        <span class="card-name">${card.name}</span>
+      </div>`;
+    }).join('');
+    hand.querySelectorAll('.nature-card').forEach(el => {
+      el.addEventListener('click', () => {
+        const idx = parseInt(el.dataset.cardIdx);
+        this._nbSelectedCard = (this._nbSelectedCard === idx) ? null : idx;
+        const card = this._nbHand[this._nbSelectedCard];
+        const descEl = document.getElementById('nature-card-desc');
+        if (descEl) descEl.textContent = card ? card.desc : '';
+        this._renderNatureHand();
+      });
+    });
+  },
+
+  _onNatureCellClick(r, c) {
+    if (this._nbSelectedCard === null) {
+      UI.toast('Seleziona prima una carta dalla mano.', 1500);
+      return;
+    }
+    const card = this._nbHand[this._nbSelectedCard];
+    card.apply(this._nbGrid, r, c);
+    this._nbHand[this._nbSelectedCard] = this._nbCards[Math.floor(Math.random() * this._nbCards.length)];
+    this._nbSelectedCard = null;
+    this._nbMovesLeft--;
+    document.getElementById('nature-moves').textContent = this._nbMovesLeft;
+    const descEl = document.getElementById('nature-card-desc');
+    if (descEl) descEl.textContent = '';
+    this._renderNatureGrid();
+    this._renderNatureHand();
+
+    if (this._nbGrid.every(row => row.every(v => v >= 4 && v <= 7))) {
+      this._endNatureBalance(true);
+      return;
+    }
+    if (this._nbMovesLeft <= 0) {
+      this._endNatureBalance(false);
+    }
+  },
+
+  _endNatureBalance(win) {
+    document.getElementById('nature-game').classList.add('d-none');
+    const result = Game.applyNatureBalanceResult(win, this._nbMovesLeft);
+    const titleEl = document.getElementById('nature-result-title');
+    const bodyEl  = document.getElementById('nature-result-body');
+    if (win) {
+      titleEl.innerHTML = '<span class="text-gold">🌿 Foresta in Equilibrio!</span>';
+      bodyEl.textContent = `+${result.xp} PE   +${result.gold} mo`;
+    } else {
+      titleEl.innerHTML = '<span class="text-danger">La Foresta è perduta...</span>';
+      bodyEl.textContent = '+20 PE per l\'impegno.';
+    }
+    document.getElementById('nature-result').classList.remove('d-none');
+    UI.refresh();
+    if (result.levelUpResult) this._triggerLevelUp(result.levelUpResult);
+  },
+
+  /* ─── Forest Study Matching Game (Druido) ─────────────── */
+  _forestPairsPool: [
+    { left:{icon:'🌙',name:'Luna'},     right:{icon:'🐺',name:'Lupo'} },
+    { left:{icon:'🌳',name:'Quercia'},  right:{icon:'🌰',name:'Ghianda'} },
+    { left:{icon:'🌧️',name:'Pioggia'}, right:{icon:'🍄',name:'Fungo'} },
+    { left:{icon:'☀️',name:'Sole'},    right:{icon:'🌻',name:'Girasole'} },
+    { left:{icon:'🏞️',name:'Fiume'}, right:{icon:'🦦',name:'Lontra'} },
+    { left:{icon:'💨',name:'Vento'},    right:{icon:'🌱',name:'Seme'} },
+    { left:{icon:'🔥',name:'Fuoco'},    right:{icon:'🦅',name:'Fenice'} },
+    { left:{icon:'🪵',name:'Radice'},   right:{icon:'🌍',name:'Terra'} },
+    { left:{icon:'🌫️',name:'Nebbia'}, right:{icon:'🦉',name:'Gufo'} },
+    { left:{icon:'⭐',name:'Stelle'},       right:{icon:'🦌',name:'Cervo'} },
+    { left:{icon:'❄️',name:'Gelo'},   right:{icon:'🐻',name:'Orso'} },
+    { left:{icon:'🌊',name:'Mare'},     right:{icon:'🐳',name:'Balena'} },
+    { left:{icon:'⛈️',name:'Tempesta'}, right:{icon:'🦅',name:'Aquila'} },
+    { left:{icon:'🌺',name:'Fiore'},    right:{icon:'🐝',name:'Ape'} },
+    { left:{icon:'🍃',name:'Foglia'},   right:{icon:'🐛',name:'Bruco'} },
+    { left:{icon:'🌑',name:'Notte'},    right:{icon:'🦇',name:'Pipistrello'} },
+    { left:{icon:'🌅',name:'Alba'},     right:{icon:'🐓',name:'Gallo'} },
+    { left:{icon:'🌰',name:'Castagna'}, right:{icon:'🐿️',name:'Scoiattolo'} },
+  ],
+
+  _startForestStudyGame() {
+    const level    = Game.state.character.level;
+    const timerMax = level >= 11 ? 45 : 60;
+    const shuffled = [...this._forestPairsPool].sort(() => Math.random() - 0.5);
+    this._fsPairs      = shuffled.slice(0, 6).map((p, i) => ({...p, id:i, matched:false}));
+    this._fsLeftSel    = null;
+    this._fsErrors     = 0;
+    this._fsPairsFound = 0;
+    this._fsTimeLeft   = timerMax;
+    this._fsTimerMax   = timerMax;
+    this._fsRightOrder = this._fsPairs.map(p => p.id).sort(() => Math.random() - 0.5);
+    this._renderForestStudyCols();
+
+    if (this._forestTimerInterval) clearInterval(this._forestTimerInterval);
+    this._forestTimerInterval = setInterval(() => {
+      this._fsTimeLeft--;
+      const lbl = document.getElementById('forest-timer-label');
+      const bar = document.getElementById('forest-timer-bar');
+      if (lbl) lbl.textContent = this._fsTimeLeft;
+      if (bar) {
+        const pct = Math.max(0, (this._fsTimeLeft / this._fsTimerMax) * 100);
+        bar.style.width = pct + '%';
+        bar.style.background = pct > 40 ? 'rgba(50,180,80,.6)' : pct > 15 ? 'rgba(200,150,30,.7)' : 'rgba(200,50,50,.7)';
+      }
+      if (this._fsTimeLeft <= 0) {
+        clearInterval(this._forestTimerInterval);
+        this._forestTimerInterval = null;
+        UI.showForestStudyResult(false, 0, this._fsErrors);
       }
     }, 1000);
   },
 
-  _renderMemoryGrid() {
-    const grid = document.getElementById('memory-grid');
-    if (!grid) return;
-    grid.innerHTML = this._memoryCards.map(card => `
-      <div class="memory-card ${card.matched ? 'matched' : (card.flipped ? 'flipped' : '')}"
-           data-card-id="${card.id}">
-        <span class="card-back">✦</span>
-        <span class="card-front">${card.symbol}</span>
-      </div>
-    `).join('');
+  _renderForestStudyCols() {
+    const leftEl  = document.getElementById('forest-col-left');
+    const rightEl = document.getElementById('forest-col-right');
+    if (!leftEl || !rightEl) return;
 
-    grid.querySelectorAll('.memory-card').forEach(el => {
-      el.addEventListener('click', () => this._onMemoryCardClick(parseInt(el.dataset.cardId)));
+    leftEl.innerHTML = this._fsPairs.map(p => {
+      const matched  = p.matched ? 'matched' : '';
+      const selected = (!p.matched && this._fsLeftSel === p.id) ? 'selected' : '';
+      return `<div class="forest-elem ${matched} ${selected}" data-left-id="${p.id}">
+        <span style="font-size:1.3rem">${p.left.icon}</span> <span>${p.left.name}</span>
+      </div>`;
+    }).join('');
+
+    rightEl.innerHTML = this._fsRightOrder.map(id => {
+      const p = this._fsPairs[id];
+      return `<div class="forest-elem ${p.matched ? 'matched' : ''}" data-right-id="${id}">
+        <span style="font-size:1.3rem">${p.right.icon}</span> <span>${p.right.name}</span>
+      </div>`;
+    }).join('');
+
+    leftEl.querySelectorAll('.forest-elem:not(.matched)').forEach(el => {
+      el.addEventListener('click', () => {
+        this._fsLeftSel = parseInt(el.dataset.leftId);
+        this._renderForestStudyCols();
+      });
+    });
+    rightEl.querySelectorAll('.forest-elem:not(.matched)').forEach(el => {
+      el.addEventListener('click', () => this._onForestRightClick(parseInt(el.dataset.rightId)));
     });
   },
 
-  _onMemoryCardClick(cardId) {
-    if (this._memoryLockBoard) return;
-    const card = this._memoryCards[cardId];
-    if (!card || card.matched || card.flipped) return;
-    if (this._memoryFlipped.includes(cardId)) return;
+  _onForestRightClick(rightId) {
+    if (this._fsLeftSel === null) return;
+    if (this._fsPairs[rightId].matched) return;
 
-    card.flipped = true;
-    this._memoryFlipped.push(cardId);
-    this._renderMemoryGrid();
-
-    if (this._memoryFlipped.length === 2) {
-      this._memoryLockBoard = true;
-      const [id1, id2] = this._memoryFlipped;
-      const c1 = this._memoryCards[id1];
-      const c2 = this._memoryCards[id2];
-
-      if (c1.symbol === c2.symbol) {
-        // Match
-        c1.matched = c2.matched = true;
-        this._memoryFlipped = [];
-        this._memoryPairs++;
-        this._memoryLockBoard = false;
-        const pairsEl = document.getElementById('memory-pairs');
-        if (pairsEl) pairsEl.textContent = this._memoryPairs;
-        this._renderMemoryGrid();
-
-        // Reward per coppia trovata
-        const pairReward = Game.applyPairReward();
-        if (pairReward.ingredient) {
-          UI.toast(`✨ +${pairReward.xp} PE  ${pairReward.ingredient.icon} ${pairReward.ingredient.name}`, 2000);
-        } else {
-          UI.toast(`✨ +${pairReward.xp} PE`, 1500);
-        }
-        if (pairReward.levelUpResult) this._triggerLevelUp(pairReward.levelUpResult);
-
-        if (this._memoryPairs === 6) {
-          // Vince!
-          clearInterval(this._memoryTimerInterval);
-          this._memoryTimerInterval = null;
-          UI.showMemoryResult(true, this._memoryTimeLeft, this._memoryErrors, []);
-        }
-      } else {
-        // Mismatch
-        this._memoryErrors++;
-        const errEl = document.getElementById('memory-errors');
-        if (errEl) errEl.textContent = this._memoryErrors;
-
-        setTimeout(() => {
-          c1.flipped = c2.flipped = false;
-          this._memoryFlipped = [];
-          this._memoryLockBoard = false;
-          this._renderMemoryGrid();
-
-          if (this._memoryErrors >= this._memoryMaxErrors) {
-            clearInterval(this._memoryTimerInterval);
-            this._memoryTimerInterval = null;
-            this._memoryLockBoard = true;
-            UI.showMemoryResult(false, this._memoryTimeLeft, this._memoryErrors, []);
-          }
-        }, 800);
+    if (this._fsLeftSel === rightId) {
+      // Coppia corretta
+      this._fsPairs[rightId].matched = true;
+      this._fsPairsFound++;
+      this._fsLeftSel = null;
+      document.getElementById('forest-pairs').textContent = this._fsPairsFound;
+      this._renderForestStudyCols();
+      if (this._fsPairsFound === 6) {
+        clearInterval(this._forestTimerInterval);
+        this._forestTimerInterval = null;
+        UI.showForestStudyResult(true, this._fsTimeLeft, this._fsErrors);
+      }
+    } else {
+      // Sbagliato: shake + -5s
+      this._fsErrors++;
+      document.getElementById('forest-errors').textContent = this._fsErrors;
+      this._fsTimeLeft = Math.max(0, this._fsTimeLeft - 5);
+      const lbl = document.getElementById('forest-timer-label');
+      if (lbl) lbl.textContent = this._fsTimeLeft;
+      const leftEl  = document.getElementById('forest-col-left');
+      const rightEl = document.getElementById('forest-col-right');
+      const lItem = leftEl?.querySelector(`[data-left-id="${this._fsLeftSel}"]`);
+      const rItem = rightEl?.querySelector(`[data-right-id="${rightId}"]`);
+      [lItem, rItem].forEach(el => {
+        if (!el) return;
+        el.classList.add('wrong');
+        setTimeout(() => el.classList.remove('wrong'), 500);
+      });
+      this._fsLeftSel = null;
+      setTimeout(() => this._renderForestStudyCols(), 520);
+      if (this._fsTimeLeft <= 0) {
+        clearInterval(this._forestTimerInterval);
+        this._forestTimerInterval = null;
+        UI.showForestStudyResult(false, 0, this._fsErrors);
       }
     }
   },
@@ -3619,6 +3708,18 @@ const App = {
 
 
 };
+
+/* ─── Helper Nature Balance (standalone) ────────────────── */
+function _nbCell(grid, r, c, delta) {
+  if (r < 0 || r >= 5 || c < 0 || c >= 5) return;
+  grid[r][c] = Math.max(0, Math.min(10, grid[r][c] + delta));
+}
+function _nbAdj(r, c, fn) {
+  [[-1,0],[1,0],[0,-1],[0,1]].forEach(([dr,dc]) => {
+    const nr = r + dr, nc = c + dc;
+    if (nr >= 0 && nr < 5 && nc >= 0 && nc < 5) fn(nr, nc);
+  });
+}
 
 /* ─── Avvio ─────────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => App.init());

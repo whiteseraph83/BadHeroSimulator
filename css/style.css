@@ -1876,3 +1876,115 @@ body {
   background: #12121e;
   box-shadow: 0 0 24px rgba(155,89,182,0.12), inset 0 0 40px rgba(0,0,0,0.4);
 }
+
+/* ══════════════════════════════════════════════════════════
+   EQUILIBRIO DELLA NATURA (Druido)
+   ══════════════════════════════════════════════════════════ */
+.nature-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+  max-width: 320px;
+  margin: 0 auto;
+}
+.nature-cell {
+  aspect-ratio: 1;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: 2px solid rgba(255,255,255,.08);
+  transition: transform .12s, box-shadow .12s;
+  user-select: none;
+}
+.nature-cell:hover { transform: scale(1.08); }
+.nature-cell.low  { background: rgba(200,50,50,.35);  border-color: rgba(220,80,80,.6);  color: #ffaaaa; }
+.nature-cell.ok   { background: rgba(40,150,60,.35);  border-color: rgba(60,200,80,.6);  color: #aaffbb; }
+.nature-cell.high { background: rgba(130,50,200,.35); border-color: rgba(170,80,240,.6); color: #ddaaff; }
+
+.nature-hand {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.nature-card {
+  background: rgba(40,90,30,.35);
+  border: 2px solid rgba(80,160,50,.35);
+  border-radius: 8px;
+  padding: 8px 10px;
+  cursor: pointer;
+  text-align: center;
+  transition: all .18s;
+  min-width: 58px;
+  user-select: none;
+}
+.nature-card:hover { background: rgba(50,110,35,.55); border-color: rgba(100,200,60,.5); }
+.nature-card.selected {
+  border-color: #ffd700;
+  background: rgba(80,140,40,.55);
+  box-shadow: 0 0 10px rgba(255,215,0,.35);
+}
+.nature-card .card-icon { font-size: 1.4rem; display: block; }
+.nature-card .card-name { font-size: .65rem; color: #b0d090; display: block; margin-top: 2px; }
+
+/* ══════════════════════════════════════════════════════════
+   STUDIA LA FORESTA (Druido)
+   ══════════════════════════════════════════════════════════ */
+.forest-study-cols {
+  display: flex;
+  gap: 16px;
+}
+.forest-study-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.forest-elem {
+  padding: 9px 13px;
+  border: 2px solid rgba(80,150,50,.35);
+  border-radius: 8px;
+  background: rgba(30,70,20,.4);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background .15s, border-color .15s, opacity .3s, transform .3s;
+  font-size: .9rem;
+  user-select: none;
+}
+.forest-elem:hover { background: rgba(50,110,30,.55); border-color: rgba(100,190,60,.5); }
+.forest-elem.selected {
+  border-color: #ffd700;
+  background: rgba(70,130,30,.6);
+  box-shadow: 0 0 8px rgba(255,215,0,.3);
+}
+.forest-elem.matched {
+  opacity: 0;
+  transform: scale(.8);
+  pointer-events: none;
+}
+.forest-elem.wrong { animation: forestShake .45s ease; }
+@keyframes forestShake {
+  0%,100% { transform: translateX(0); }
+  20%,60%  { transform: translateX(-7px); }
+  40%,80%  { transform: translateX(7px); }
+}
+.forest-timer-bar {
+  height: 7px;
+  border-radius: 3px;
+  background: rgba(50,180,80,.55);
+  transition: width 1s linear, background .4s;
+}
+
+[data-theme="light"] .nature-cell.low  { background: rgba(220,80,80,.18);  border-color: rgba(200,60,60,.5);  color: #c02020; }
+[data-theme="light"] .nature-cell.ok   { background: rgba(40,160,70,.15);  border-color: rgba(40,160,70,.45); color: #1a7a30; }
+[data-theme="light"] .nature-cell.high { background: rgba(130,50,200,.12); border-color: rgba(130,50,200,.4); color: #6020b0; }
+[data-theme="light"] .nature-card      { background: rgba(220,250,210,.5); border-color: rgba(80,160,50,.35); }
+[data-theme="light"] .nature-card.selected { border-color: #b8860b; background: rgba(200,240,180,.7); }
+[data-theme="light"] .forest-elem      { background: rgba(220,250,210,.45); border-color: rgba(80,160,50,.3); color: #2a5a20; }
+[data-theme="light"] .forest-elem.selected { border-color: #b8860b; background: rgba(200,240,180,.7); }
