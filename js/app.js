@@ -29,7 +29,7 @@ const App = {
   _memoryMaxErrors:     8,
   // Nature Balance (Druido)
   _nbGrid:          null,
-  _nbMovesLeft:     10,
+  _nbMovesLeft:     12,
   _nbSelectedCard:  null,
   _nbHand:          [],
   // Forest Study (Druido)
@@ -1583,10 +1583,11 @@ const App = {
   ],
 
   _startNatureBalance() {
+    // Valori 2-8: meno celle agli estremi, più vicini all'equilibrio
     this._nbGrid = Array.from({length:5}, () =>
-      Array.from({length:5}, () => 1 + Math.floor(Math.random() * 9))
+      Array.from({length:5}, () => 2 + Math.floor(Math.random() * 7))
     );
-    this._nbMovesLeft    = 10;
+    this._nbMovesLeft    = 12;
     this._nbSelectedCard = null;
     this._nbHand         = this._drawNatureHand();
 
@@ -1609,7 +1610,7 @@ const App = {
     if (!grid) return;
     grid.innerHTML = this._nbGrid.map((row, r) =>
       row.map((val, c) => {
-        const cls = val < 4 ? 'low' : val <= 7 ? 'ok' : 'high';
+        const cls = val < 3 ? 'low' : val <= 8 ? 'ok' : 'high';
         return `<div class="nature-cell ${cls}" data-nr="${r}" data-nc="${c}">${val}</div>`;
       }).join('')
     ).join('');
@@ -1658,7 +1659,7 @@ const App = {
     this._renderNatureGrid();
     this._renderNatureHand();
 
-    if (this._nbGrid.every(row => row.every(v => v >= 4 && v <= 7))) {
+    if (this._nbGrid.every(row => row.every(v => v >= 3 && v <= 8))) {
       this._endNatureBalance(true);
       return;
     }
