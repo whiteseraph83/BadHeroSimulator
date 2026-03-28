@@ -364,8 +364,23 @@ const UI = {
 
   /* ─── Tab Foresta (solo Druido) ───────────────────── */
   renderNatureTab() {
-    // Il minigioco Equilibrio della Natura è gestito interamente da App.
-    // Questa funzione è un no-op: lo stato del gioco è mantenuto in App._nb*.
+    if (!Game.state) return;
+    const rem  = Game.natureBalanceRemaining();
+    const btn  = document.getElementById('btn-start-nature');
+    const retryBtn = document.getElementById('btn-nature-retry');
+    // Aggiorna badge sul pulsante lobby
+    if (btn) {
+      btn.disabled = rem <= 0;
+      btn.innerHTML = rem > 0
+        ? `<i class="bi bi-tree"></i> Entra nella Foresta <span class="badge bg-dark ms-1">${rem}</span>`
+        : `<i class="bi bi-tree"></i> Torna domani`;
+    }
+    if (retryBtn) {
+      retryBtn.disabled = rem <= 0;
+      retryBtn.innerHTML = rem > 0
+        ? `<i class="bi bi-arrow-repeat"></i> Riprova <span class="badge bg-dark ms-1">${rem}</span>`
+        : `<i class="bi bi-moon-stars"></i> Torna domani`;
+    }
   },
 
     /* ─── Tab Incantesimi (solo Mago) ───────────────────────── */
@@ -1464,8 +1479,14 @@ const UI = {
     // Tab Dadi (Ladro e Guerriero)
     document.getElementById('tab-dice-nav').classList.toggle('d-none', !cls.hasDiceGame);
 
-    // Studio (Mago e Druido)
+    // Studio (Mago e Druido) — label differente per classe
     document.getElementById('study-wrapper').classList.toggle('d-none', !cls.hasStudy);
+    const studyLabelEl = document.getElementById('study-btn-label');
+    if (studyLabelEl) {
+      studyLabelEl.innerHTML = cls.id === 'druido'
+        ? '🌿 Studia la Foresta'
+        : '<i class="bi bi-book"></i> Studia';
+    }
 
     // Tab Foresta (solo Druido)
     document.getElementById('tab-pozioni-nav').classList.toggle('d-none', !cls.hasNatureTab);

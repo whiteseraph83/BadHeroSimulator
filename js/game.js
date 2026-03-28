@@ -29,6 +29,7 @@ const Game = {
           if (this.state.diceRerollsUsed === undefined)        this.state.diceRerollsUsed = 0;
           if (!this.state.character.classe)                    this.state.character.classe = 'ladro';
           if (this.state.studyUsed === undefined)              this.state.studyUsed = 0;
+          if (this.state.natureUsed === undefined)             this.state.natureUsed = 0;
           if (this.state.freeSpellUsed === undefined)          this.state.freeSpellUsed = 0;
           if (!this.state.componentInventory)                 this.state.componentInventory = [];
           if (!this.state.spellInventory)                     this.state.spellInventory = [];
@@ -95,6 +96,7 @@ const Game = {
       spellRequests: [],
       knownSpells: [],
       studyUsed: 0,
+      natureUsed: 0,
       drinkingGameUsed: 0,
       prayUsed: 0,
       conversionUsed: 0,
@@ -351,7 +353,15 @@ const Game = {
   },
 
   /* ─── Equilibrio della Natura (solo Druido) ─────────── */
+  natureBalanceRemaining() {
+    return Math.max(0, 2 - (this.state.natureUsed || 0));
+  },
+
   startNatureBalance() {
+    if (this.natureBalanceRemaining() <= 0)
+      return { ok: false, reason: 'Hai già giocato 2 volte oggi. Riprova domani.' };
+    this.state.natureUsed = (this.state.natureUsed || 0) + 1;
+    this.save();
     return { ok: true };
   },
 
@@ -1165,6 +1175,7 @@ const Game = {
     this.state.rerollsUsed            = 0;
     this.state.diceRerollsUsed        = 0;
     this.state.studyUsed              = 0;
+    this.state.natureUsed             = 0;
     this.state.drinkingGameUsed       = 0;
     this.state.prayUsed               = 0;
     this.state.conversionUsed         = 0;

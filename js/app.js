@@ -511,12 +511,18 @@ const App = {
     // Pulsante avvia Nature Balance
     document.getElementById('btn-start-nature').addEventListener('click', () => {
       if (!Game.state || Game.state.gameOver) return;
+      const check = Game.startNatureBalance();
+      if (!check.ok) { UI.toast(check.reason, 3000); return; }
+      UI.refresh();
       this._startNatureBalance();
     });
 
     // Pulsante riprova Nature Balance
     document.getElementById('btn-nature-retry').addEventListener('click', () => {
       if (!Game.state || Game.state.gameOver) return;
+      const check = Game.startNatureBalance();
+      if (!check.ok) { UI.toast(check.reason, 3000); return; }
+      UI.refresh();
       this._startNatureBalance();
     });
 
