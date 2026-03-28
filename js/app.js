@@ -152,17 +152,18 @@ const App = {
           body: `
             <p class="text-muted small">Come Ladro, la <strong>Taglia</strong> è il prezzo sulla tua testa. Cresce quando vieni scoperto a rubare, fallisci un borseggio o completi azioni illecite.</p>
             <div class="mb-2">${row('🚨', 'Soglie critiche', 'Superata una certa soglia di taglia, <strong>un Cacciatore di Taglie</strong> ti blocca la strada. Devi affrontarlo (e batterlo) prima di poter avanzare al giorno successivo.')}</div>
-            <div class="mb-2">${row('📉', 'Come ridurla', 'Affronta e sconfiggi il cacciatore di taglie oppure completa la missione taglia speciale. Il tempo e un basso profilo la abbassano lentamente.')}</div>
+            <div class="mb-2">${row('📉', 'Come ridurla', 'Affronta e sconfiggi il cacciatore di taglie oppure completa la missione taglia speciale.')}</div>
             <div class="text-warning small mt-2">⚠️ Ogni furto fallito al mercato aumenta taglia, riduce fama e ti vieta gli acquisti per quel giorno.</div>`,
         };
       }
       return {
         title: '👁️ Visibilità',
         body: `
-          <p class="text-muted small">La <strong>Visibilità</strong> indica quanto sei esposto agli sguardi dei potenti e delle fazioni cittadine. Una visibilità alta può attirare eventi indesiderati.</p>
-          <div class="mb-2">${row('📈', 'Come cresce', 'Aumenta con azioni controverse, missioni ad alto rischio o comportamenti che attirano l\'attenzione.')}</div>
-          <div class="mb-2">${row('📉', 'Come diminuisce', 'Mantieni un profilo basso, evita scontri non necessari e scegli missioni discrete.')}</div>
-          <div class="text-muted small mt-2">💡 Per ${clsName} la visibilità ha effetti moderati rispetto ad altri personaggi più nell\'ombra.</div>`,
+          <p class="text-muted small">La <strong>Visibilità</strong> misura quanto ${clsName} è esposto agli sguardi delle fazioni cittadine, dei ladri e delle organizzazioni criminali. Cresce ogni giorno e con le missioni completate.</p>
+          <div class="mb-2">${row('📈', 'Come cresce', '+4 al giorno (notorietà passiva) +3 su missione completata, +6 su parziale, +12/+20 su fallimento critico.')}</div>
+          <div class="mb-2">${row('🗡️', 'Incontro obbligatorio', 'Sopra una certa soglia un <strong>ladro</strong> tenta di derubarti. Devi risolvere l\'incontro prima di avanzare al giorno successivo.')}</div>
+          <div class="mb-2">${row('📉', 'Come diminuisce', 'Rispondere all\'attacco del ladro riduce la visibilità: −25 se derubato (stai più basso di profilo), −8/−15 se lo respingi.')}</div>
+          <div class="text-muted small mt-2">💡 La visibilità crea un ciclo naturale: cresce con l\'attività, si riduce dopo ogni incontro. Gestiscila come parte del ritmo quotidiano.</div>`,
       };
     }
 

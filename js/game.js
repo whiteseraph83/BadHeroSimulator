@@ -740,9 +740,12 @@ const Game = {
     // Applica ricompense
     const char = this.state.character;
 
-    // Aumenta Taglia (Ladro) o Visibilità (altre classi) sul fallimento
+    // Taglia / Visibilità — aumenta su fallimento, cresce lievemente su successo (notorietà)
     if (!isSuccess && !isPartial) {
       char.wanted = (char.wanted || 0) + (check.result === 'nat1' ? 20 : 12);
+    } else if (this.getClasse().id !== 'ladro') {
+      // Completare missioni attira attenzione anche in caso di successo
+      char.wanted = (char.wanted || 0) + (isSuccess ? 3 : 6);
     }
     char.xp   += rewards.xp;
     char.gold += rewards.gold;
@@ -1271,6 +1274,12 @@ const Game = {
     if (this.getClasse().hasPotioniTab) this.generatePotionRequests();
     if (this.getClasse().hasSpellTab)   this.generateSpellRequests();
 
+    // Visibilità passiva giornaliera per classi non-Ladro
+    // (essere attivi in città aumenta la notorietà ogni giorno)
+    if (this.getClasse().id !== 'ladro') {
+      char.wanted = (char.wanted || 0) + 4;
+    }
+
     // Controlla se scatta missione taglia
     this.state.wantedMissionPending = this._checkWantedTrigger();
 
@@ -1654,11 +1663,12 @@ const Game = {
 
   /* ─── Attacco Ladro ─────────────────────────────────────── */
   _checkThiefTrigger() {
-    // L'attacco ladro è guidato dalla Visibilità del personaggio
+    // L'attacco ladro è guidato dalla Visibilità del personaggio (classi non-Ladro)
     if (this.getClasse().id === 'ladro') return false;
     const vis = this.state.character.wanted || 0;
     if (vis < 15) return false;
-    const chance = Math.min(0.75, vis / 200);
+    // Scala più ripida: a vis=15 → 5%, vis=50 → 30%, vis=100 → 65%, vis=150+ → cap 85%
+    const chance = Math.min(0.85, (vis - 15) / 160);
     return Math.random() < chance;
   },
 
@@ -1674,27 +1684,31 @@ const Game = {
 
     let result;
     if (isSuccess || isPartial) {
-      // Ladro sconfitto/in fuga
+      // Ladro sconfitto/in fuga — piccola riduzione visibilità (hai dimostrato di sapertela cavare)
       const xp   = 60 + char.level * 15;
       const fame = isSuccess ? 12 + char.level * 3 : 5;
       const goldGained = isSuccess ? 10 + Math.floor(Math.random() * 20 * char.level) : 0;
+      const visReduction = isSuccess ? 15 : 8;
       char.xp   += xp;
       char.fame += fame;
       char.gold += goldGained;
+      char.wanted = Math.max(0, (char.wanted || 0) - visReduction);
       const text = isSuccess
-        ? `Attacco ladro respinto! ${check.result === 'nat20' ? 'CRITICO — ' : ''}+${xp} PE, +${fame} fama${goldGained ? `, +${goldGained} mo rubati al ladro` : ''}`
-        : `Attacco parzialmente respinto. +${xp} PE, +${fame} fama`;
+        ? `Attacco ladro respinto! ${check.result === 'nat20' ? 'CRITICO — ' : ''}+${xp} PE, +${fame} fama${goldGained ? `, +${goldGained} mo rubati al ladro` : ''}. Visibilità -${visReduction}`
+        : `Attacco parzialmente respinto. +${xp} PE, +${fame} fama. Visibilità -${visReduction}`;
       char.log.unshift({ day: char.day, text, type: 'success' });
-      result = { ok: true, partial: isPartial, xp, fame, goldGained, check };
+      result = { ok: true, partial: isPartial, xp, fame, goldGained, visReduction, check };
     } else {
-      // Derubato
+      // Derubato — l'incidente ti insegna a stare più basso di profilo
       const goldLost = Math.max(10, Math.min(Math.floor(char.gold * 0.20), 200));
-      char.gold = Math.max(0, char.gold - goldLost);
+      const visReduction = 25;
+      char.gold   = Math.max(0, char.gold - goldLost);
+      char.wanted = Math.max(0, (char.wanted || 0) - visReduction);
       const text = check.result === 'nat1'
-        ? `CRITICO! Il ladro ti deruба e ti ferisce. -${goldLost} mo`
-        : `Il ladro è riuscito a derubarti. -${goldLost} mo`;
+        ? `CRITICO! Il ladro ti deruba e ti ferisce. -${goldLost} mo. Visibilità -${visReduction}`
+        : `Il ladro è riuscito a derubarti. -${goldLost} mo. Visibilità -${visReduction}`;
       char.log.unshift({ day: char.day, text, type: 'fail' });
-      result = { ok: false, goldLost, check };
+      result = { ok: false, goldLost, visReduction, check };
     }
 
     if (char.log.length > 500) char.log.pop();
