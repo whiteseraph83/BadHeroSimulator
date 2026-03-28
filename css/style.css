@@ -960,6 +960,19 @@ body {
   .stats-grid { grid-template-columns: repeat(3, 1fr); }
   .adventure-log { max-height: 200px; }
   .card-dark-body { padding: 0.75rem; }
+
+  /* Previene lo zoom automatico di iOS sulle input con font < 16px */
+  input[type="text"],
+  input[type="number"],
+  input[type="email"],
+  input[type="password"],
+  input[type="search"],
+  input[type="tel"],
+  input[type="url"],
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
 }
 
 /* ── Gioco dei Dadi ── */
