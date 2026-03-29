@@ -2607,8 +2607,8 @@ const App = {
     // Demon state
     this._prayDemonActive  = false;
     this._prayDemonTimer   = 0;
-    this._prayDemonLimit   = 2.4;
-    this._prayNextDemon    = 4.5 + Math.random() * 3.5;
+    this._prayDemonLimit   = 2.0;
+    this._prayNextDemon    = 3.5 + Math.random() * 3.0;
     this._prayDemonX       = 0;
     this._prayDemonY       = 0;
     this._prayDemonIcon    = '👿';
@@ -2684,7 +2684,7 @@ const App = {
       document.getElementById('prayer-hint').textContent = '✨ Momento di Grazia! Clicca Amen!';
       document.getElementById('btn-amen').classList.add('grace-active');
     }
-    if (this._prayGraceActive && this._prayGraceTimer >= 1.3) {
+    if (this._prayGraceActive && this._prayGraceTimer >= 1.0) {
       this._prayGraceActive = false;
       this._prayGraceTimer  = 0;
       document.getElementById('prayer-hint').textContent = 'Prega con devozione… aspetta il momento di grazia';
@@ -2696,7 +2696,7 @@ const App = {
     if (!this._prayDemonActive && !this._prayGraceActive && this._prayDemonTimer >= this._prayNextDemon) {
       this._prayDemonActive = true;
       this._prayDemonTimer  = 0;
-      this._prayNextDemon   = 4.5 + Math.random() * 3.5;
+      this._prayNextDemon   = 3.5 + Math.random() * 3.0;
       this._prayDemonIcon   = Math.random() < 0.5 ? '👿' : '💀';
       // Position away from sphere, within canvas margins
       const margin = 36;
@@ -2720,10 +2720,10 @@ const App = {
     }
 
     // Passive devotion
-    this._prayDevotion = Math.min(100, this._prayDevotion + dt * 3.2);
+    this._prayDevotion = Math.min(100, this._prayDevotion + dt * 2.5);
     // Drain attivo durante grazia e demone — bisogna reagire in fretta
-    if (this._prayGraceActive) this._prayDevotion = Math.max(0, this._prayDevotion - dt * 8);
-    if (this._prayDemonActive) this._prayDevotion = Math.max(0, this._prayDevotion - dt * 10);
+    if (this._prayGraceActive) this._prayDevotion = Math.max(0, this._prayDevotion - dt * 11);
+    if (this._prayDemonActive) this._prayDevotion = Math.max(0, this._prayDevotion - dt * 14);
     this._updatePrayDevoBar();
 
     this._drawPrayer(canvas);
