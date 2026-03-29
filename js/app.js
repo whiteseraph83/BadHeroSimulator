@@ -696,12 +696,6 @@ const App = {
       UI.openRecipeModal(card.dataset.recipeId, card.dataset.recipeType || 'spell');
     });
 
-    document.getElementById('known-recipes-list').addEventListener('click', (e) => {
-      const card = e.target.closest('.recipe-card');
-      if (!card) return;
-      UI.openRecipeModal(card.dataset.recipeId, card.dataset.recipeType || 'potion');
-    });
-
     // Modale ricetta: bottone Prepara
     document.getElementById('btn-recipe-prepare').addEventListener('click', () => {
       const recipeId = document.getElementById('btn-recipe-prepare').dataset.recipeId;
