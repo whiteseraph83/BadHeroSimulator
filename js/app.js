@@ -1585,6 +1585,102 @@ const App = {
     }, 400);
   },
 
+  /* ─── Memory Game (Mago — Studio Arcano) ───────────────── */
+  _startMemoryGame() {
+    const symbols = ['🔮','⚡','🌀','❄️','🔥','💫'];
+    this._memoryCards = [...symbols, ...symbols]
+      .sort(() => Math.random() - 0.5)
+      .map((sym, i) => ({ id: i, symbol: sym, flipped: false, matched: false }));
+    this._memoryFlipped  = [];
+    this._memoryErrors   = 0;
+    this._memoryPairs    = 0;
+    this._memoryTimeLeft = 90;
+    this._memoryLockBoard = false;
+
+    document.getElementById('memory-timer').textContent  = '90';
+    document.getElementById('memory-errors').textContent = '0';
+    document.getElementById('memory-pairs').textContent  = '0';
+    document.getElementById('memory-result').classList.add('d-none');
+
+    this._renderMemoryGrid();
+
+    if (this._memoryTimerInterval) clearInterval(this._memoryTimerInterval);
+    this._memoryTimerInterval = setInterval(() => {
+      this._memoryTimeLeft--;
+      const timerEl = document.getElementById('memory-timer');
+      if (timerEl) timerEl.textContent = this._memoryTimeLeft;
+      if (this._memoryTimeLeft <= 0) {
+        clearInterval(this._memoryTimerInterval);
+        this._memoryTimerInterval = null;
+        UI.showMemoryResult(false, 0, this._memoryErrors);
+      }
+    }, 1000);
+  },
+
+  _renderMemoryGrid() {
+    const grid = document.getElementById('memory-grid');
+    if (!grid) return;
+    grid.innerHTML = this._memoryCards.map((card, i) => `
+      <div class="memory-card${card.flipped ? ' flipped' : ''}${card.matched ? ' matched' : ''}" data-index="${i}">
+        <span class="card-back">✦</span>
+        <span class="card-front">${card.symbol}</span>
+      </div>`).join('');
+    grid.querySelectorAll('.memory-card').forEach(el => {
+      el.addEventListener('click', () => this._onMemoryCardClick(parseInt(el.dataset.index)));
+    });
+  },
+
+  _onMemoryCardClick(index) {
+    if (this._memoryLockBoard) return;
+    const card = this._memoryCards[index];
+    if (card.flipped || card.matched) return;
+
+    card.flipped = true;
+    this._memoryFlipped.push(index);
+    this._renderMemoryGrid();
+
+    if (this._memoryFlipped.length < 2) return;
+
+    this._memoryLockBoard = true;
+    const [a, b] = this._memoryFlipped;
+
+    if (this._memoryCards[a].symbol === this._memoryCards[b].symbol) {
+      // Coppia trovata
+      this._memoryCards[a].matched = true;
+      this._memoryCards[b].matched = true;
+      this._memoryFlipped  = [];
+      this._memoryPairs++;
+      this._memoryLockBoard = false;
+      const pairsEl = document.getElementById('memory-pairs');
+      if (pairsEl) pairsEl.textContent = this._memoryPairs;
+      const reward = Game.applyPairReward();
+      if (reward.levelUpResult) App._triggerLevelUp(reward.levelUpResult);
+      this._renderMemoryGrid();
+      if (this._memoryPairs >= 6) {
+        clearInterval(this._memoryTimerInterval);
+        this._memoryTimerInterval = null;
+        setTimeout(() => UI.showMemoryResult(true, this._memoryTimeLeft, this._memoryErrors), 400);
+      }
+    } else {
+      // Errore
+      this._memoryErrors++;
+      const errEl = document.getElementById('memory-errors');
+      if (errEl) errEl.textContent = this._memoryErrors;
+      setTimeout(() => {
+        this._memoryCards[a].flipped = false;
+        this._memoryCards[b].flipped = false;
+        this._memoryFlipped   = [];
+        this._memoryLockBoard = false;
+        this._renderMemoryGrid();
+        if (this._memoryErrors >= this._memoryMaxErrors) {
+          clearInterval(this._memoryTimerInterval);
+          this._memoryTimerInterval = null;
+          UI.showMemoryResult(false, this._memoryTimeLeft, this._memoryErrors);
+        }
+      }, 900);
+    }
+  },
+
   /* ─── Helper per Nature Balance ────────────────── */
   _nbCards: [
     { id:'ruscello', name:'Ruscello',    icon:'🌊', desc:'+2 cella, +1 adiacenti',
