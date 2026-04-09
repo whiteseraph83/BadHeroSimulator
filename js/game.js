@@ -2311,6 +2311,24 @@ const Game = {
     return false;
   },
 
+  _selectVictoryItem(enemyTier) {
+    const char = this.state.character;
+    const cls  = this.getClasse();
+    const profs = cls.proficiencies || [];
+    // Qualità coerente con il tier del nemico
+    const maxQ = Math.min(5, enemyTier + 1);
+    const eligible = (DB.items || []).filter(item => {
+      if (!item.stats || !item.slot) return false;
+      const hasProfStat = profs.some(p => (item.stats[p] || 0) > 0);
+      if (!hasProfStat) return false;
+      if (item.quality > maxQ) return false;
+      if (item.classRestrict && !item.classRestrict.includes(cls.id)) return false;
+      return true;
+    });
+    if (!eligible.length) return null;
+    return eligible[Math.floor(Math.random() * eligible.length)];
+  },
+
   _applyCombatVictory() {
     const c = this.state.combat;
     const char = this.state.character;
@@ -2325,19 +2343,15 @@ const Game = {
     char.xp   += xp;
     char.gold += gold;
     char.fame += fame;
-    let droppedItem = null;
-    for (const drop of (enemy.dropTable || [])) {
-      if (Math.random() < drop.chance) {
-        const item = DB.items.find(i => i.id === drop.itemId);
-        if (item) { char.inventory.push(item.id); droppedItem = item; }
-        break;
-      }
-    }
+    // Oggetto garantito con stat delle competenze del personaggio
+    const droppedItem = this._selectVictoryItem(enemy.tier);
+    if (droppedItem) char.inventory.push(droppedItem.id);
     c.rewards = { xp, gold, fame, droppedItem };
     const completedChallenges = this.checkChallenges('combat_victory', { tier: enemy.tier });
     const levelUpResult = this.checkLevelUp();
     if (levelUpResult) this.state._lastLevelUp = levelUpResult;
-    this._addLog(`Vittoria! +${xp} PE, +${gold} mo, +${fame} fama.`, 'info');
+    const itemNote = droppedItem ? `, ottieni ${droppedItem.name}` : '';
+    this._addLog(`Vittoria! +${xp} PE, +${gold} mo, +${fame} fama${itemNote}.`, 'info');
     return { completedChallenges, levelUpResult };
   },
 

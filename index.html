@@ -725,9 +725,31 @@
           <!-- Lobby -->
           <div id="combat-lobby" class="card-dark mb-3">
             <div class="card-dark-header">⚔️ Combattimento</div>
-            <div class="card-dark-body text-center">
-              <p class="text-muted small mb-3">Sfida un nemico casuale in un combattimento a turni. Usa le tue abilità, gestisci gli HP e gli MP, e supera l'avversario.</p>
-              <div class="d-flex justify-content-center gap-4 mb-3">
+            <div class="card-dark-body">
+
+              <!-- Avviso posta in gioco -->
+              <div class="combat-stakes">
+                <div class="stakes-col stakes-win">
+                  <div class="stakes-title">🏆 Se vinci</div>
+                  <ul class="stakes-list">
+                    <li>⭐ Punti esperienza</li>
+                    <li>💰 Oro</li>
+                    <li>🌟 Fama</li>
+                    <li>🎁 Un oggetto con bonus in <strong id="combat-prof-list">—</strong></li>
+                  </ul>
+                </div>
+                <div class="stakes-col stakes-lose">
+                  <div class="stakes-title">💀 Se perdi</div>
+                  <ul class="stakes-list">
+                    <li>💸 10–20% del tuo oro</li>
+                    <li>🎒 Un oggetto casuale dall'inventario o dall'equipaggiamento</li>
+                    <li>👁️ 3 punti fama</li>
+                  </ul>
+                </div>
+              </div>
+
+              <!-- Stats personaggio -->
+              <div class="d-flex justify-content-center gap-4 mb-3 mt-3">
                 <div class="text-center">
                   <div class="text-gold fw-bold fs-5" id="combat-hp-preview">--</div>
                   <div class="text-muted small">❤️ HP massimi</div>
@@ -741,7 +763,10 @@
                   <div class="text-muted small">Combattimenti oggi</div>
                 </div>
               </div>
-              <button class="btn btn-gold btn-lg" id="btn-combat-start">⚔️ Trova un Nemico</button>
+              <div class="text-center">
+                <button class="btn btn-gold btn-lg" id="btn-combat-start">⚔️ Trova un Nemico</button>
+              </div>
+
             </div>
           </div>
 

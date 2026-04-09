@@ -1906,6 +1906,13 @@ const UI = {
     document.getElementById('combat-mp-preview').textContent = mpMax;
     document.getElementById('combat-uses-left').textContent = Game.combatRemaining();
     document.getElementById('btn-combat-start').disabled = Game.combatRemaining() <= 0 || Game.state.gameOver;
+
+    // Mostra competenze nella lobby
+    const profAbbr = { str:'FOR', dex:'DES', con:'COS', int:'INT', wis:'SAG', cha:'CAR' };
+    const profs = (Game.getClasse().proficiencies || []).map(k => profAbbr[k] || k).join(', ');
+    const profEl = document.getElementById('combat-prof-list');
+    if (profEl) profEl.textContent = profs;
+
     document.getElementById('combat-lobby').classList.remove('d-none');
     document.getElementById('combat-screen').classList.add('d-none');
     document.getElementById('combat-result').classList.add('d-none');
@@ -2008,7 +2015,7 @@ const UI = {
       if (rewards.xp)          rows.push(row('⭐', 'Punti Esperienza', `+${rewards.xp} PE`, 'gain'));
       if (rewards.gold)        rows.push(row('💰', 'Oro guadagnato',   `+${rewards.gold} mo`, 'gain'));
       if (rewards.fame)        rows.push(row('🌟', 'Fama',             `+${rewards.fame}`, 'gain'));
-      if (rewards.droppedItem) rows.push(row('📦', 'Oggetto trovato',  rewards.droppedItem.name, 'gain'));
+      if (rewards.droppedItem) rows.push(row('🎁', 'Oggetto ottenuto', rewards.droppedItem.name, 'gain'));
     }
     if (outcome === 'defeat' && rewards) {
       if (rewards.goldLoss != null) rows.push(row('💸', `Oro perso (${rewards.goldLossPct}%)`, `-${rewards.goldLoss} mo`, 'loss'));

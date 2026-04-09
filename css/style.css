@@ -1997,6 +1997,47 @@ body {
 [data-theme="light"] .forest-elem      { background: rgba(220,250,210,.45); border-color: rgba(80,160,50,.3); color: #2a5a20; }
 [data-theme="light"] .forest-elem.selected { border-color: #b8860b; background: rgba(200,240,180,.7); }
 
+/* ── LOBBY COMBATTIMENTO — POSTA IN GIOCO ───────────────── */
+.combat-stakes {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+.stakes-col {
+  flex: 1;
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: .82rem;
+}
+.stakes-win {
+  background: rgba(82,183,136,.07);
+  border: 1px solid rgba(82,183,136,.3);
+}
+.stakes-lose {
+  background: rgba(230,57,70,.07);
+  border: 1px solid rgba(230,57,70,.25);
+}
+.stakes-title {
+  font-family: 'Cinzel', serif;
+  font-size: .78rem;
+  font-weight: 700;
+  letter-spacing: .04em;
+  margin-bottom: 7px;
+}
+.stakes-win  .stakes-title { color: #52b788; }
+.stakes-lose .stakes-title { color: #e06060; }
+.stakes-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: #b0a898;
+}
+.stakes-list li { line-height: 1.4; }
+.stakes-list strong { color: #c9a84c; }
+
 /* ── COMBATTIMENTO A TURNI — JRPG STYLE ─────────────────── */
 
 /* ─ Battlefield (area sprite con sfondo) ─ */
