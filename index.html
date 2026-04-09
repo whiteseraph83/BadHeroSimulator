@@ -745,59 +745,68 @@
             </div>
           </div>
 
-          <!-- Schermata combattimento -->
+          <!-- Schermata combattimento (JRPG) -->
           <div id="combat-screen" class="d-none">
 
-            <!-- Barre HP/MP e status -->
-            <div class="row g-2 mb-2">
-              <div class="col-6">
-                <div class="card-dark p-2">
-                  <div class="d-flex justify-content-between align-items-center mb-1">
-                    <small class="text-muted" id="combat-player-name">Tu</small>
-                    <small id="combat-player-status-pills"></small>
-                  </div>
-                  <div class="combat-bar-label d-flex justify-content-between">
-                    <span class="text-danger small">❤️</span>
-                    <span class="small" id="combat-player-hp-text">28/28</span>
-                  </div>
-                  <div class="combat-hp-bar-wrap">
-                    <div class="combat-hp-bar" id="combat-player-hp-bar" style="width:100%"></div>
-                  </div>
-                  <div class="combat-bar-label d-flex justify-content-between mt-1">
-                    <span class="text-primary small">💙</span>
-                    <span class="small" id="combat-player-mp-text">10/10</span>
-                  </div>
-                  <div class="combat-mp-bar-wrap">
-                    <div class="combat-mp-bar" id="combat-player-mp-bar" style="width:100%"></div>
-                  </div>
+            <!-- Battlefield -->
+            <div class="combat-battlefield">
+              <div class="combat-turn-badge" id="combat-turn-badge">Turno 1</div>
+              <div class="combat-fighters-row">
+
+                <!-- Personaggio (sinistra) -->
+                <div class="combat-fighter player-side-fighter">
+                  <img id="combat-player-sprite" src="" alt="Player" class="fighter-avatar">
+                  <div class="fighter-shadow player-shadow"></div>
                 </div>
-              </div>
-              <div class="col-6">
-                <div class="card-dark p-2">
-                  <div class="d-flex justify-content-between align-items-center mb-1">
-                    <small class="fw-bold" id="combat-enemy-name">Nemico</small>
-                    <small id="combat-enemy-status-pills"></small>
-                  </div>
-                  <div class="combat-bar-label d-flex justify-content-between">
-                    <span class="text-danger small" id="combat-enemy-icon">❤️</span>
-                    <span class="small" id="combat-enemy-hp-text">14/14</span>
-                  </div>
-                  <div class="combat-hp-bar-wrap">
-                    <div class="combat-hp-bar" id="combat-enemy-hp-bar" style="width:100%"></div>
-                  </div>
+
+                <!-- Log (centro) -->
+                <div class="combat-center-log">
+                  <div class="combat-log" id="combat-log"></div>
                 </div>
+
+                <!-- Nemico (destra) -->
+                <div class="combat-fighter enemy-side-fighter">
+                  <div class="fighter-enemy-icon" id="combat-enemy-sprite">👺</div>
+                  <div class="fighter-shadow enemy-shadow"></div>
+                </div>
+
               </div>
             </div>
 
-            <!-- Log combattimento -->
-            <div class="card-dark mb-2">
-              <div class="card-dark-body p-0">
-                <div class="combat-log" id="combat-log"></div>
-              </div>
-            </div>
+            <!-- HUD inferiore -->
+            <div class="combat-hud-bottom">
 
-            <!-- Bottoni azione -->
-            <div id="combat-actions" class="d-flex flex-wrap gap-2 justify-content-center"></div>
+              <!-- Barre HP/MP -->
+              <div class="combat-hud-stats">
+                <div class="hud-stat-box">
+                  <div class="hud-char-name" id="combat-player-name">Eroe</div>
+                  <div class="hud-bar-row">
+                    <span class="hud-lbl hud-hp">HP</span>
+                    <div class="combat-hp-bar-wrap"><div class="combat-hp-bar" id="combat-player-hp-bar" style="width:100%"></div></div>
+                    <span class="hud-val" id="combat-player-hp-text">28/28</span>
+                  </div>
+                  <div class="hud-bar-row">
+                    <span class="hud-lbl hud-mp">MP</span>
+                    <div class="combat-mp-bar-wrap"><div class="combat-mp-bar" id="combat-player-mp-bar" style="width:100%"></div></div>
+                    <span class="hud-val" id="combat-player-mp-text">10/10</span>
+                  </div>
+                  <div id="combat-player-status-pills" class="hud-pills"></div>
+                </div>
+                <div class="hud-stat-box">
+                  <div class="hud-char-name" id="combat-enemy-name">Nemico</div>
+                  <div class="hud-bar-row">
+                    <span class="hud-lbl hud-hp">HP</span>
+                    <div class="combat-hp-bar-wrap"><div class="combat-hp-bar" id="combat-enemy-hp-bar" style="width:100%"></div></div>
+                    <span class="hud-val" id="combat-enemy-hp-text">14/14</span>
+                  </div>
+                  <div id="combat-enemy-status-pills" class="hud-pills"></div>
+                </div>
+              </div>
+
+              <!-- Bottoni azione -->
+              <div id="combat-actions" class="combat-actions-grid"></div>
+
+            </div>
 
           </div>
 

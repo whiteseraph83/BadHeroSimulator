@@ -1917,9 +1917,23 @@ const UI = {
     document.getElementById('combat-result').classList.add('d-none');
     document.getElementById('combat-screen').classList.remove('d-none');
 
-    // Player
+    // Turn badge
+    const badge = document.getElementById('combat-turn-badge');
+    if (badge) badge.textContent = `Turno ${combat.turn}`;
+
+    // Player sprite
+    const cls = Game.getClasse();
+    const spriteEl = document.getElementById('combat-player-sprite');
+    if (spriteEl) spriteEl.src = `assets/${cls.avatar}?v=${Date.now()}`;
+
+    // Enemy sprite (emoji grande)
+    const enemySpriteEl = document.getElementById('combat-enemy-sprite');
+    if (enemySpriteEl) enemySpriteEl.textContent = combat.enemy.icon;
+
+    // Player HUD
     const playerPct = Math.max(0, Math.round((combat.playerHP / combat.playerHPMax) * 100));
     const mpPct     = combat.playerMPMax > 0 ? Math.max(0, Math.round((combat.playerMP / combat.playerMPMax) * 100)) : 0;
+    document.getElementById('combat-player-name').textContent = Game.state.character.name;
     document.getElementById('combat-player-hp-text').textContent = `${combat.playerHP}/${combat.playerHPMax}`;
     document.getElementById('combat-player-mp-text').textContent = `${combat.playerMP}/${combat.playerMPMax}`;
     const hpBar = document.getElementById('combat-player-hp-bar');
@@ -1928,9 +1942,9 @@ const UI = {
     document.getElementById('combat-player-mp-bar').style.width = `${mpPct}%`;
     document.getElementById('combat-player-status-pills').innerHTML = this._renderStatusPills(combat.playerStatusEffects);
 
-    // Enemy
+    // Enemy HUD
     const enemyPct = Math.max(0, Math.round((combat.enemy.hp / combat.enemy.hpMax) * 100));
-    document.getElementById('combat-enemy-name').textContent = `${combat.enemy.icon} ${combat.enemy.name} (Tier ${combat.enemy.tier})`;
+    document.getElementById('combat-enemy-name').textContent = `${combat.enemy.name} (T${combat.enemy.tier})`;
     document.getElementById('combat-enemy-hp-text').textContent = `${combat.enemy.hp}/${combat.enemy.hpMax}`;
     const eHpBar = document.getElementById('combat-enemy-hp-bar');
     eHpBar.style.width = `${enemyPct}%`;
@@ -1943,16 +1957,15 @@ const UI = {
     // Action buttons
     const actionsEl = document.getElementById('combat-actions');
     const isPlayerTurn = combat.phase === 'player_choice' && !combat.outcome;
-    const cls = Game.getClasse();
     const availableSkills = COMBAT_SKILLS.filter(s => {
       if (s.availableFor === 'all') return true;
       return Array.isArray(s.availableFor) && s.availableFor.includes(cls.id);
     });
     actionsEl.innerHTML = availableSkills.map(s => {
-      const mpLabel = s.mpCost > 0 ? ` <small class="opacity-50">(${s.mpCost}MP)</small>` : '';
+      const mpLabel = s.mpCost > 0 ? `<br><small style="opacity:.55">${s.mpCost} MP</small>` : '';
       const notEnoughMP = (s.mpCost || 0) > combat.playerMP;
-      const disabled = !isPlayerTurn || notEnoughMP ? 'disabled' : '';
-      return `<button class="btn combat-action-btn ${disabled ? 'opacity-50' : ''}" data-skill="${s.id}" ${disabled}>${s.icon} ${s.name}${mpLabel}</button>`;
+      const dis = !isPlayerTurn || notEnoughMP ? 'disabled' : '';
+      return `<button class="combat-action-btn" data-skill="${s.id}" ${dis}>${s.icon}<br><span style="font-size:.72rem">${s.name}</span>${mpLabel}</button>`;
     }).join('');
   },
 
