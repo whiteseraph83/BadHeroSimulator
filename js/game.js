@@ -1787,11 +1787,9 @@ const Game = {
 
   /* ─── Gioco dei Dadi ────────────────────────────────────── */
   maxDiceBet() {
-    const char = this.state.character;
-    const tier = this.getFameLevel().tier || 0;
-    // Curva quadratica: piccolo a basso livello, grande ad alto livello
-    // Lv1≈50  Lv3≈400  Lv5≈1100  Lv7≈2500  Lv10≈4500 (+ bonus fama)
-    return Math.max(10, char.level * char.level * 45 + tier * 250);
+    const gold = this.state.character.gold;
+    // Massimo = 10% dell'oro attuale, minimo 1
+    return Math.max(1, Math.floor(gold * 0.10));
   },
 
   getDiceBetOptions() {
