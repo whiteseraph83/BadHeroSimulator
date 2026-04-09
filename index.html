@@ -1483,6 +1483,37 @@
   </div>
 </div>
 
+<!-- MODAL: Risultato Combattimento -->
+<div class="modal fade" id="modal-combat-result" tabindex="-1"
+     data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content combat-result-modal" id="combat-result-modal-content">
+      <div class="modal-body p-0">
+
+        <!-- Header colorato -->
+        <div class="crm-header" id="crm-header">
+          <div class="crm-big-icon" id="crm-icon">🏆</div>
+          <div class="crm-title"    id="crm-title">Vittoria!</div>
+        </div>
+
+        <!-- Corpo con ricompense/perdite -->
+        <div class="crm-body">
+          <div id="crm-subtitle" class="crm-subtitle"></div>
+          <div id="crm-rewards" class="crm-rewards-list"></div>
+        </div>
+
+        <!-- Footer -->
+        <div class="crm-footer">
+          <button class="btn btn-gold w-100" id="btn-combat-result-continue">
+            Continua <i class="bi bi-arrow-right"></i>
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
   var _v = '?v=' + Date.now();

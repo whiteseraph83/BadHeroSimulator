@@ -1060,8 +1060,14 @@ const App = {
       }
     });
 
-    // Combattimento — combatti ancora
+    // Combattimento — combatti ancora (bottone vecchio nella card, tenuto per compatibilità)
     document.getElementById('btn-combat-again').addEventListener('click', () => {
+      UI.renderCombatLobby();
+    });
+
+    // Combattimento — continua dalla modal risultato
+    document.getElementById('btn-combat-result-continue').addEventListener('click', () => {
+      bootstrap.Modal.getOrCreateInstance(document.getElementById('modal-combat-result')).hide();
       UI.renderCombatLobby();
     });
 

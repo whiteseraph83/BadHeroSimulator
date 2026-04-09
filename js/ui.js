@@ -1979,29 +1979,50 @@ const UI = {
   },
 
   showCombatResult(outcome, rewards) {
-    document.getElementById('combat-screen').classList.add('d-none');
-    document.getElementById('combat-result').classList.remove('d-none');
+    // Prepara contenuto modal
+    const modalEl  = document.getElementById('modal-combat-result');
+    const contentEl = document.getElementById('combat-result-modal-content');
 
-    const icons = { victory: '🏆', defeat: '💀', fled: '🏃' };
-    const titles = { victory: 'Vittoria!', defeat: 'Sconfitto!', fled: 'Fuggito!' };
-    document.getElementById('combat-result-icon').textContent = icons[outcome] || '⚔️';
-    const titleEl = document.getElementById('combat-result-title');
-    titleEl.textContent = titles[outcome] || outcome;
-    titleEl.className = `fw-bold fs-4 mb-1 ${outcome === 'victory' ? 'text-gold' : outcome === 'defeat' ? 'text-danger' : 'text-muted'}`;
+    const cfg = {
+      victory: { icon: '🏆', title: 'Vittoria!',  cls: 'crm-victory', subtitle: 'Hai sconfitto il nemico!' },
+      defeat:  { icon: '💀', title: 'Sconfitto!', cls: 'crm-defeat',  subtitle: 'Il nemico ti ha sopraffatto. Riprendi le forze e torna più forte.' },
+      fled:    { icon: '🏃', title: 'Fuggito!',   cls: 'crm-fled',    subtitle: 'Sei riuscito a scappare. A volte la discrezione vale più del valore.' },
+    };
+    const c = cfg[outcome] || cfg.fled;
 
+    contentEl.className = `modal-content combat-result-modal ${c.cls}`;
+    document.getElementById('crm-icon').textContent    = c.icon;
+    document.getElementById('crm-title').textContent   = c.title;
+    document.getElementById('crm-subtitle').textContent = c.subtitle;
+
+    // Costruisci righe ricompense/perdite
     const rows = [];
-    if (rewards) {
-      if (rewards.xp)       rows.push(`<div>⭐ +${rewards.xp} PE</div>`);
-      if (rewards.gold)     rows.push(`<div>💰 +${rewards.gold} mo</div>`);
-      if (rewards.fame)     rows.push(`<div>🌟 +${rewards.fame} fama</div>`);
-      if (rewards.droppedItem) rows.push(`<div>📦 Trovato: ${rewards.droppedItem.name}</div>`);
-      if (rewards.goldLoss) rows.push(`<div class="text-danger">💸 -${rewards.goldLoss} mo</div>`);
-      if (rewards.fameLoss) rows.push(`<div class="text-danger">👁️ -${rewards.fameLoss} fama</div>`);
-    }
-    if (outcome === 'fled') rows.push(`<div class="text-muted">Nessuna ricompensa.</div>`);
-    document.getElementById('combat-result-rewards').innerHTML = rows.join('');
+    const row = (icon, label, value, type) =>
+      `<div class="crm-reward-row ${type}">
+         <span class="crm-row-icon">${icon}</span>
+         <span class="crm-row-label">${label}</span>
+         <span class="crm-row-value">${value}</span>
+       </div>`;
 
-    document.getElementById('btn-combat-again').disabled = Game.combatRemaining() <= 0;
+    if (outcome === 'victory' && rewards) {
+      if (rewards.xp)          rows.push(row('⭐', 'Punti Esperienza', `+${rewards.xp} PE`, 'gain'));
+      if (rewards.gold)        rows.push(row('💰', 'Oro guadagnato',   `+${rewards.gold} mo`, 'gain'));
+      if (rewards.fame)        rows.push(row('🌟', 'Fama',             `+${rewards.fame}`, 'gain'));
+      if (rewards.droppedItem) rows.push(row('📦', 'Oggetto trovato',  rewards.droppedItem.name, 'gain'));
+    }
+    if (outcome === 'defeat' && rewards) {
+      if (rewards.goldLoss)    rows.push(row('💸', 'Oro perso',  `-${rewards.goldLoss} mo`, 'loss'));
+      if (rewards.fameLoss)    rows.push(row('👁️', 'Fama persa', `-${rewards.fameLoss}`, 'loss'));
+    }
+
+    document.getElementById('crm-rewards').innerHTML = rows.join('');
+
+    // Bottone "Combatti ancora" abilitato solo se rimangono combattimenti
+    document.getElementById('btn-combat-result-continue').textContent =
+      Game.combatRemaining() > 0 ? '⚔️ Combatti ancora' : '🔙 Torna alla lobby';
+
+    // Mostra modal via Bootstrap
+    bootstrap.Modal.getOrCreateInstance(modalEl).show();
   },
 
   _renderStatusPills(effects) {

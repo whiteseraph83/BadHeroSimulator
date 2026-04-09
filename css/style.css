@@ -2266,3 +2266,104 @@ body {
   .fighter-avatar      { width: 72px; height: 72px; }
   .fighter-enemy-icon  { font-size: 3.8rem; }
 }
+
+/* ── MODAL RISULTATO COMBATTIMENTO ──────────────────────── */
+.combat-result-modal {
+  background: #0b0915;
+  border: none;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 0 40px rgba(0,0,0,.9);
+}
+
+/* Header: cambia colore per esito */
+.crm-header {
+  padding: 28px 20px 18px;
+  text-align: center;
+  background: linear-gradient(180deg, var(--crm-bg1, #1a1430) 0%, var(--crm-bg2, #0d0b18) 100%);
+  border-bottom: 1px solid var(--crm-border, rgba(201,168,76,.3));
+}
+
+.combat-result-modal.crm-victory {
+  --crm-bg1:   #1a1200;
+  --crm-bg2:   #0d0900;
+  --crm-border: rgba(201,168,76,.6);
+}
+.combat-result-modal.crm-defeat {
+  --crm-bg1:   #1a0505;
+  --crm-bg2:   #0d0202;
+  --crm-border: rgba(200,40,40,.55);
+}
+.combat-result-modal.crm-fled {
+  --crm-bg1:   #0f0f18;
+  --crm-bg2:   #080810;
+  --crm-border: rgba(150,150,180,.3);
+}
+
+/* Icona grande con animazione */
+.crm-big-icon {
+  font-size: 3.6rem;
+  line-height: 1;
+  margin-bottom: 10px;
+  display: block;
+  animation: crmPop .45s cubic-bezier(.175,.885,.32,1.275);
+  filter: drop-shadow(0 0 16px var(--crm-glow, rgba(201,168,76,.7)));
+}
+.combat-result-modal.crm-victory .crm-big-icon { --crm-glow: rgba(255,215,0,.6); }
+.combat-result-modal.crm-defeat  .crm-big-icon { --crm-glow: rgba(220,50,50,.6); }
+.combat-result-modal.crm-fled    .crm-big-icon { --crm-glow: rgba(160,160,200,.3); }
+
+@keyframes crmPop {
+  0%   { transform: scale(.4); opacity: 0; }
+  80%  { transform: scale(1.12); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.crm-title {
+  font-family: 'Cinzel', serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: .05em;
+}
+.combat-result-modal.crm-victory .crm-title { color: #c9a84c; }
+.combat-result-modal.crm-defeat  .crm-title { color: #e05050; }
+.combat-result-modal.crm-fled    .crm-title { color: #9090b0; }
+
+/* Corpo */
+.crm-body {
+  padding: 16px 20px 6px;
+}
+.crm-subtitle {
+  font-size: .85rem;
+  color: #a09080;
+  text-align: center;
+  margin-bottom: 14px;
+  line-height: 1.5;
+}
+
+/* Lista ricompense/perdite */
+.crm-rewards-list {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.crm-reward-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.06);
+  border-radius: 8px;
+  padding: 7px 12px;
+  font-size: .88rem;
+}
+.crm-reward-row .crm-row-icon { font-size: 1.2rem; flex-shrink: 0; }
+.crm-reward-row .crm-row-label { flex: 1; color: #c0b090; }
+.crm-reward-row .crm-row-value { font-weight: 700; font-size: .95rem; }
+.crm-reward-row.gain .crm-row-value { color: #7ec88a; }
+.crm-reward-row.loss .crm-row-value { color: #e05050; }
+
+/* Footer */
+.crm-footer {
+  padding: 12px 20px 18px;
+}
