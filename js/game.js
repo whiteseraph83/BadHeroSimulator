@@ -2344,11 +2344,39 @@ const Game = {
   _applyCombatDefeat() {
     const c = this.state.combat;
     const char = this.state.character;
-    const goldLoss = Math.floor(char.gold * 0.15);
+
+    // Perdita oro: 10–20% casuale
+    const lossPct     = 0.10 + Math.random() * 0.10;
+    const goldLoss    = Math.floor(char.gold * lossPct);
+    const goldLossPct = Math.round(lossPct * 100);
     char.gold = Math.max(0, char.gold - goldLoss);
     char.fame = Math.max(0, char.fame - 3);
-    c.rewards = { goldLoss, fameLoss: 3 };
-    this._addLog(`Sconfitto! Perdi ${goldLoss} mo e 3 fama.`, 'info');
+
+    // Perdita oggetto: casuale tra inventario + oggetti equipaggiati
+    let lostItem = null;
+    let lostFrom = null;
+
+    const invPool = char.inventory.map((id, idx) => ({ source: 'inventory', idx, id }));
+    const eqSlots = ['weapon','torso','head','gloves','legs','boots','ringRight','ringLeft','shield'];
+    const eqPool  = eqSlots
+      .filter(slot => char.equipment[slot] != null)
+      .map(slot => ({ source: 'equipment', slot, id: char.equipment[slot] }));
+
+    const pool = [...invPool, ...eqPool];
+    if (pool.length > 0) {
+      const pick = pool[Math.floor(Math.random() * pool.length)];
+      lostItem = DB.items.find(i => i.id === pick.id) || { name: 'Oggetto sconosciuto' };
+      lostFrom = pick.source;
+      if (pick.source === 'inventory') {
+        char.inventory.splice(pick.idx, 1);
+      } else {
+        char.equipment[pick.slot] = null;
+      }
+    }
+
+    c.rewards = { goldLoss, goldLossPct, fameLoss: 3, lostItem, lostFrom };
+    const itemNote = lostItem ? `, perdi ${lostItem.name}` : '';
+    this._addLog(`Sconfitto! -${goldLoss} mo (-${goldLossPct}%), -3 fama${itemNote}.`, 'info');
   },
 };
 

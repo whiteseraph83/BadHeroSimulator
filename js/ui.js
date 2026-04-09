@@ -1985,7 +1985,7 @@ const UI = {
 
     const cfg = {
       victory: { icon: '🏆', title: 'Vittoria!',  cls: 'crm-victory', subtitle: 'Hai sconfitto il nemico!' },
-      defeat:  { icon: '💀', title: 'Sconfitto!', cls: 'crm-defeat',  subtitle: 'Il nemico ti ha sopraffatto. Riprendi le forze e torna più forte.' },
+      defeat:  { icon: '💀', title: 'Sconfitto!', cls: 'crm-defeat',  subtitle: 'Il nemico ti ha sopraffatto e ti ha derubato. Riprendi le forze e torna a vendicarti.' },
       fled:    { icon: '🏃', title: 'Fuggito!',   cls: 'crm-fled',    subtitle: 'Sei riuscito a scappare. A volte la discrezione vale più del valore.' },
     };
     const c = cfg[outcome] || cfg.fled;
@@ -2011,8 +2011,12 @@ const UI = {
       if (rewards.droppedItem) rows.push(row('📦', 'Oggetto trovato',  rewards.droppedItem.name, 'gain'));
     }
     if (outcome === 'defeat' && rewards) {
-      if (rewards.goldLoss)    rows.push(row('💸', 'Oro perso',  `-${rewards.goldLoss} mo`, 'loss'));
-      if (rewards.fameLoss)    rows.push(row('👁️', 'Fama persa', `-${rewards.fameLoss}`, 'loss'));
+      if (rewards.goldLoss != null) rows.push(row('💸', `Oro perso (${rewards.goldLossPct}%)`, `-${rewards.goldLoss} mo`, 'loss'));
+      if (rewards.fameLoss)         rows.push(row('👁️', 'Fama persa', `-${rewards.fameLoss}`, 'loss'));
+      if (rewards.lostItem) {
+        const fromLabel = rewards.lostFrom === 'equipment' ? 'Equipaggiamento rubato' : 'Oggetto rubato';
+        rows.push(row('🎒', fromLabel, rewards.lostItem.name, 'loss'));
+      }
     }
 
     document.getElementById('crm-rewards').innerHTML = rows.join('');
