@@ -1980,7 +1980,33 @@ const Game = {
     const total = roll + statMod + prof + (hitPenalty || 0) + blindPenalty;
     const CA = 10 + this.modifier(targetStats.dex || 10) + (targetEvasion || 0);
     const hit = roll === 20 || (roll !== 1 && total >= CA);
-    return { roll, total, CA, hit, critical: roll === 20 };
+    return { roll, statMod, prof, blindPenalty, hitPenalty: hitPenalty || 0, total, CA, hit, critical: roll === 20, hitStat };
+  },
+
+  /* Formatta la prova tiro in testo leggibile */
+  _rollSummary(r) {
+    const abbr = { str:'FOR', dex:'DES', con:'COS', int:'INT', wis:'SAG', cha:'CAR' };
+    const s = r.hitStat ? (abbr[r.hitStat] || r.hitStat.toUpperCase()) : '';
+    const fmt = n => n >= 0 ? `+${n}` : `${n}`;
+    if (r.critical) return `🎲[20] ✨ CRITICO!`;
+    if (r.roll === 1) return `🎲[1] 💨 Fumble!`;
+    const parts = [`🎲[${r.roll}]`];
+    if (r.statMod !== 0) parts.push(`${fmt(r.statMod)}${s}`);
+    if (r.prof > 0)      parts.push(`+${r.prof}(Prof)`);
+    if (r.hitPenalty !== 0) parts.push(fmt(r.hitPenalty));
+    if (r.blindPenalty !== 0) parts.push(`${r.blindPenalty}(cieco)`);
+    return `${parts.join(' ')} = ${r.total} vs CA ${r.CA}`;
+  },
+
+  /* Come _rollSummary ma per i tiri del nemico (nessun prof, no blind) */
+  _enemyRollSummary(roll, mod, hitPenalty, total, playerCA) {
+    const fmt = n => n >= 0 ? `+${n}` : `${n}`;
+    if (roll === 20) return `🎲[20] ✨ CRITICO!`;
+    if (roll === 1)  return `🎲[1] 💨 Fumble!`;
+    const parts = [`🎲[${roll}]`];
+    if (mod !== 0)        parts.push(fmt(mod));
+    if (hitPenalty !== 0) parts.push(fmt(hitPenalty));
+    return `${parts.join(' ')} = ${total} vs CA ${playerCA}`;
   },
 
   _combatCalcDamage(skill, isCritical) {
@@ -2035,16 +2061,20 @@ const Game = {
     let actionLog = '';
 
     if (skill.id === 'fuggi') {
-      const roll = rollDice('1d20') + this.modifier(this.effectiveStat('dex'));
+      const dexMod  = this.modifier(this.effectiveStat('dex'));
+      const baseRoll = rollDice('1d20');
+      const total    = baseRoll + dexMod;
       const threshold = this.modifier(c.enemy.stats.dex) + 8;
-      if (roll > threshold) {
+      const fmtMod = dexMod >= 0 ? `+${dexMod}` : `${dexMod}`;
+      const rollDesc = `🎲[${baseRoll}] ${fmtMod}DES = ${total} vs soglia ${threshold}`;
+      if (total > threshold) {
         c.outcome = 'fled';
         c.phase = 'end';
-        this._addLog(`Fuggi riuscita! (${roll} vs ${threshold})`, 'info');
+        this._addLog(`Fuga: ${rollDesc} → Riuscita!`, 'info');
         this.save();
         return { ok: true, fled: true };
       } else {
-        this._addLog(`Tentativo di fuga fallito (${roll} vs ${threshold}). Il nemico attacca!`, 'miss');
+        this._addLog(`Fuga: ${rollDesc} → Fallita! Il nemico attacca!`, 'miss');
         c.phase = 'enemy_turn';
         this.save();
         return { ok: true, fled: false, enemyTurnPending: true };
@@ -2052,21 +2082,24 @@ const Game = {
     }
 
     if (skill.id === 'cura_ferite') {
-      // Skill di cura: guarisce il giocatore
-      const healAmt = rollDice(skill.damageDice) + this.modifier(this.effectiveStat(skill.stat));
+      const abbr = { str:'FOR', dex:'DES', con:'COS', int:'INT', wis:'SAG', cha:'CAR' };
+      const statKey  = skill.stat;
+      const statMod  = this.modifier(this.effectiveStat(statKey));
+      const diceRoll = rollDice(skill.damageDice);
+      const healAmt  = Math.max(1, diceRoll + statMod);
       c.playerHP = Math.min(c.playerHPMax, c.playerHP + healAmt);
-      this._addLog(`Cura Ferite: recuperi ${healAmt} HP!`, 'status');
+      const fmtMod = statMod >= 0 ? `+${statMod}` : `${statMod}`;
+      this._addLog(`${skill.name}: ${skill.damageDice}[${diceRoll}] ${fmtMod}${abbr[statKey]||''} = +${healAmt} HP`, 'status');
       c.phase = 'enemy_turn';
       this.save();
       return { ok: true, healAmt, enemyTurnPending: true };
     }
 
     if (skill.type === 'utility' && skill.target === 'self') {
-      // Buff su sé stesso
       if (skill.statusApply) {
         this._applyStatusToPlayer(skill.statusApply, 2);
         const effect = STATUS_EFFECTS[skill.statusApply];
-        this._addLog(`${skill.name}: ottieni ${effect?.name || skill.statusApply}!`, 'status');
+        this._addLog(`${skill.name}: ottieni ${effect?.name || skill.statusApply}! (nessun tiro)`, 'status');
       }
       c.phase = 'enemy_turn';
       this.save();
@@ -2074,43 +2107,43 @@ const Game = {
     }
 
     if (skill.type === 'utility' && skill.target === 'enemy') {
-      // Debuff sul nemico
-      const { roll, hit } = this._combatRollToHit(skill.hitStat, skill.hitPenalty, c.enemy.evasion, c.enemy.stats);
-      if (hit) {
+      const rollR = this._combatRollToHit(skill.hitStat, skill.hitPenalty, c.enemy.evasion, c.enemy.stats);
+      const rollDesc = this._rollSummary(rollR);
+      if (rollR.hit) {
         if (skill.statusApply) {
           this._applyStatusToEnemy(skill.statusApply, 2);
           const effect = STATUS_EFFECTS[skill.statusApply];
-          this._addLog(`${skill.name}: applichi ${effect?.name || skill.statusApply} al nemico!`, 'status');
+          this._addLog(`${skill.name}: ${rollDesc} → ${effect?.name || skill.statusApply}!`, 'status');
         }
       } else {
-        this._addLog(`${skill.name}: mancato! (${roll})`, 'miss');
+        this._addLog(`${skill.name}: ${rollDesc} → Mancato!`, 'miss');
       }
       c.phase = 'enemy_turn';
       this.save();
-      return { ok: true, hit, enemyTurnPending: true };
+      return { ok: true, hit: rollR.hit, enemyTurnPending: true };
     }
 
     // Attacco fisico/magico
-    const { roll, hit, critical } = this._combatRollToHit(skill.hitStat, skill.hitPenalty || 0, c.enemy.evasion, c.enemy.stats);
+    const rollR = this._combatRollToHit(skill.hitStat, skill.hitPenalty || 0, c.enemy.evasion, c.enemy.stats);
+    const { hit, critical } = rollR;
+    const rollDesc = this._rollSummary(rollR);
     if (hit) {
       let dmg = this._combatCalcDamage(skill, critical);
-      // Controlla magic_shield sul nemico (non standard, ma robusto)
       const shieldIdx = c.enemy.statusEffects.findIndex(s => s.id === 'magic_shield' && s.duration > 0);
       if (shieldIdx >= 0) {
         dmg = Math.max(1, Math.floor(dmg * 0.5));
         c.enemy.statusEffects.splice(shieldIdx, 1);
-        this._addLog(`Scudo del nemico assorbe metà danno!`, 'status');
+        this._addLog(`Scudo arcano del nemico: danno dimezzato!`, 'status');
       }
       c.enemy.hp = Math.max(0, c.enemy.hp - dmg);
-      const critText = critical ? ' CRITICO! 💥' : '';
-      this._addLog(`${skill.name}: colpisci ${c.enemy.name} per ${dmg} danni!${critText}`, critical ? 'crit' : 'hit');
+      this._addLog(`${skill.name}: ${rollDesc} → ${dmg} danni${critical ? ' 💥' : ''}`, critical ? 'crit' : 'hit');
       if (skill.statusApply) {
         this._applyStatusToEnemy(skill.statusApply, 2);
         const effect = STATUS_EFFECTS[skill.statusApply];
-        this._addLog(`${c.enemy.name} subisce ${effect?.name || skill.statusApply}!`, 'status');
+        this._addLog(`↳ ${c.enemy.name} subisce ${effect?.name || skill.statusApply}!`, 'status');
       }
     } else {
-      this._addLog(`${skill.name}: mancato! (${roll})`, 'miss');
+      this._addLog(`${skill.name}: ${rollDesc} → Mancato!`, 'miss');
     }
 
     const ended = this._checkCombatEnd();
@@ -2150,43 +2183,38 @@ const Game = {
         const roll = rollDice('1d20');
         const mod = this.modifier(c.enemy.stats[hitStat] || 10);
         const total = roll + mod + hitPenalty;
-        // Player defense: 10 + DEX mod + shield bonus
         const playerCA = 10 + this.modifier(this.effectiveStat('dex'));
         const hit = roll === 20 || (roll !== 1 && total >= playerCA);
         const critical = roll === 20;
+        const label = eSkill ? eSkill.name : 'Attacco';
+        const rollDesc = this._enemyRollSummary(roll, mod, hitPenalty, total, playerCA);
 
         if (hit) {
           let dmg = rollDice(dice) + this.modifier(c.enemy.stats[dmgStat] || 10);
           if (critical) dmg += rollDice('1d6');
           dmg = Math.max(1, dmg);
 
-          // Check magic_shield on player
           const shieldIdx = c.playerStatusEffects.findIndex(s => s.id === 'magic_shield' && s.duration > 0);
           if (shieldIdx >= 0) {
             dmg = Math.max(1, Math.floor(dmg * 0.5));
             c.playerStatusEffects.splice(shieldIdx, 1);
-            this._addLog(`Il tuo scudo arcano assorbe metà danno!`, 'status');
+            this._addLog(`Il tuo scudo arcano dimezza il danno!`, 'status');
           }
 
           c.playerHP = Math.max(0, c.playerHP - dmg);
-          const label = eSkill ? eSkill.name : 'Attacco';
-          const critText = critical ? ' CRITICO! 💥' : '';
-          this._addLog(`${c.enemy.name} usa ${label}: subisci ${dmg} danni!${critText}`, critical ? 'crit' : 'hit');
+          this._addLog(`${c.enemy.name} — ${label}: ${rollDesc} → ${dmg} danni${critical ? ' 💥' : ''}`, critical ? 'crit' : 'hit');
 
           if (eSkill?.statusApply) {
             this._applyStatusToPlayer(eSkill.statusApply, 2);
             const effect = STATUS_EFFECTS[eSkill.statusApply];
-            this._addLog(`Sei ${effect?.name || eSkill.statusApply}!`, 'status');
+            this._addLog(`↳ Sei ${effect?.name || eSkill.statusApply}!`, 'status');
           }
-
-          // Drain: nemico recupera HP
           if (eSkill?.drain) {
             c.enemy.hp = Math.min(c.enemy.hpMax, c.enemy.hp + Math.floor(dmg / 2));
-            this._addLog(`${c.enemy.name} drena ${Math.floor(dmg / 2)} HP!`, 'status');
+            this._addLog(`↳ ${c.enemy.name} drena ${Math.floor(dmg / 2)} HP!`, 'status');
           }
         } else {
-          const label = eSkill ? eSkill.name : 'Attacco';
-          this._addLog(`${c.enemy.name} usa ${label}: mancato! (${roll})`, 'miss');
+          this._addLog(`${c.enemy.name} — ${label}: ${rollDesc} → Mancato!`, 'miss');
         }
       } else if (action.action === 'skill') {
         // utility skill
