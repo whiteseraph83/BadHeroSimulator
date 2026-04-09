@@ -244,6 +244,11 @@
             🛡️ Salva i Prigionieri
           </button>
         </li>
+        <li class="nav-item d-none" id="tab-combat-nav">
+          <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-combat">
+            ⚔️ Combatti
+          </button>
+        </li>
         <li class="nav-item">
           <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-log">
             <i class="bi bi-journal-text"></i> Diario
@@ -709,6 +714,100 @@
               <div id="rescue-result-sub" class="text-muted small mb-3"></div>
               <div id="rescue-result-rewards" class="mb-3"></div>
               <button class="btn btn-gold" id="btn-rescue-again">🛡️ Nuova Missione</button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- TAB: COMBATTIMENTO A TURNI -->
+        <div class="tab-pane fade" id="tab-combat">
+
+          <!-- Lobby -->
+          <div id="combat-lobby" class="card-dark mb-3">
+            <div class="card-dark-header">⚔️ Combattimento</div>
+            <div class="card-dark-body text-center">
+              <p class="text-muted small mb-3">Sfida un nemico casuale in un combattimento a turni. Usa le tue abilità, gestisci gli HP e gli MP, e supera l'avversario.</p>
+              <div class="d-flex justify-content-center gap-4 mb-3">
+                <div class="text-center">
+                  <div class="text-gold fw-bold fs-5" id="combat-hp-preview">--</div>
+                  <div class="text-muted small">❤️ HP massimi</div>
+                </div>
+                <div class="text-center">
+                  <div class="text-gold fw-bold fs-5" id="combat-mp-preview">--</div>
+                  <div class="text-muted small">💙 MP massimi</div>
+                </div>
+                <div class="text-center">
+                  <div class="text-gold fw-bold fs-5"><span id="combat-uses-left">2</span></div>
+                  <div class="text-muted small">Combattimenti oggi</div>
+                </div>
+              </div>
+              <button class="btn btn-gold btn-lg" id="btn-combat-start">⚔️ Trova un Nemico</button>
+            </div>
+          </div>
+
+          <!-- Schermata combattimento -->
+          <div id="combat-screen" class="d-none">
+
+            <!-- Barre HP/MP e status -->
+            <div class="row g-2 mb-2">
+              <div class="col-6">
+                <div class="card-dark p-2">
+                  <div class="d-flex justify-content-between align-items-center mb-1">
+                    <small class="text-muted" id="combat-player-name">Tu</small>
+                    <small id="combat-player-status-pills"></small>
+                  </div>
+                  <div class="combat-bar-label d-flex justify-content-between">
+                    <span class="text-danger small">❤️</span>
+                    <span class="small" id="combat-player-hp-text">28/28</span>
+                  </div>
+                  <div class="combat-hp-bar-wrap">
+                    <div class="combat-hp-bar" id="combat-player-hp-bar" style="width:100%"></div>
+                  </div>
+                  <div class="combat-bar-label d-flex justify-content-between mt-1">
+                    <span class="text-primary small">💙</span>
+                    <span class="small" id="combat-player-mp-text">10/10</span>
+                  </div>
+                  <div class="combat-mp-bar-wrap">
+                    <div class="combat-mp-bar" id="combat-player-mp-bar" style="width:100%"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="card-dark p-2">
+                  <div class="d-flex justify-content-between align-items-center mb-1">
+                    <small class="fw-bold" id="combat-enemy-name">Nemico</small>
+                    <small id="combat-enemy-status-pills"></small>
+                  </div>
+                  <div class="combat-bar-label d-flex justify-content-between">
+                    <span class="text-danger small" id="combat-enemy-icon">❤️</span>
+                    <span class="small" id="combat-enemy-hp-text">14/14</span>
+                  </div>
+                  <div class="combat-hp-bar-wrap">
+                    <div class="combat-hp-bar" id="combat-enemy-hp-bar" style="width:100%"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Log combattimento -->
+            <div class="card-dark mb-2">
+              <div class="card-dark-body p-0">
+                <div class="combat-log" id="combat-log"></div>
+              </div>
+            </div>
+
+            <!-- Bottoni azione -->
+            <div id="combat-actions" class="d-flex flex-wrap gap-2 justify-content-center"></div>
+
+          </div>
+
+          <!-- Risultato -->
+          <div id="combat-result" class="card-dark d-none">
+            <div class="card-dark-body text-center">
+              <div id="combat-result-icon" class="fs-1 mb-2">⚔️</div>
+              <div id="combat-result-title" class="fw-bold fs-4 mb-1"></div>
+              <div id="combat-result-rewards" class="mb-3 text-muted small"></div>
+              <button class="btn btn-gold" id="btn-combat-again">⚔️ Combatti ancora</button>
             </div>
           </div>
 

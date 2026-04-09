@@ -44,6 +44,8 @@ const Game = {
           if (this.state.arenaHighScore === undefined)         this.state.arenaHighScore = 0;
           if (this.state.stableUsed === undefined)  this.state.stableUsed = 0;
           if (this.state.rescueUsed === undefined)  this.state.rescueUsed = 0;
+          if (this.state.combatUsed === undefined)  this.state.combatUsed = 0;
+          if (this.state.combat === undefined)      this.state.combat = null;
           if (this.state.marketStealBanned === undefined) this.state.marketStealBanned = false;
           if (this.state.character.equipment.shield === undefined) this.state.character.equipment.shield = null;
           return true;
@@ -104,6 +106,8 @@ const Game = {
       arenaHighScore: 0,
       stableUsed: 0,
       rescueUsed: 0,
+      combatUsed: 0,
+      combat: null,
       gameOver: false
     };
     this.generateDailyMissions();
@@ -1182,6 +1186,8 @@ const Game = {
     this.state.arenaUsed              = 0;
     this.state.stableUsed             = 0;
     this.state.rescueUsed             = 0;
+    this.state.combatUsed             = 0;
+    this.state.combat                 = null;
     this.state.wantedMissionCompleted = false;
     this.state.thiefAttackCompleted   = false;
     this.state.marketStealBanned      = false;
@@ -1899,5 +1905,431 @@ const Game = {
 
   canAffordTax() {
     return this.state.character.gold >= this.guildTax();
-  }
+  },
+
+  /* ─── COMBATTIMENTO A TURNI ────────────────────────────── */
+
+  combatRemaining() {
+    return Math.max(0, 2 - (this.state.combatUsed || 0));
+  },
+
+  calcPlayerHPMax() {
+    const char = this.state.character;
+    const cls = this.getClasse();
+    const baseHP = { guerriero: 12, paladino: 10, chierico: 9, druido: 8, ladro: 8, mago: 6 }[cls.id] || 8;
+    const conMod = this.modifier(this.effectiveStat('con'));
+    return baseHP + baseHP * (char.level - 1) + conMod * char.level;
+  },
+
+  calcPlayerMPMax() {
+    const char = this.state.character;
+    const cls = this.getClasse();
+    const baseMP = { mago: 10, chierico: 8, druido: 7, paladino: 4, ladro: 2, guerriero: 0 }[cls.id] || 0;
+    const spellStatKey = { mago: 'int', chierico: 'wis', druido: 'wis', paladino: 'cha', ladro: 'int', guerriero: 'con' }[cls.id] || 'int';
+    const spellMod = Math.max(0, this.modifier(this.effectiveStat(spellStatKey)));
+    return baseMP + spellMod * char.level;
+  },
+
+  startCombat() {
+    if (this.combatRemaining() <= 0) return { ok: false, reason: 'Hai già combattuto 2 volte oggi.' };
+    const char = this.state.character;
+    const maxTier = Math.min(3, Math.ceil(char.level / 3));
+    const pool = ENEMIES.filter(e => e.tier <= maxTier);
+    const template = pool[Math.floor(Math.random() * pool.length)];
+    const enemy = { ...template, hpMax: template.hp, hp: template.hp, mpMax: template.mp, mp: template.mp, statusEffects: [] };
+
+    const playerDexMod = this.modifier(this.effectiveStat('dex'));
+    const playerRoll = rollDice('1d20') + playerDexMod;
+    const enemyRoll  = rollDice('1d20') + this.modifier(template.stats.dex);
+    const playerGoesFirst = playerRoll >= enemyRoll;
+
+    const hpMax = this.calcPlayerHPMax();
+    const mpMax = this.calcPlayerMPMax();
+
+    this.state.combat = {
+      active: true,
+      phase: playerGoesFirst ? 'player_choice' : 'enemy_turn',
+      turn: 1,
+      playerGoesFirst,
+      enemy,
+      playerHP: hpMax, playerHPMax: hpMax,
+      playerMP: mpMax, playerMPMax: mpMax,
+      playerStatusEffects: [],
+      log: [{ turn: 0, text: `Iniziativa: tu ${playerRoll} vs ${enemy.name} ${enemyRoll}. ${playerGoesFirst ? 'Vai per primo!' : 'Il nemico attacca per primo!'}`, type: 'info' }],
+      outcome: null,
+      rewards: null
+    };
+
+    this.state.combatUsed = (this.state.combatUsed || 0) + 1;
+    this.save();
+    return { ok: true };
+  },
+
+  _getWeaponDamage() {
+    const eq = this.state.character.equipment;
+    const weapon = eq.weapon ? DB.items.find(i => i.id === eq.weapon) : null;
+    return weapon?.combatDamage || '1d4';
+  },
+
+  _combatRollToHit(hitStat, hitPenalty, targetEvasion, targetStats) {
+    const roll = rollDice('1d20');
+    const statMod = this.modifier(this.effectiveStat(hitStat));
+    const profStats = this.getClasse().proficiencies || [];
+    const prof = profStats.includes(hitStat) ? (this.state.character.proficiency || 2) : 0;
+    const blindPenalty = this._playerHasStatus('blind') ? -4 : 0;
+    const total = roll + statMod + prof + (hitPenalty || 0) + blindPenalty;
+    const CA = 10 + this.modifier(targetStats.dex || 10) + (targetEvasion || 0);
+    const hit = roll === 20 || (roll !== 1 && total >= CA);
+    return { roll, total, CA, hit, critical: roll === 20 };
+  },
+
+  _combatCalcDamage(skill, isCritical) {
+    const combat = this.state.combat;
+    const weaponDice = this._getWeaponDamage();
+    const dice = skill.damageDice === 'weapon' ? weaponDice : (skill.damageDice || '1d4');
+    let base = rollDice(dice) + this.modifier(this.effectiveStat(skill.stat)) + (skill.damageBonus || 0);
+    if (isCritical) base += rollDice(weaponDice);
+    if (skill.divineDice) base += rollDice(skill.divineDice) + this.modifier(this.effectiveStat(skill.divineStat));
+    const defense = skill.type === 'magical' ? (combat.enemy.magicResist || 0) : (combat.enemy.defense || 0);
+    // Apply magic_shield if present on enemy (not typical but check anyway)
+    return Math.max(1, base - defense);
+  },
+
+  _playerHasStatus(id) {
+    return (this.state.combat?.playerStatusEffects || []).some(s => s.id === id && s.duration > 0);
+  },
+
+  _enemyHasStatus(id) {
+    return (this.state.combat?.enemy?.statusEffects || []).some(s => s.id === id && s.duration > 0);
+  },
+
+  _applyStatusToPlayer(statusId, duration) {
+    const c = this.state.combat;
+    c.playerStatusEffects = c.playerStatusEffects.filter(s => s.id !== statusId);
+    c.playerStatusEffects.push({ id: statusId, duration: duration || 2 });
+  },
+
+  _applyStatusToEnemy(statusId, duration) {
+    const c = this.state.combat;
+    c.enemy.statusEffects = c.enemy.statusEffects.filter(s => s.id !== statusId);
+    c.enemy.statusEffects.push({ id: statusId, duration: duration || 2 });
+  },
+
+  _addLog(text, type) {
+    const c = this.state.combat;
+    c.log.unshift({ turn: c.turn, text, type: type || 'info' });
+  },
+
+  playerAction(skillId) {
+    const c = this.state.combat;
+    if (!c || c.phase !== 'player_choice' || c.outcome) return { ok: false };
+
+    const skill = COMBAT_SKILLS.find(s => s.id === skillId);
+    if (!skill) return { ok: false, reason: 'Azione sconosciuta.' };
+
+    // Controlla MP
+    if ((skill.mpCost || 0) > c.playerMP) return { ok: false, reason: 'MP insufficienti.' };
+
+    c.playerMP -= (skill.mpCost || 0);
+
+    let actionLog = '';
+
+    if (skill.id === 'fuggi') {
+      const roll = rollDice('1d20') + this.modifier(this.effectiveStat('dex'));
+      const threshold = this.modifier(c.enemy.stats.dex) + 8;
+      if (roll > threshold) {
+        c.outcome = 'fled';
+        c.phase = 'end';
+        this._addLog(`Fuggi riuscita! (${roll} vs ${threshold})`, 'info');
+        this.save();
+        return { ok: true, fled: true };
+      } else {
+        this._addLog(`Tentativo di fuga fallito (${roll} vs ${threshold}). Il nemico attacca!`, 'miss');
+        c.phase = 'enemy_turn';
+        this.save();
+        return { ok: true, fled: false, enemyTurnPending: true };
+      }
+    }
+
+    if (skill.id === 'cura_ferite') {
+      // Skill di cura: guarisce il giocatore
+      const healAmt = rollDice(skill.damageDice) + this.modifier(this.effectiveStat(skill.stat));
+      c.playerHP = Math.min(c.playerHPMax, c.playerHP + healAmt);
+      this._addLog(`Cura Ferite: recuperi ${healAmt} HP!`, 'status');
+      c.phase = 'enemy_turn';
+      this.save();
+      return { ok: true, healAmt, enemyTurnPending: true };
+    }
+
+    if (skill.type === 'utility' && skill.target === 'self') {
+      // Buff su sé stesso
+      if (skill.statusApply) {
+        this._applyStatusToPlayer(skill.statusApply, 2);
+        const effect = STATUS_EFFECTS[skill.statusApply];
+        this._addLog(`${skill.name}: ottieni ${effect?.name || skill.statusApply}!`, 'status');
+      }
+      c.phase = 'enemy_turn';
+      this.save();
+      return { ok: true, enemyTurnPending: true };
+    }
+
+    if (skill.type === 'utility' && skill.target === 'enemy') {
+      // Debuff sul nemico
+      const { roll, hit } = this._combatRollToHit(skill.hitStat, skill.hitPenalty, c.enemy.evasion, c.enemy.stats);
+      if (hit) {
+        if (skill.statusApply) {
+          this._applyStatusToEnemy(skill.statusApply, 2);
+          const effect = STATUS_EFFECTS[skill.statusApply];
+          this._addLog(`${skill.name}: applichi ${effect?.name || skill.statusApply} al nemico!`, 'status');
+        }
+      } else {
+        this._addLog(`${skill.name}: mancato! (${roll})`, 'miss');
+      }
+      c.phase = 'enemy_turn';
+      this.save();
+      return { ok: true, hit, enemyTurnPending: true };
+    }
+
+    // Attacco fisico/magico
+    const { roll, hit, critical } = this._combatRollToHit(skill.hitStat, skill.hitPenalty || 0, c.enemy.evasion, c.enemy.stats);
+    if (hit) {
+      let dmg = this._combatCalcDamage(skill, critical);
+      // Controlla magic_shield sul nemico (non standard, ma robusto)
+      const shieldIdx = c.enemy.statusEffects.findIndex(s => s.id === 'magic_shield' && s.duration > 0);
+      if (shieldIdx >= 0) {
+        dmg = Math.max(1, Math.floor(dmg * 0.5));
+        c.enemy.statusEffects.splice(shieldIdx, 1);
+        this._addLog(`Scudo del nemico assorbe metà danno!`, 'status');
+      }
+      c.enemy.hp = Math.max(0, c.enemy.hp - dmg);
+      const critText = critical ? ' CRITICO! 💥' : '';
+      this._addLog(`${skill.name}: colpisci ${c.enemy.name} per ${dmg} danni!${critText}`, critical ? 'crit' : 'hit');
+      if (skill.statusApply) {
+        this._applyStatusToEnemy(skill.statusApply, 2);
+        const effect = STATUS_EFFECTS[skill.statusApply];
+        this._addLog(`${c.enemy.name} subisce ${effect?.name || skill.statusApply}!`, 'status');
+      }
+    } else {
+      this._addLog(`${skill.name}: mancato! (${roll})`, 'miss');
+    }
+
+    const ended = this._checkCombatEnd();
+    if (!ended) {
+      c.phase = 'enemy_turn';
+    }
+    this.save();
+    return { ok: true, hit, critical, enemyTurnPending: !ended };
+  },
+
+  runEnemyTurn() {
+    const c = this.state.combat;
+    if (!c || c.phase !== 'enemy_turn' || c.outcome) return;
+
+    // 1. Process enemy status at start of its turn
+    this._processStatusEffects(false);
+    if (c.outcome) { this.save(); return; }
+
+    // 2. Check if stunned (skip turn)
+    const enemyStunned = this._enemyHasStatus('stunned');
+    if (enemyStunned) {
+      // Decrement stunned
+      const se = c.enemy.statusEffects.find(s => s.id === 'stunned');
+      if (se) se.duration--;
+      this._addLog(`${c.enemy.name} è stordito e salta il turno!`, 'status');
+    } else {
+      // 3. Run AI
+      const action = this._runEnemyAI();
+
+      if (action.action === 'attack' || (action.action === 'skill' && ENEMY_SKILLS[action.skill]?.type === 'offensive')) {
+        const eSkill = action.action === 'skill' ? ENEMY_SKILLS[action.skill] : null;
+        const hitStat = eSkill?.hitStat || 'str';
+        const dice = eSkill?.damageDice || '1d6';
+        const dmgStat = eSkill?.stat || 'str';
+        const hitPenalty = eSkill?.hitPenalty || 0;
+
+        const roll = rollDice('1d20');
+        const mod = this.modifier(c.enemy.stats[hitStat] || 10);
+        const total = roll + mod + hitPenalty;
+        // Player defense: 10 + DEX mod + shield bonus
+        const playerCA = 10 + this.modifier(this.effectiveStat('dex'));
+        const hit = roll === 20 || (roll !== 1 && total >= playerCA);
+        const critical = roll === 20;
+
+        if (hit) {
+          let dmg = rollDice(dice) + this.modifier(c.enemy.stats[dmgStat] || 10);
+          if (critical) dmg += rollDice('1d6');
+          dmg = Math.max(1, dmg);
+
+          // Check magic_shield on player
+          const shieldIdx = c.playerStatusEffects.findIndex(s => s.id === 'magic_shield' && s.duration > 0);
+          if (shieldIdx >= 0) {
+            dmg = Math.max(1, Math.floor(dmg * 0.5));
+            c.playerStatusEffects.splice(shieldIdx, 1);
+            this._addLog(`Il tuo scudo arcano assorbe metà danno!`, 'status');
+          }
+
+          c.playerHP = Math.max(0, c.playerHP - dmg);
+          const label = eSkill ? eSkill.name : 'Attacco';
+          const critText = critical ? ' CRITICO! 💥' : '';
+          this._addLog(`${c.enemy.name} usa ${label}: subisci ${dmg} danni!${critText}`, critical ? 'crit' : 'hit');
+
+          if (eSkill?.statusApply) {
+            this._applyStatusToPlayer(eSkill.statusApply, 2);
+            const effect = STATUS_EFFECTS[eSkill.statusApply];
+            this._addLog(`Sei ${effect?.name || eSkill.statusApply}!`, 'status');
+          }
+
+          // Drain: nemico recupera HP
+          if (eSkill?.drain) {
+            c.enemy.hp = Math.min(c.enemy.hpMax, c.enemy.hp + Math.floor(dmg / 2));
+            this._addLog(`${c.enemy.name} drena ${Math.floor(dmg / 2)} HP!`, 'status');
+          }
+        } else {
+          const label = eSkill ? eSkill.name : 'Attacco';
+          this._addLog(`${c.enemy.name} usa ${label}: mancato! (${roll})`, 'miss');
+        }
+      } else if (action.action === 'skill') {
+        // utility skill
+        const eSkill = ENEMY_SKILLS[action.skill];
+        if (eSkill?.statusApply) {
+          this._applyStatusToPlayer(eSkill.statusApply, 2);
+          const effect = STATUS_EFFECTS[eSkill.statusApply];
+          this._addLog(`${c.enemy.name} usa ${eSkill.name}: sei ${effect?.name || eSkill.statusApply}!`, 'status');
+        }
+      }
+    }
+
+    const ended = this._checkCombatEnd();
+    if (!ended) {
+      // 4. Process player status at end of enemy turn
+      this._processStatusEffects(true);
+      // 5. Decrement durations
+      c.enemy.statusEffects = c.enemy.statusEffects.map(s => ({ ...s, duration: s.duration - 1 })).filter(s => s.duration > 0);
+      c.playerStatusEffects = c.playerStatusEffects.map(s => ({ ...s, duration: s.duration - 1 })).filter(s => s.duration > 0);
+      c.turn++;
+      if (!this._checkCombatEnd()) {
+        c.phase = 'player_choice';
+      }
+    }
+    this.save();
+  },
+
+  _processStatusEffects(isPlayer) {
+    const c = this.state.combat;
+    const effects = isPlayer ? c.playerStatusEffects : c.enemy.statusEffects;
+    for (const se of effects) {
+      if (se.duration <= 0) continue;
+      const def = STATUS_EFFECTS[se.id];
+      if (!def) continue;
+      if (def.trigger === 'end_of_turn' || def.trigger === 'start_of_turn') {
+        if (def.damageDice) {
+          // Damage tick (e.g. poison)
+          const dmg = rollDice(def.damageDice);
+          if (isPlayer) {
+            c.playerHP = Math.max(0, c.playerHP - dmg);
+            this._addLog(`${def.name}: subisci ${dmg} danno!`, 'status');
+          } else {
+            c.enemy.hp = Math.max(0, c.enemy.hp - dmg);
+            this._addLog(`${c.enemy.name} subisce ${dmg} danno da ${def.name}!`, 'status');
+          }
+        }
+        if (def.healDice && isPlayer) {
+          // Heal tick (e.g. regeneration)
+          const heal = rollDice(def.healDice) + Math.max(0, this.modifier(this.effectiveStat('wis')));
+          c.playerHP = Math.min(c.playerHPMax, c.playerHP + heal);
+          this._addLog(`Rigenerazione: recuperi ${heal} HP!`, 'status');
+        }
+      }
+    }
+    this._checkCombatEnd();
+  },
+
+  _runEnemyAI() {
+    const c = this.state.combat;
+    const ai = c.enemy.ai_type;
+    const skills = c.enemy.skills || [];
+    if (ai === 'aggressive') {
+      const off = skills.filter(s => ENEMY_SKILLS[s]?.type === 'offensive');
+      if (off.length && Math.random() < 0.4) return { action: 'skill', skill: off[Math.floor(Math.random() * off.length)] };
+      return { action: 'attack' };
+    }
+    if (ai === 'defensive') {
+      if (c.enemy.hp / c.enemy.hpMax < 0.3) {
+        const def = skills.find(s => ENEMY_SKILLS[s]?.type !== 'offensive');
+        if (def) return { action: 'skill', skill: def };
+      }
+      return { action: 'attack' };
+    }
+    // random
+    const opts = [{ action: 'attack' }, ...skills.map(s => ({ action: 'skill', skill: s }))];
+    return opts[Math.floor(Math.random() * opts.length)];
+  },
+
+  _checkCombatEnd() {
+    const c = this.state.combat;
+    if (!c || c.outcome) return true;
+    if (c.enemy.hp <= 0) {
+      c.outcome = 'victory';
+      c.phase = 'end';
+      this._applyCombatVictory();
+      return true;
+    }
+    if (c.playerHP <= 0) {
+      c.outcome = 'defeat';
+      c.phase = 'end';
+      this._applyCombatDefeat();
+      return true;
+    }
+    return false;
+  },
+
+  _applyCombatVictory() {
+    const c = this.state.combat;
+    const char = this.state.character;
+    const enemy = c.enemy;
+    const levelFactor = Math.max(0.2, 1 - (char.level - enemy.tier * 2) * 0.1);
+    const abilities = this.getEquipmentAbilities();
+    const xp   = Math.round(enemy.xpReward * levelFactor * (1 + (abilities.xpBonus || 0)));
+    const goldMin = enemy.goldReward?.min || 5;
+    const goldMax = enemy.goldReward?.max || 15;
+    const gold = Math.round((goldMin + Math.floor(Math.random() * (goldMax - goldMin + 1))) * (1 + (abilities.goldBonus || 0)));
+    const fame = enemy.fameReward || 0;
+    char.xp   += xp;
+    char.gold += gold;
+    char.fame += fame;
+    let droppedItem = null;
+    for (const drop of (enemy.dropTable || [])) {
+      if (Math.random() < drop.chance) {
+        const item = DB.items.find(i => i.id === drop.itemId);
+        if (item) { char.inventory.push(item.id); droppedItem = item; }
+        break;
+      }
+    }
+    c.rewards = { xp, gold, fame, droppedItem };
+    const completedChallenges = this.checkChallenges('combat_victory', { tier: enemy.tier });
+    const levelUpResult = this.checkLevelUp();
+    if (levelUpResult) this.state._lastLevelUp = levelUpResult;
+    this._addLog(`Vittoria! +${xp} PE, +${gold} mo, +${fame} fama.`, 'info');
+    return { completedChallenges, levelUpResult };
+  },
+
+  _applyCombatDefeat() {
+    const c = this.state.combat;
+    const char = this.state.character;
+    const goldLoss = Math.floor(char.gold * 0.15);
+    char.gold = Math.max(0, char.gold - goldLoss);
+    char.fame = Math.max(0, char.fame - 3);
+    c.rewards = { goldLoss, fameLoss: 3 };
+    this._addLog(`Sconfitto! Perdi ${goldLoss} mo e 3 fama.`, 'info');
+  },
 };
+
+/* ─── Utility standalone ──────────────────────────────── */
+function rollDice(str) {
+  if (!str) return 0;
+  const [n, s] = str.split('d').map(Number);
+  if (!s) return n || 0;
+  let t = 0;
+  for (let i = 0; i < n; i++) t += Math.floor(Math.random() * s) + 1;
+  return t;
+}

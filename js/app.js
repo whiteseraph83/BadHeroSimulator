@@ -1029,6 +1029,42 @@ const App = {
       UI.renderArenaLobby();
     });
 
+    // Combattimento — inizia
+    document.getElementById('btn-combat-start').addEventListener('click', () => {
+      if (!Game.state || Game.state.gameOver) return;
+      const result = Game.startCombat();
+      if (!result.ok) { UI.toast(result.reason || 'Combattimenti esauriti per oggi.'); return; }
+      const c = Game.state.combat;
+      UI.renderCombatScreen(c);
+      if (c.phase === 'enemy_turn') this._combatEnemyTurnDelay();
+    });
+
+    // Combattimento — azioni giocatore (delegazione click)
+    document.getElementById('combat-actions').addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-skill]');
+      if (!btn || btn.disabled) return;
+      const skillId = btn.dataset.skill;
+      const result = Game.playerAction(skillId);
+      if (!result.ok) { UI.toast(result.reason || 'Azione non valida.'); return; }
+      const c = Game.state.combat;
+      if (c.outcome) {
+        UI.showCombatResult(c.outcome, c.rewards);
+        UI.refresh();
+      } else if (result.enemyTurnPending) {
+        // Blocca i bottoni durante il turno nemico
+        document.querySelectorAll('#combat-actions button').forEach(b => b.disabled = true);
+        UI.renderCombatScreen(c);
+        this._combatEnemyTurnDelay();
+      } else {
+        UI.renderCombatScreen(c);
+      }
+    });
+
+    // Combattimento — combatti ancora
+    document.getElementById('btn-combat-again').addEventListener('click', () => {
+      UI.renderCombatLobby();
+    });
+
     // Arena — mouse tracking sul canvas
     const arenaCanvas = document.getElementById('arena-canvas');
     arenaCanvas.addEventListener('mousemove', (e) => {
@@ -3826,6 +3862,27 @@ const App = {
     ctx.fillStyle='#c9a84c'; ctx.beginPath(); ctx.arc(x+16,y-9,3,0,Math.PI*2); ctx.fill();
 
     ctx.restore();
+  },
+
+  /* ─── COMBATTIMENTO A TURNI ────────────────────────────── */
+
+  _combatEnemyTurnDelay() {
+    const c = Game.state.combat;
+    if (!c || c.outcome) return;
+    setTimeout(() => {
+      Game.runEnemyTurn();
+      const c2 = Game.state.combat;
+      if (c2.outcome) {
+        UI.showCombatResult(c2.outcome, c2.rewards);
+        UI.refresh();
+        if (c2.outcome === 'victory') {
+          const lvlUp = Game.state._lastLevelUp;
+          if (lvlUp) { this._triggerLevelUp(lvlUp); Game.state._lastLevelUp = null; }
+        }
+      } else {
+        UI.renderCombatScreen(c2);
+      }
+    }, 900);
   },
 
   _endRescueGame() {

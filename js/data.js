@@ -111,6 +111,7 @@ const CLASSES = [
     avatar: 'ladro.svg',
     hasPickpocket: true,
     hasDiceGame: true,
+    hasCombat: true,
     startingGold: 30,
   },
   {
@@ -125,6 +126,7 @@ const CLASSES = [
     hasArena: true,
     arenaPerDay: 2,
     hasShieldSlot: true,
+    hasCombat: true,
     startingGold: 50,
   },
   {
@@ -139,6 +141,7 @@ const CLASSES = [
     hasStudy: true,
     hasSpellTab: true,
     studyPerDay: 2,
+    hasCombat: true,
   },
   {
     id: 'paladino',
@@ -154,6 +157,7 @@ const CLASSES = [
     rescuePerDay: 2,
     rescueStrengthBase: 20,
     hasShieldSlot: true,
+    hasCombat: true,
     startingGold: 40,
   },
   {
@@ -168,6 +172,7 @@ const CLASSES = [
     hasStudy: true,
     hasNatureTab: true,
     studyPerDay: 2,
+    hasCombat: true,
   },
   {
     id: 'chierico',
@@ -181,6 +186,7 @@ const CLASSES = [
     hasConversionTab: true,
     conversionPerDay: 2,
     prayPerDay: 2,
+    hasCombat: true,
     startingGold: 35,
   },
 ];
@@ -2484,132 +2490,132 @@ const DB = {
     /* ── WEAPON ── */
     { id: 101, name: "Pugnale Arrugginito",         slot: "weapon", weaponType: "knife", quality: 1, tier: 1, reqLevel: 1, reqStat: null,
       desc: "Un vecchio pugnale ancora affilato, per chi sa usarlo.",
-      stats: { dex: 1 }, classRestrict: ['ladro'],
+      combatDamage: '1d4', stats: { dex: 1 }, classRestrict: ['ladro'],
       abilities: { pickpocketBonus: 0, rerollBonus: 0, taxDiscount: 0, goldBonus: 0, xpBonus: 0 },
       buyPrice: 40,  sellPrice: 16 },
 
     { id: 102, name: "Coltello da Borsaiolo",       slot: "weapon", weaponType: "knife", quality: 2, tier: 1, reqLevel: 1, reqStat: null,
       desc: "Lama sottile perfetta per tagliare cinturini e borse.",
-      stats: { dex: 2 }, classRestrict: ['ladro'],
+      combatDamage: '1d6', stats: { dex: 2 }, classRestrict: ['ladro'],
       abilities: { pickpocketBonus: 1, rerollBonus: 0, taxDiscount: 0, goldBonus: 0, xpBonus: 0 },
       buyPrice: 130, sellPrice: 52 },
 
     { id: 103, name: "Lama dell'Ombra",             slot: "weapon", weaponType: "sword", quality: 3, tier: 2, reqLevel: 4, reqStat: null,
       desc: "Forgiata nell'oscurità, si rivolge in modo quasi magico verso la prossima vittima.",
-      stats: { dex: 3 }, classRestrict: ['ladro'],
+      combatDamage: '1d6', stats: { dex: 3 }, classRestrict: ['ladro'],
       abilities: { pickpocketBonus: 0, rerollBonus: 1, taxDiscount: 0, goldBonus: 0, xpBonus: 0 },
       buyPrice: 380, sellPrice: 152 },
 
     { id: 104, name: "Stiletto del Fantasma",       slot: "weapon", weaponType: "knife", quality: 4, tier: 2, reqLevel: 6, reqStat: { key: 'dex', val: 14 },
       desc: "Chi viene colpito da questa lama non ricorda niente.",
-      stats: { dex: 4 }, classRestrict: ['ladro'],
+      combatDamage: '1d6', stats: { dex: 4 }, classRestrict: ['ladro'],
       abilities: { pickpocketBonus: 1, rerollBonus: 1, taxDiscount: 0, goldBonus: 0, xpBonus: 0 },
       buyPrice: 950, sellPrice: 380 },
 
     { id: 105, name: "Lama Maledetta di Nerull",    slot: "weapon", weaponType: "knife", quality: 5, tier: 3, reqLevel: 9, reqStat: { key: 'dex', val: 17 },
       desc: "Il dio della morte benedice ogni furto compiuto con questa lama.",
-      stats: { dex: 5 }, classRestrict: ['ladro'],
+      combatDamage: '1d8', stats: { dex: 5 }, classRestrict: ['ladro'],
       abilities: { pickpocketBonus: 2, rerollBonus: 1, taxDiscount: 0, goldBonus: 0.10, xpBonus: 0 },
       buyPrice: 2500, sellPrice: 1000 },
 
     /* ── WEAPON — Guerriero/Paladino (spade) ── */
     { id: 110, name: "Spada di Ferro", slot: "weapon", weaponType: "sword", quality: 1, tier: 1, reqLevel: 1, reqStat: null,
       desc: "Una spada robusta e senza fronzoli. Fa il suo lavoro.",
-      stats: { str: 1 }, classRestrict: ['guerriero','paladino'],
+      combatDamage: '1d8', stats: { str: 1 }, classRestrict: ['guerriero','paladino'],
       abilities: { arenaBonus: 0 }, buyPrice: 45, sellPrice: 18 },
 
     { id: 111, name: "Spada del Milite", slot: "weapon", weaponType: "sword", quality: 2, tier: 1, reqLevel: 2, reqStat: null,
       desc: "La lama preferita dei soldati di fanteria. Equilibrata e affidabile.",
-      stats: { str: 2 }, classRestrict: ['guerriero','paladino'],
+      combatDamage: '1d8', stats: { str: 2 }, classRestrict: ['guerriero','paladino'],
       abilities: { arenaBonus: 0 }, buyPrice: 140, sellPrice: 56 },
 
     { id: 112, name: "Spada del Crociato", slot: "weapon", weaponType: "sword", quality: 3, tier: 2, reqLevel: 4, reqStat: null,
       desc: "Lama benedetta che risuona con la giustizia.",
-      stats: { str: 2, cha: 1 }, classRestrict: ['guerriero','paladino'],
+      combatDamage: '1d8', stats: { str: 2, cha: 1 }, classRestrict: ['guerriero','paladino'],
       abilities: { arenaBonus: 0 }, buyPrice: 400, sellPrice: 160 },
 
     { id: 113, name: "Spada Epica del Guerriero", slot: "weapon", weaponType: "sword", quality: 4, tier: 2, reqLevel: 6, reqStat: {key:'str', val:14},
       desc: "Forgiata nel fuoco di una montagna vulcanica, taglia l'acciaio come burro.",
-      stats: { str: 4 }, classRestrict: ['guerriero','paladino'],
+      combatDamage: '2d6', stats: { str: 4 }, classRestrict: ['guerriero','paladino'],
       abilities: { arenaBonus: 1 }, buyPrice: 1000, sellPrice: 400 },
 
     /* ── WEAPON — Guerriero/Paladino/Chierico (mazze) ── */
     { id: 114, name: "Mazza di Guerra", slot: "weapon", weaponType: "mace", quality: 1, tier: 1, reqLevel: 1, reqStat: null,
       desc: "Pesante ma micidiale. Chi la impugna non ha dubbi sulle proprie intenzioni.",
-      stats: { str: 1, con: 1 }, classRestrict: ['guerriero','paladino','chierico'],
+      combatDamage: '1d6', stats: { str: 1, con: 1 }, classRestrict: ['guerriero','paladino','chierico'],
       abilities: {}, buyPrice: 35, sellPrice: 14 },
 
     { id: 115, name: "Mazza del Templare", slot: "weapon", weaponType: "mace", quality: 2, tier: 1, reqLevel: 2, reqStat: null,
       desc: "Consacrata da un ordine di paladini, porta benedizioni in battaglia.",
-      stats: { str: 1, con: 1 }, classRestrict: ['guerriero','paladino','chierico'],
+      combatDamage: '1d8', stats: { str: 1, con: 1 }, classRestrict: ['guerriero','paladino','chierico'],
       abilities: {}, buyPrice: 130, sellPrice: 52 },
 
     { id: 116, name: "Mazza Sacra di Pelor", slot: "weapon", weaponType: "mace", quality: 3, tier: 2, reqLevel: 4, reqStat: null,
       desc: "Il sole si riflette nel metallo sacro. I non-morti tremano alla sua vista.",
-      stats: { str: 2, wis: 1 }, classRestrict: ['guerriero','paladino','chierico'],
+      combatDamage: '1d8', stats: { str: 2, wis: 1 }, classRestrict: ['guerriero','paladino','chierico'],
       abilities: {}, buyPrice: 380, sellPrice: 152 },
 
     /* ── WEAPON — Mago/Druido (bastoni) ── */
     { id: 120, name: "Bastone di Legno", slot: "weapon", weaponType: "staff", quality: 1, tier: 1, reqLevel: 1, reqStat: null,
       desc: "Un semplice bastone d'olmo con qualche runa incisa.",
-      stats: { int: 1 }, classRestrict: ['mago','druido'],
+      combatDamage: '1d6', stats: { int: 1 }, classRestrict: ['mago','druido'],
       abilities: { studyBonus: 0 }, buyPrice: 30, sellPrice: 12 },
 
     { id: 121, name: "Bastone dell'Apprendista", slot: "weapon", weaponType: "staff", quality: 2, tier: 1, reqLevel: 2, reqStat: null,
       desc: "Donato ai migliori studenti della torre arcana.",
-      stats: { int: 2 }, classRestrict: ['mago','druido'],
+      combatDamage: '1d8', stats: { int: 2 }, classRestrict: ['mago','druido'],
       abilities: { studyBonus: 0 }, buyPrice: 125, sellPrice: 50 },
 
     { id: 122, name: "Bastone dell'Arcimago", slot: "weapon", weaponType: "staff", quality: 3, tier: 2, reqLevel: 4, reqStat: null,
       desc: "Il cristallo in cima pulsa di magia arcana concentrata.",
-      stats: { int: 3 }, classRestrict: ['mago','druido'],
+      combatDamage: '1d8', stats: { int: 3 }, classRestrict: ['mago','druido'],
       abilities: { studyBonus: 1 }, buyPrice: 400, sellPrice: 160 },
 
     { id: 123, name: "Bacchetta di Frassino", slot: "weapon", weaponType: "wand", quality: 2, tier: 1, reqLevel: 2, reqStat: null,
       desc: "Leggera e precisa, amplifica i canali magici.",
-      stats: { int: 1, cha: 1 }, classRestrict: ['mago'],
+      combatDamage: '1d4', stats: { int: 1, cha: 1 }, classRestrict: ['mago'],
       abilities: {}, buyPrice: 110, sellPrice: 44 },
 
     { id: 124, name: "Bacchetta di Cristallo", slot: "weapon", weaponType: "wand", quality: 4, tier: 2, reqLevel: 6, reqStat: {key:'int', val:14},
       desc: "Modellata da un unicorno de facto, risuona solo con chi possiede vera magia.",
-      stats: { int: 4 }, classRestrict: ['mago'],
+      combatDamage: '1d4', stats: { int: 4 }, classRestrict: ['mago'],
       abilities: { studyBonus: 1 }, buyPrice: 950, sellPrice: 380 },
 
     { id: 125, name: "Tomo degli Arcani", slot: "weapon", weaponType: "tome", quality: 3, tier: 2, reqLevel: 4, reqStat: null,
       desc: "Un grimorio vivente che sussurra formule al proprio portatore.",
-      stats: { int: 2, wis: 1 }, classRestrict: ['mago','chierico'],
+      combatDamage: '1d4', stats: { int: 2, wis: 1 }, classRestrict: ['mago','chierico'],
       abilities: { studyBonus: 1 }, buyPrice: 380, sellPrice: 152 },
 
     { id: 126, name: "Tomo Proibito del Lich", slot: "weapon", weaponType: "tome", quality: 5, tier: 3, reqLevel: 9, reqStat: {key:'int', val:17},
       desc: "Scritto in inchiostro di non-morto. Proibito ma straordinariamente potente.",
-      stats: { int: 5 }, classRestrict: ['mago','chierico'],
+      combatDamage: '1d6', stats: { int: 5 }, classRestrict: ['mago','chierico'],
       abilities: { studyBonus: 2, xpBonus: 0.10 }, buyPrice: 2500, sellPrice: 1000 },
 
     /* ── WEAPON — Druido (bastoni natura) ── */
     { id: 127, name: "Bastone della Foresta", slot: "weapon", weaponType: "staff", quality: 1, tier: 1, reqLevel: 1, reqStat: null,
       desc: "Intrecciato con rami vivi, pulsa con la linfa della natura.",
-      stats: { wis: 1 }, classRestrict: ['druido'],
+      combatDamage: '1d6', stats: { wis: 1 }, classRestrict: ['druido'],
       abilities: {}, buyPrice: 30, sellPrice: 12 },
 
     { id: 128, name: "Bastone del Cervo Antico", slot: "weapon", weaponType: "staff", quality: 4, tier: 2, reqLevel: 6, reqStat: {key:'wis', val:14},
       desc: "Intagliato da un druido di rango superiore, parla agli spiriti della terra.",
-      stats: { wis: 4 }, classRestrict: ['druido'],
+      combatDamage: '1d8', stats: { wis: 4 }, classRestrict: ['druido'],
       abilities: { studyBonus: 1 }, buyPrice: 950, sellPrice: 380 },
 
     { id: 129, name: "Bastone del Grande Albero", slot: "weapon", weaponType: "staff", quality: 5, tier: 3, reqLevel: 9, reqStat: {key:'wis', val:17},
       desc: "Forgiato dal cuore di un millenario. Risveglia la natura con ogni tocco.",
-      stats: { wis: 5 }, classRestrict: ['druido'],
+      combatDamage: '2d6', stats: { wis: 5 }, classRestrict: ['druido'],
       abilities: { studyBonus: 2 }, buyPrice: 2500, sellPrice: 1000 },
 
     /* ── WEAPON — Chierico (mazze divine) ── */
     { id: 130, name: "Martello Divino", slot: "weapon", weaponType: "mace", quality: 4, tier: 2, reqLevel: 6, reqStat: {key:'wis', val:14},
       desc: "La divinità ha forgiato questo martello per scacciare il male.",
-      stats: { wis: 3, con: 1 }, classRestrict: ['chierico'],
+      combatDamage: '1d8', stats: { wis: 3, con: 1 }, classRestrict: ['chierico'],
       abilities: { conversionBonus: 1 }, buyPrice: 1000, sellPrice: 400 },
 
     { id: 131, name: "Mazza dei Santi", slot: "weapon", weaponType: "mace", quality: 5, tier: 3, reqLevel: 9, reqStat: {key:'wis', val:17},
       desc: "Portata dai più devoti tra i chierici. Ogni colpo è una preghiera.",
-      stats: { wis: 5 }, classRestrict: ['chierico'],
+      combatDamage: '2d6', stats: { wis: 5 }, classRestrict: ['chierico'],
       abilities: { conversionBonus: 1, conversionSpeed: 0.2 }, buyPrice: 2500, sellPrice: 1000 },
 
     /* ── HEAD ── */
@@ -2843,7 +2849,7 @@ const DB = {
 
     { id: 1001, name: "Spada dei Campioni dell'Arena", slot: "weapon", weaponType: "sword", quality: 5, tier: 3, reqLevel: 9, reqStat: { key: 'str', val: 16 },
       desc: "Forgiata per i guerrieri leggendari. Ogni fendente colpisce due volte e la resistenza garantisce un ingresso extra nell'Arena ogni giorno.",
-      stats: { str: 5, con: 3 }, classRestrict: ['guerriero','paladino'],
+      combatDamage: '2d8', stats: { str: 5, con: 3 }, classRestrict: ['guerriero','paladino'],
       abilities: { pickpocketBonus: 0, rerollBonus: 0, taxDiscount: 0, goldBonus: 0, xpBonus: 0, arenaBonus: 1, arenaDoubleHit: true },
       buyPrice: 3200, sellPrice: 1280 },
 
@@ -2867,7 +2873,7 @@ const DB = {
 
     { id: 1104, name: "Croce Sacra",              slot: "weapon", weaponType: "cross", quality: 4, tier: 3, reqLevel: 6, reqStat: { key: 'cha', val: 14 },
       desc: "Reliquia benedetta. Potenzia la conversione e permette una missione extra ogni giorno.",
-      stats: { wis: 3, cha: 4 }, classRestrict: ['chierico'],
+      combatDamage: '1d8', stats: { wis: 3, cha: 4 }, classRestrict: ['chierico'],
       abilities: { pickpocketBonus: 0, rerollBonus: 0, taxDiscount: 0, goldBonus: 0, xpBonus: 0, conversionBonus: 1, conversionSpeed: 0.20 },
       buyPrice: 980, sellPrice: 392 },
 
@@ -3354,3 +3360,151 @@ const SPELL_RECIPES = [
     desc: 'Cancella una cosa dall\'esistenza per sempre. Mai e poi mai vista.',
     reward: { xp: 500, gold: 500 }, clientGold: 1300 },
 ];
+
+/* ── COMBAT SYSTEM ─────────────────────────────────────── */
+
+const ENEMIES = [
+  { id: 'ratto_gigante',     name: 'Ratto Gigante',       tier: 1, icon: '🐀',
+    hp: 10, mp: 0, stats: { str:6, dex:12, con:10, int:4, wis:6, cha:4 },
+    defense: 0, magicResist: 0, accuracy: 0, evasion: 0,
+    xpReward: 35, goldReward: { min:4, max:12 }, fameReward: 3,
+    dropTable: [], ai_type: 'random', skills: ['morso_velenoso'] },
+
+  { id: 'goblin_ladro',      name: 'Goblin Ladro',        tier: 1, icon: '👺',
+    hp: 14, mp: 0, stats: { str:8, dex:14, con:10, int:8, wis:8, cha:6 },
+    defense: 1, magicResist: 0, accuracy: 0, evasion: 0,
+    xpReward: 45, goldReward: { min:8, max:18 }, fameReward: 4,
+    dropTable: [], ai_type: 'aggressive', skills: [] },
+
+  { id: 'guardia_corrotta',  name: 'Guardia Corrotta',    tier: 1, icon: '💂',
+    hp: 18, mp: 0, stats: { str:12, dex:8, con:13, int:8, wis:8, cha:8 },
+    defense: 3, magicResist: 0, accuracy: 0, evasion: 0,
+    xpReward: 40, goldReward: { min:6, max:15 }, fameReward: 4,
+    dropTable: [], ai_type: 'defensive', skills: [] },
+
+  { id: 'mercenario_oscuro', name: 'Mercenario Oscuro',   tier: 2, icon: '🗡️',
+    hp: 26, mp: 0, stats: { str:14, dex:12, con:14, int:10, wis:9, cha:8 },
+    defense: 2, magicResist: 0, accuracy: 0, evasion: 0,
+    xpReward: 70, goldReward: { min:15, max:30 }, fameReward: 7,
+    dropTable: [], ai_type: 'aggressive', skills: ['colpo_poderoso'] },
+
+  { id: 'cultista_vuoto',    name: 'Cultista del Vuoto',  tier: 2, icon: '🌀',
+    hp: 20, mp: 12, stats: { str:8, dex:10, con:10, int:15, wis:12, cha:10 },
+    defense: 0, magicResist: 2, accuracy: 0, evasion: 0,
+    xpReward: 75, goldReward: { min:14, max:28 }, fameReward: 7,
+    dropTable: [], ai_type: 'random', skills: ['palla_fuoco_debole'] },
+
+  { id: 'orco_teppista',     name: 'Orco Teppista',       tier: 2, icon: '👹',
+    hp: 34, mp: 0, stats: { str:17, dex:8, con:16, int:6, wis:7, cha:6 },
+    defense: 2, magicResist: 0, accuracy: 0, evasion: -1,
+    xpReward: 80, goldReward: { min:12, max:25 }, fameReward: 8,
+    dropTable: [], ai_type: 'aggressive', skills: ['furia'] },
+
+  { id: 'cavaliere_caduto',  name: 'Cavaliere Caduto',    tier: 3, icon: '🏇',
+    hp: 42, mp: 0, stats: { str:16, dex:10, con:16, int:10, wis:10, cha:8 },
+    defense: 5, magicResist: 1, accuracy: 0, evasion: 0,
+    xpReward: 130, goldReward: { min:30, max:60 }, fameReward: 12,
+    dropTable: [], ai_type: 'defensive', skills: ['colpo_poderoso', 'sfida_mistica'] },
+
+  { id: 'negromante_minore', name: 'Negromante Minore',   tier: 3, icon: '💀',
+    hp: 28, mp: 18, stats: { str:8, dex:10, con:10, int:17, wis:14, cha:10 },
+    defense: 0, magicResist: 3, accuracy: 0, evasion: 0,
+    xpReward: 140, goldReward: { min:28, max:55 }, fameReward: 13,
+    dropTable: [], ai_type: 'random', skills: ['drenaggio_vitale'] },
+];
+
+const ENEMY_SKILLS = {
+  morso_velenoso:    { id: 'morso_velenoso',    name: 'Morso Velenoso',  type: 'offensive',
+    damageDice: '1d4', stat: 'str', hitStat: 'dex', statusApply: 'poison' },
+  colpo_poderoso:    { id: 'colpo_poderoso',    name: 'Colpo Poderoso',  type: 'offensive',
+    damageDice: '2d6', stat: 'str', hitStat: 'str', hitPenalty: -2 },
+  furia:             { id: 'furia',             name: 'Furia',           type: 'offensive',
+    damageDice: '2d8', stat: 'str', hitStat: 'str', hitPenalty: -3 },
+  palla_fuoco_debole:{ id: 'palla_fuoco_debole',name: 'Palla di Fuoco',  type: 'offensive',
+    damageDice: '2d6', stat: 'int', hitStat: 'int', magical: true },
+  drenaggio_vitale:  { id: 'drenaggio_vitale',  name: 'Drenaggio Vitale',type: 'offensive',
+    damageDice: '2d6', stat: 'int', hitStat: 'int', magical: true, drain: true },
+  sfida_mistica:     { id: 'sfida_mistica',     name: 'Sfida Mistica',   type: 'utility',
+    statusApply: 'stunned', hitStat: 'cha' },
+};
+
+const COMBAT_SKILLS = [
+  // ── Sempre disponibili ──────────────────────────────────
+  { id: 'attacca',           name: 'Attacca',             icon: '⚔️',
+    type: 'physical', stat: 'str', hitStat: 'str',
+    damageDice: 'weapon', damageBonus: 0, mpCost: 0,
+    target: 'enemy', availableFor: 'all', hitPenalty: 0 },
+  { id: 'fuggi',             name: 'Fuggi',               icon: '🏃',
+    type: 'utility',  stat: 'dex', hitStat: 'dex',
+    damageDice: null,  damageBonus: 0, mpCost: 0,
+    target: 'self',   availableFor: 'all', hitPenalty: 0 },
+
+  // ── Ladro ────────────────────────────────────────────────
+  { id: 'colpo_spalle',      name: 'Colpo alle Spalle',   icon: '🗡️',
+    type: 'physical', stat: 'dex', hitStat: 'dex',
+    damageDice: '2d6', damageBonus: 0, mpCost: 0,
+    target: 'enemy', availableFor: ['ladro'], hitPenalty: 0 },
+  { id: 'polvere_accecante', name: 'Polvere Accecante',   icon: '💨',
+    type: 'utility',  stat: 'dex', hitStat: 'dex',
+    damageDice: null,  damageBonus: 0, mpCost: 0,
+    target: 'enemy', availableFor: ['ladro'], statusApply: 'blind', hitPenalty: 0 },
+
+  // ── Guerriero ────────────────────────────────────────────
+  { id: 'fendente_poderoso', name: 'Fendente Poderoso',   icon: '🪓',
+    type: 'physical', stat: 'str', hitStat: 'str',
+    damageDice: '2d8', damageBonus: 2, mpCost: 0,
+    target: 'enemy', availableFor: ['guerriero'], hitPenalty: -2 },
+  { id: 'posizione_difensiva', name: 'Posizione Difensiva', icon: '🛡️',
+    type: 'utility',  stat: 'con', hitStat: 'str',
+    damageDice: null,  damageBonus: 0, mpCost: 0,
+    target: 'self',  availableFor: ['guerriero'], statusApply: 'defense_up', hitPenalty: 0 },
+
+  // ── Mago ─────────────────────────────────────────────────
+  { id: 'palla_fuoco',       name: 'Palla di Fuoco',      icon: '🔥',
+    type: 'magical',  stat: 'int', hitStat: 'int',
+    damageDice: '2d6', damageBonus: 3, mpCost: 4,
+    target: 'enemy', availableFor: ['mago'], hitPenalty: 0 },
+  { id: 'scudo_arcano',      name: 'Scudo Arcano',        icon: '✨',
+    type: 'utility',  stat: 'int', hitStat: 'int',
+    damageDice: null,  damageBonus: 0, mpCost: 3,
+    target: 'self',  availableFor: ['mago'], statusApply: 'magic_shield', hitPenalty: 0 },
+
+  // ── Paladino ─────────────────────────────────────────────
+  { id: 'colpo_sacro',       name: 'Colpo Sacro',         icon: '⚜️',
+    type: 'physical', stat: 'str', hitStat: 'str',
+    damageDice: '1d8', damageBonus: 0, mpCost: 2,
+    target: 'enemy', availableFor: ['paladino'], divineDice: '1d6', divineStat: 'cha', hitPenalty: 0 },
+  { id: 'imponiti',          name: 'Imponiti',            icon: '✝️',
+    type: 'utility',  stat: 'cha', hitStat: 'cha',
+    damageDice: null,  damageBonus: 0, mpCost: 2,
+    target: 'enemy', availableFor: ['paladino'], statusApply: 'stunned', hitPenalty: 0 },
+
+  // ── Druido ───────────────────────────────────────────────
+  { id: 'folgore_naturale',  name: 'Folgore Naturale',    icon: '⚡',
+    type: 'magical',  stat: 'wis', hitStat: 'wis',
+    damageDice: '2d4', damageBonus: 2, mpCost: 3,
+    target: 'enemy', availableFor: ['druido'], hitPenalty: 0 },
+  { id: 'rigenerazione',     name: 'Rigenerazione',       icon: '🌿',
+    type: 'utility',  stat: 'wis', hitStat: 'wis',
+    damageDice: null,  damageBonus: 0, mpCost: 2,
+    target: 'self',  availableFor: ['druido'], statusApply: 'regeneration', hitPenalty: 0 },
+
+  // ── Chierico ─────────────────────────────────────────────
+  { id: 'martello_divino',   name: 'Martello Divino',     icon: '🔨',
+    type: 'physical', stat: 'wis', hitStat: 'wis',
+    damageDice: '1d8', damageBonus: 2, mpCost: 2,
+    target: 'enemy', availableFor: ['chierico'], hitPenalty: 0 },
+  { id: 'cura_ferite',       name: 'Cura Ferite',         icon: '💚',
+    type: 'utility',  stat: 'wis', hitStat: 'wis',
+    damageDice: '2d6', damageBonus: 0, mpCost: 3,
+    target: 'self',  availableFor: ['chierico'], hitPenalty: 0 },
+];
+
+const STATUS_EFFECTS = {
+  poison:      { id: 'poison',      name: 'Avvelenato',         icon: '☠️',  trigger: 'end_of_turn',   damageDice: '1d4', color: '#7cb342' },
+  stunned:     { id: 'stunned',     name: 'Stordito',           icon: '💫',  trigger: 'start_of_turn', skipTurn: true,    color: '#ffb300' },
+  blind:       { id: 'blind',       name: 'Accecato',           icon: '🕶️', trigger: 'passive',       hitPenalty: -4,    color: '#78909c' },
+  regeneration:{ id: 'regeneration',name: 'Rigenerazione',      icon: '🌿',  trigger: 'start_of_turn', healDice: '1d6',   color: '#52b788' },
+  defense_up:  { id: 'defense_up',  name: 'Posizione Difensiva',icon: '🛡️', trigger: 'passive',       defenseBonus: 3,   color: '#42a5f5' },
+  magic_shield:{ id: 'magic_shield',name: 'Scudo Arcano',       icon: '✨',  trigger: 'on_hit',        damageReduction: 0.5, consumeOnHit: true, color: '#ab47bc' },
+};

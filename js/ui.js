@@ -1465,6 +1465,7 @@ const UI = {
     this.renderStableLobby();
     this.renderRescueLobby();
     this.renderArenaLobby();
+    this.renderCombatLobby();
     this.renderNatureTab();
     this.renderIncantesimiTab();
     this.renderSpellCraftSlots();
@@ -1524,6 +1525,9 @@ const UI = {
 
     // Tab Salva i Prigionieri (solo Paladino)
     document.getElementById('tab-rescue-nav').classList.toggle('d-none', !cls.hasRescueTab);
+
+    // Tab Combattimento (tutte le classi con hasCombat)
+    document.getElementById('tab-combat-nav').classList.toggle('d-none', !cls.hasCombat);
 
     // Classe sotto il nome
     document.getElementById('char-class').textContent = cls.name;
@@ -1890,6 +1894,109 @@ const UI = {
     if (result.xp > 0)         rewards.push(`<div class="reward-row"><span class="reward-icon">⭐</span> +${result.xp} PE</div>`);
     if (result.fameDelta < 0)  rewards.push(`<div class="reward-row text-danger"><span class="reward-icon">👁️</span> ${result.fameDelta} fama</div>`);
     document.getElementById('dice-result-rewards').innerHTML = rewards.join('');
+  },
+
+  /* ─── COMBATTIMENTO A TURNI ────────────────────────────── */
+
+  renderCombatLobby() {
+    if (!Game.state) return;
+    const hpMax = Game.calcPlayerHPMax();
+    const mpMax = Game.calcPlayerMPMax();
+    document.getElementById('combat-hp-preview').textContent = hpMax;
+    document.getElementById('combat-mp-preview').textContent = mpMax;
+    document.getElementById('combat-uses-left').textContent = Game.combatRemaining();
+    document.getElementById('btn-combat-start').disabled = Game.combatRemaining() <= 0 || Game.state.gameOver;
+    document.getElementById('combat-lobby').classList.remove('d-none');
+    document.getElementById('combat-screen').classList.add('d-none');
+    document.getElementById('combat-result').classList.add('d-none');
+  },
+
+  renderCombatScreen(combat) {
+    if (!combat) return;
+    document.getElementById('combat-lobby').classList.add('d-none');
+    document.getElementById('combat-result').classList.add('d-none');
+    document.getElementById('combat-screen').classList.remove('d-none');
+
+    // Player
+    const playerPct = Math.max(0, Math.round((combat.playerHP / combat.playerHPMax) * 100));
+    const mpPct     = combat.playerMPMax > 0 ? Math.max(0, Math.round((combat.playerMP / combat.playerMPMax) * 100)) : 0;
+    document.getElementById('combat-player-hp-text').textContent = `${combat.playerHP}/${combat.playerHPMax}`;
+    document.getElementById('combat-player-mp-text').textContent = `${combat.playerMP}/${combat.playerMPMax}`;
+    const hpBar = document.getElementById('combat-player-hp-bar');
+    hpBar.style.width = `${playerPct}%`;
+    hpBar.className = `combat-hp-bar ${playerPct <= 25 ? 'danger' : playerPct <= 50 ? 'warning' : ''}`;
+    document.getElementById('combat-player-mp-bar').style.width = `${mpPct}%`;
+    document.getElementById('combat-player-status-pills').innerHTML = this._renderStatusPills(combat.playerStatusEffects);
+
+    // Enemy
+    const enemyPct = Math.max(0, Math.round((combat.enemy.hp / combat.enemy.hpMax) * 100));
+    document.getElementById('combat-enemy-name').textContent = `${combat.enemy.icon} ${combat.enemy.name} (Tier ${combat.enemy.tier})`;
+    document.getElementById('combat-enemy-hp-text').textContent = `${combat.enemy.hp}/${combat.enemy.hpMax}`;
+    const eHpBar = document.getElementById('combat-enemy-hp-bar');
+    eHpBar.style.width = `${enemyPct}%`;
+    eHpBar.className = `combat-hp-bar ${enemyPct <= 25 ? 'danger' : enemyPct <= 50 ? 'warning' : ''}`;
+    document.getElementById('combat-enemy-status-pills').innerHTML = this._renderStatusPills(combat.enemy.statusEffects);
+
+    // Log
+    this.renderCombatLog(combat.log);
+
+    // Action buttons
+    const actionsEl = document.getElementById('combat-actions');
+    const isPlayerTurn = combat.phase === 'player_choice' && !combat.outcome;
+    const cls = Game.getClasse();
+    const availableSkills = COMBAT_SKILLS.filter(s => {
+      if (s.availableFor === 'all') return true;
+      return Array.isArray(s.availableFor) && s.availableFor.includes(cls.id);
+    });
+    actionsEl.innerHTML = availableSkills.map(s => {
+      const mpLabel = s.mpCost > 0 ? ` <small class="opacity-50">(${s.mpCost}MP)</small>` : '';
+      const notEnoughMP = (s.mpCost || 0) > combat.playerMP;
+      const disabled = !isPlayerTurn || notEnoughMP ? 'disabled' : '';
+      return `<button class="btn combat-action-btn ${disabled ? 'opacity-50' : ''}" data-skill="${s.id}" ${disabled}>${s.icon} ${s.name}${mpLabel}</button>`;
+    }).join('');
+  },
+
+  renderCombatLog(entries) {
+    const logEl = document.getElementById('combat-log');
+    if (!logEl) return;
+    const typeClass = { hit: 'text-warning', miss: 'text-muted', crit: 'text-gold flash-gold', status: 'text-info', info: 'text-light' };
+    logEl.innerHTML = entries.slice(0, 20).map(e =>
+      `<div class="combat-log-entry ${typeClass[e.type] || ''}">${e.turn > 0 ? `<span class="text-muted me-1">T${e.turn}:</span>` : ''}${e.text}</div>`
+    ).join('');
+  },
+
+  showCombatResult(outcome, rewards) {
+    document.getElementById('combat-screen').classList.add('d-none');
+    document.getElementById('combat-result').classList.remove('d-none');
+
+    const icons = { victory: '🏆', defeat: '💀', fled: '🏃' };
+    const titles = { victory: 'Vittoria!', defeat: 'Sconfitto!', fled: 'Fuggito!' };
+    document.getElementById('combat-result-icon').textContent = icons[outcome] || '⚔️';
+    const titleEl = document.getElementById('combat-result-title');
+    titleEl.textContent = titles[outcome] || outcome;
+    titleEl.className = `fw-bold fs-4 mb-1 ${outcome === 'victory' ? 'text-gold' : outcome === 'defeat' ? 'text-danger' : 'text-muted'}`;
+
+    const rows = [];
+    if (rewards) {
+      if (rewards.xp)       rows.push(`<div>⭐ +${rewards.xp} PE</div>`);
+      if (rewards.gold)     rows.push(`<div>💰 +${rewards.gold} mo</div>`);
+      if (rewards.fame)     rows.push(`<div>🌟 +${rewards.fame} fama</div>`);
+      if (rewards.droppedItem) rows.push(`<div>📦 Trovato: ${rewards.droppedItem.name}</div>`);
+      if (rewards.goldLoss) rows.push(`<div class="text-danger">💸 -${rewards.goldLoss} mo</div>`);
+      if (rewards.fameLoss) rows.push(`<div class="text-danger">👁️ -${rewards.fameLoss} fama</div>`);
+    }
+    if (outcome === 'fled') rows.push(`<div class="text-muted">Nessuna ricompensa.</div>`);
+    document.getElementById('combat-result-rewards').innerHTML = rows.join('');
+
+    document.getElementById('btn-combat-again').disabled = Game.combatRemaining() <= 0;
+  },
+
+  _renderStatusPills(effects) {
+    if (!effects || !effects.length) return '';
+    return effects.filter(e => e.duration > 0).map(e => {
+      const def = STATUS_EFFECTS[e.id];
+      return `<span class="combat-status-pill" style="background:${def?.color || '#555'}">${def?.icon || '?'} ${e.duration}t</span>`;
+    }).join('');
   },
 
   _abilitiesLong(abilities) {
