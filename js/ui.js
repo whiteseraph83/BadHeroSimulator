@@ -598,7 +598,12 @@ const UI = {
       const mb = DB.missions.find(m => m.id === b);
       return (ma?.tier ?? 0) - (mb?.tier ?? 0);
     });
-    // Card speciale: Investimento XP
+    // Card speciale: Investimento XP — rigenera se il costo supera l'oro corrente
+    if (Game.state.goldXPOffer && !Game.state.goldXPOffer.used) {
+      const g = Game.state.character.gold || 0;
+      if (g < 1) Game.state.goldXPOffer = null;
+      else if (Game.state.goldXPOffer.goldCost > g) Game.generateGoldXPOffer();
+    }
     const offer        = Game.state.goldXPOffer;
     const charGold     = Game.state.character.gold || 0;
     const investUsed   = !!(offer && offer.used);

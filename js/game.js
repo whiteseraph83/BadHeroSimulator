@@ -1283,22 +1283,31 @@ const Game = {
   generateGoldXPOffer() {
     const gold = this.state.character.gold || 0;
     if (gold < 1) { this.state.goldXPOffer = null; return; }
-    const goldCost   = 1 + Math.floor(Math.random() * gold);
-    const multiplier = 3 + Math.floor(Math.random() * 3); // 3–5×
+    // goldCost sempre <= oro attuale (1..gold)
+    const goldCost = 1 + Math.floor(Math.random() * gold);
+    // ×3 comune (55%), ×4 raro (30%), ×5 rarissimo (15%)
+    const r = Math.random();
+    const multiplier = r < 0.55 ? 3 : r < 0.85 ? 4 : 5;
     this.state.goldXPOffer = { goldCost, multiplier, xpGain: goldCost * multiplier, used: false };
   },
 
   acceptGoldXPOffer() {
-    const char  = this.state.character;
-    // Defensive: regenerate if somehow missing but player has gold
+    const char = this.state.character;
+    // Se l'offerta manca ma il giocatore ha oro, rigenerala
     if (!this.state.goldXPOffer && (char.gold || 0) >= 1) this.generateGoldXPOffer();
+    // Se l'offerta supera l'oro corrente, rigenerala su base attuale
+    if (this.state.goldXPOffer && !this.state.goldXPOffer.used && char.gold < this.state.goldXPOffer.goldCost) {
+      this.generateGoldXPOffer();
+    }
     const offer = this.state.goldXPOffer;
-    if (!offer || offer.used)             return { ok: false, reason: 'Offerta non disponibile.' };
-    if (char.gold < offer.goldCost)       return { ok: false, reason: 'Oro insufficiente.' };
+    if (!offer || offer.used)       return { ok: false, reason: 'Offerta non disponibile.' };
+    if (char.gold < offer.goldCost) return { ok: false, reason: 'Oro insufficiente.' };
     char.gold -= offer.goldCost;
     char.xp   += offer.xpGain;
     offer.used = true;
-    this.addLog(`Investimento: −${offer.goldCost} mo → +${offer.xpGain} PE (×${offer.multiplier}).`, 'gold');
+    const logEntry = { day: char.day, text: `Investimento: −${offer.goldCost} mo → +${offer.xpGain} PE (×${offer.multiplier}).`, type: 'gold' };
+    char.log.unshift(logEntry);
+    if (char.log.length > 500) char.log.pop();
     const levelUpResult = this.checkLevelUp();
     if (levelUpResult) this.state._lastLevelUp = levelUpResult;
     this.save();
