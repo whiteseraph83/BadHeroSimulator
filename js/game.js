@@ -1284,7 +1284,7 @@ const Game = {
     const gold = this.state.character.gold || 0;
     if (gold < 1) { this.state.goldXPOffer = null; return; }
     const goldCost   = 1 + Math.floor(Math.random() * gold);
-    const multiplier = 3 + Math.floor(Math.random() * 4); // 3–6×
+    const multiplier = 3 + Math.floor(Math.random() * 3); // 3–5×
     this.state.goldXPOffer = { goldCost, multiplier, xpGain: goldCost * multiplier, used: false };
   },
 
