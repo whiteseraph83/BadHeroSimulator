@@ -24,12 +24,12 @@ Il gioco è in **italiano**, con un tono ironico e narrativo.
 
 | Classe | Stile | Meccaniche esclusive |
 |--------|-------|----------------------|
-| 🗡️ **Ladro** | Furtivo, ingannevole | Borseggio, Gioco dei Dadi, Sistema Taglia |
-| ⚔️ **Guerriero** | Brutale, resistente | Arena (2/giorno), Gara di Bevute |
-| 🔮 **Mago** | Arcano, studioso | Studia (memory game), Tab Incantesimi |
-| 🛡️ **Paladino** | Onorevole, fiero | Accudisci Cavalcatura (Guitar Hero), Salva i Prigionieri (top-down action) |
-| 🌿 **Druido** | Naturale, alchimico | Studia, Tab Pozioni, ingredienti da missioni |
-| ✝️ **Chierico** | Devoto, carismatico | Preghiera, Conversione (evangelizzazione) |
+| 🗡️ **Ladro** | Furtivo, ingannevole | Borseggio, Gioco dei Dadi, Sistema Taglia, Combattimento |
+| ⚔️ **Guerriero** | Brutale, resistente | Arena (2/giorno), Gara di Bevute, Combattimento |
+| 🔮 **Mago** | Arcano, studioso | Studia (memory game), Tab Incantesimi, Combattimento |
+| 🛡️ **Paladino** | Onorevole, fiero | Accudisci Cavalcatura (Guitar Hero), Salva i Prigionieri (top-down action), Combattimento |
+| 🌿 **Druido** | Naturale, alchimico | Studia, Tab Pozioni, ingredienti da missioni, Combattimento |
+| ✝️ **Chierico** | Devoto, carismatico | Preghiera, Conversione (evangelizzazione), Combattimento |
 
 ---
 
@@ -37,9 +37,10 @@ Il gioco è in **italiano**, con un tono ironico e narrativo.
 
 1. **Compi missioni** — scegli un approccio, tira i dadi, raccogli ricompense
 2. **Usa le abilità di classe** — minigiochi esclusivi per XP e oro extra
-3. **Gestisci l'equipaggiamento** — acquista al mercato, vesti, potenzia le statistiche
-4. **Completa le sfide** — obiettivi giornalieri per bonus aggiuntivi
-5. **Avanza al giorno successivo** — paga la tassa alla gilda e ricomincia
+3. **Combatti** — scontri a turni JRPG con 10 abilità per classe sbloccabili a ogni livello
+4. **Gestisci l'equipaggiamento** — acquista al mercato, vesti, potenzia le statistiche
+5. **Completa le sfide** — obiettivi giornalieri per bonus aggiuntivi
+6. **Avanza al giorno successivo** — paga la tassa alla gilda e ricomincia
 
 ---
 

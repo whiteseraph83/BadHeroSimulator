@@ -11,9 +11,10 @@
 7. [Stato di gioco (state)](#stato-di-gioco-state)
 8. [Sistema di salvataggio](#sistema-di-salvataggio)
 9. [Sistema di prove (D20)](#sistema-di-prove-d20)
-10. [Minigiochi canvas](#minigiochi-canvas)
-11. [Sistema equipaggiamento e abilità](#sistema-equipaggiamento-e-abilità)
-12. [Aggiungere nuove classi o meccaniche](#aggiungere-nuove-classi-o-meccaniche)
+10. [Sistema di combattimento a turni](#sistema-di-combattimento-a-turni)
+11. [Minigiochi canvas](#minigiochi-canvas)
+12. [Sistema equipaggiamento e abilità](#sistema-equipaggiamento-e-abilità)
+13. [Aggiungere nuove classi o meccaniche](#aggiungere-nuove-classi-o-meccaniche)
 
 ---
 
@@ -86,6 +87,10 @@ File di sola lettura. Contiene tutte le costanti di gioco.
 | `SPELL_COMPONENTS` | 50 componenti per incantesimi (IDs 2001–2050) |
 | `SPELL_RECIPES` | 25 ricette incantesimi (IDs s001–s025) |
 | `DB` | Oggetto principale con `missions`, `items`, `xpTable`, `fameLevels`, ecc. |
+| `ENEMIES` | Array 8 nemici (3 tier) con stats, skills, rewards |
+| `ENEMY_SKILLS` | Oggetto abilità nemici (`morso_velenoso`, `palla_fuoco_debole`, ecc.) |
+| `COMBAT_SKILLS` | Array 50 abilità giocatore (2 universali + 8 per classe × 6 classi) |
+| `STATUS_EFFECTS` | Oggetto 6 effetti di stato (`poison`, `stunned`, `blind`, ecc.) |
 
 ### Struttura CLASSES
 
@@ -117,6 +122,7 @@ File di sola lettura. Contiene tutte le costanti di gioco.
   hasRescueTab: true,        // Paladino
   rescuePerDay: 2,
   rescueStrengthBase: 10,    // Forza iniziale del minigioco salvataggio
+  hasCombat: true,           // Tutte le 6 classi — abilita la tab Combatti
 }
 ```
 
@@ -188,6 +194,72 @@ File di sola lettura. Contiene tutte le costanti di gioco.
 }
 ```
 
+### Struttura COMBAT_SKILLS
+
+```javascript
+{
+  id: 'palla_fuoco',          // ID univoco
+  name: 'Palla di Fuoco',     // Nome visualizzato
+  icon: '🔥',
+  type: 'magical',            // 'physical' | 'magical' | 'utility'
+  stat: 'int',                // Stat usata per danno / cura
+  hitStat: 'int',             // Stat usata per il tiro per colpire
+  damageDice: '2d6',          // Dadi danno (o dadi cura se healSelf: true), null se utility
+  damageBonus: 3,             // Bonus fisso al danno
+  mpCost: 4,                  // Costo in MP (0 = gratuito)
+  target: 'enemy',            // 'enemy' | 'self'
+  availableFor: ['mago'],     // Array ID classi, oppure 'all'
+  hitPenalty: 0,              // Malus al tiro per colpire (es. −2 per attacchi pesanti)
+  unlockLevel: 3,             // Livello personaggio richiesto per usare l'abilità
+  statusApply: 'stunned',     // (opz.) Effetto di stato applicato al bersaglio se colpisce
+  healSelf: true,             // (opz.) Se true, damageDice cura invece di fare danno
+  drain: true,                // (opz.) Mago: drena HP dal nemico
+  divineDice: '1d6',          // (opz.) Paladino: dadi danno bonus divino
+  divineStat: 'cha',          // (opz.) Stat usata per il bonus divino
+}
+```
+
+**Distribuzione abilità per classe (unlockLevel 3–10):**
+
+| Classe | Tema | Stat primaria |
+|--------|------|---------------|
+| Ladro | Veleni, esecuzioni, ombre | DES |
+| Guerriero | Fendenti, difesa, resistenza | FOR/COS |
+| Mago | Magie elementali, scudi, drain | INT |
+| Paladino | Colpi sacri, cure, ira divina | FOR/SAG/CAR |
+| Druido | Nature, rigenerazione, cataclismi | SAG/COS |
+| Chierico | Martelli, cure, miracoli | SAG/CAR |
+
+### Struttura ENEMIES
+
+```javascript
+{
+  id: 'goblin_ladro',
+  name: 'Goblin Ladro',
+  icon: '👺',
+  tier: 1,                    // 1–3 (abbinato al livello del personaggio)
+  hpMax: 18,
+  stats: { str, dex, con, int, wis, cha },
+  evasion: 13,                // CA del nemico
+  proficiency: 2,
+  skills: ['colpo_poderoso'], // IDs in ENEMY_SKILLS
+  rewards: { xp, goldMin, goldMax, fameXp },
+}
+```
+
+### Struttura STATUS_EFFECTS
+
+```javascript
+{
+  poison: { trigger: 'end_of_turn',   damageDice: '1d4' },
+  stunned: { trigger: 'start_of_turn', skipTurn: true },
+  blind:   { trigger: 'passive',       hitPenalty: -4 },
+  regeneration: { trigger: 'start_of_turn', healDice: '1d6' },
+  defense_up:   { trigger: 'passive',  defenseBonus: 3 },
+  magic_shield: { trigger: 'on_hit',   damageReduction: 0.5, consumeOnHit: true },
+}
+```
+
 ---
 
 ## game.js — Logica di gioco
@@ -249,6 +321,36 @@ Game.unequipItem(slot)       // Rimuove item dallo slot → va in inventario
 #### Daily reset
 ```javascript
 Game.nextDay()  // Avanza giorno: tassa, reset contatori, nuovi contenuti, eventi
+```
+
+#### Combattimento a turni
+```javascript
+// Avvio e gestione
+Game.startCombat()              // Inizializza state.combat con nemico, HP/MP, initiative
+Game.playerAction(skillId)      // Esegue azione giocatore → { ok, hit, critical, enemyTurnPending, fled }
+Game.runEnemyTurn()             // Esegue turno nemico (AI), aggiorna log, controlla fine
+Game._checkCombatEnd()          // → bool; imposta combat.outcome ('victory'|'defeat')
+
+// Ricompense e penalità
+Game._applyVictoryRewards()     // Applica XP/oro/item vittoria a state
+Game._applyCombatDefeat()       // Detrae oro (10–20%), rimuove item casuale, −3 fama
+Game._selectVictoryItem(tier)   // Trova item con bonus stat compatibili con le proficienze della classe
+
+// Helpers interni
+Game._combatRollToHit(hitStat, hitPenalty, enemyEvasion, enemyStats)
+  // → { roll, statMod, prof, blindPenalty, hitPenalty, total, CA, hit, critical }
+Game._combatCalcDamage(skill, critical)   // Calcola danno finale (con critico, stat, bonus)
+Game._rollSummary(r)                      // → stringa log "🎲[14] +3FOR +2(Prof) = 19 vs CA 15"
+Game._enemyRollSummary(roll, mod, pen, total, playerCA) // Identico per nemici
+Game._applyStatusToPlayer(id, duration)  // Aggiunge/rinnova effetto su giocatore
+Game._applyStatusToEnemy(id, duration)   // Aggiunge/rinnova effetto su nemico
+Game._processStatusEffects(isPlayerTurn) // Applica trigger (veleno, regen, ecc.)
+Game._runEnemyAI()                        // → { action: 'attack'|'skill', skill? }
+Game._enemyHasStatus(id)                 // → bool
+Game._addLog(text, type)                 // Aggiunge riga al log di combattimento
+
+// Funzione standalone (fuori dall'oggetto Game)
+rollDice('2d6')                          // → somma N dadi a S facce
 ```
 
 #### Sistemi per classe
@@ -322,6 +424,13 @@ UI.renderInventory()          // Inventario e equipaggiamento
 UI.renderChallenges()         // Sfide giornaliere
 UI.renderLog()                // Diario/storico azioni
 UI.updateClassConditionalUI() // Mostra/nasconde elementi specifici per classe
+
+// Combattimento
+UI.renderCombatLobby()        // Pannello pre-combattimento: HP/MP, puntate, abilità proficiency
+UI.renderCombatScreen(combat) // Battlefield JRPG: sprite, HUD HP/MP, log, griglia 5×2 abilità
+UI.renderCombatLog(entries)   // Aggiorna il log visivo (ultimi 20 eventi)
+UI.showCombatResult(outcome, rewards)  // Mostra modal risultato con tema vittoria/sconfitta/fuga
+UI._renderStatusPills(effects) // → HTML badge colorati per effetti di stato attivi
 ```
 
 ### updateClassConditionalUI()
@@ -499,6 +608,21 @@ Game.state = {
   knownRecipes: [],
   knownSpells: [],
 
+  // Combattimento (azzerato da nextDay)
+  combatUsed: 0,
+  combat: null,               // null fuori dal combattimento, oppure:
+  // {
+  //   enemy: { id, name, icon, tier, hp, hpMax, stats, evasion, proficiency, skills, statusEffects },
+  //   playerHP: N, playerHPMax: N,
+  //   playerMP: N, playerMPMax: N,
+  //   playerStatusEffects: [],
+  //   turn: 1,
+  //   phase: 'player_choice' | 'enemy_turn' | 'end',
+  //   outcome: null | 'victory' | 'defeat' | 'fled',
+  //   log: [{ turn, text, type }],
+  //   rewards: { xp, gold, fameXp, item? } | null,
+  // }
+
   // Flag eventi
   wantedMissionPending: false,
   wantedMissionCompleted: false,
@@ -548,6 +672,70 @@ Game.resolveCheck(statKey, dc) {
 
 La differenza tra successo pieno e parziale è sempre **5 punti**.
 I successi parziali danno il **50% delle ricompense** (oro, XP ridotti).
+
+---
+
+## Sistema di combattimento a turni
+
+### Flusso di una sessione
+
+```
+startCombat()
+  └─ Sceglie nemico (tier = ceil(charLevel/3.5))
+  └─ Calcola playerHP/MP da stats
+  └─ Tira initiative: 1d20+DEX (giocatore) vs 1d20+DEX (nemico)
+  └─ phase = 'player_choice'
+
+playerAction(skillId)
+  ├─ Controlla: skill.unlockLevel <= charLevel
+  ├─ Controlla: skill.mpCost <= playerMP
+  ├─ 'fuggi' → tiro DES vs soglia nemico
+  ├─ skill.healSelf → cura HP (damageDice + statMod)
+  ├─ utility+self → applica status al giocatore
+  ├─ utility+enemy → tiro per colpire → applica status al nemico
+  └─ fisico/magico → tiro per colpire → danno → (statusApply) → _checkCombatEnd()
+
+runEnemyTurn()
+  ├─ _processStatusEffects(false): veleno, regen, stun
+  ├─ Se stunned → salta turno
+  └─ _runEnemyAI() → sceglie attacco o abilità speciale
+       └─ tiro per colpire → danno / status al giocatore → _checkCombatEnd()
+```
+
+### Calcolo danni
+
+```javascript
+// Tiro per colpire
+total = rollDice('1d20') + modifier(stat) + (hasProficiency ? proficiency : 0) + hitPenalty + blindPenalty
+hit = (roll === 20) || (roll !== 1 && total >= CA)
+critical = roll === 20
+
+// Danno fisico/magico
+baseDmg = rollDice(skill.damageDice) + skill.damageBonus + modifier(skill.stat)
+if (critical) baseDmg *= 2
+if (skill.divineDice) baseDmg += rollDice(skill.divineDice) + modifier(skill.divineStat)
+if (magic_shield attivo) baseDmg = floor(baseDmg * 0.5)   // shield si consuma
+```
+
+### UI combattimento
+
+- **Battlefield** (`.combat-battlefield`): sfondo dungeon scuro con scanlines, animazione `combatBob` su sprite giocatore e nemico
+- **Sprite giocatore**: SVG dalla `cls.avatar` (lato sinistro)
+- **Sprite nemico**: emoji grande (lato destro) — es. `👺`, `💀`, `🧙`
+- **HUD**: barra HP (rossa con warning gialla) + barra MP (viola), badge status pill colorati
+- **Griglia abilità**: `grid-template-columns: repeat(5, 1fr)` → 2 righe da 5 pulsanti
+  - Abilità bloccate (`unlockLevel > charLevel`): classe CSS `.locked`, grigie, 🔒 + "Lv.X"
+  - Abilità senza MP: `disabled` ma non `.locked`
+- **Log**: ultimi 20 eventi, colorati per tipo (`hit`=giallo, `crit`=oro lampeggiante, `miss`=grigio, `status`=azzurro)
+- **Modal risultato** (`#modal-combat-result`): tema CSS variabile per vittoria (oro), sconfitta (rosso), fuga (grigio)
+
+### Aggiungere una nuova abilità di combattimento
+
+1. **`data.js`** → Aggiungi oggetto in `COMBAT_SKILLS` con tutti i campi (incluso `unlockLevel` e `availableFor`)
+2. Se l'abilità cura: aggiungi `healSelf: true` e `damageDice` con i dadi di cura
+3. Se applica status: aggiungi `statusApply: 'id_effetto'`
+4. Se nuovo tipo di effetto: aggiungi in `STATUS_EFFECTS` e gestisci in `_processStatusEffects()`
+5. `game.js` — `playerAction()` già gestisce tutti i casi generici; aggiungi un branch solo per logiche speciali
 
 ---
 

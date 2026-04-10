@@ -10,10 +10,11 @@
 6. [XP e Livelli](#xp-e-livelli)
 7. [Equipaggiamento e Mercato](#equipaggiamento-e-mercato)
 8. [Sfide giornaliere](#sfide-giornaliere)
-9. [Classi e minigiochi](#classi-e-minigiochi)
-10. [Sistemi di crafting](#sistemi-di-crafting)
-11. [Oggetti consumabili e boost](#oggetti-consumabili-e-boost)
-12. [Condizioni di fine partita](#condizioni-di-fine-partita)
+9. [Combattimento a turni](#combattimento-a-turni)
+10. [Classi e minigiochi](#classi-e-minigiochi)
+11. [Sistemi di crafting](#sistemi-di-crafting)
+12. [Oggetti consumabili e boost](#oggetti-consumabili-e-boost)
+13. [Condizioni di fine partita](#condizioni-di-fine-partita)
 
 ---
 
@@ -235,6 +236,149 @@ Ogni giorno hai **3 sfide attive** (aumentabili con equipaggiamento). Completarl
 - Acquista/vendi oggetti al mercato
 
 Puoi **rifiutare e sostituire** una sfida se hai l'abilità `challengeRefresh` sull'equipaggiamento.
+
+---
+
+## Combattimento a turni
+
+Tutte le classi hanno accesso alla tab **Combatti** — uno scontro JRPG a turni con grafica battlefield, log dettagliato e 10 abilità sbloccabili per ogni classe.
+
+### Come funziona
+
+1. **Accedi alla tab Combatti** — viene mostrato un pannello con le puntate in gioco (vittoria e sconfitta)
+2. **Avvia il combattimento** — il gioco sceglie un nemico casuale (tier proporzionale al livello) e tira l'iniziativa
+3. **Al tuo turno**: scegli un'abilità dal pannello azioni (2 righe da 5 pulsanti)
+4. **Al turno del nemico**: attacca automaticamente secondo la sua IA
+5. **Fine combattimento**: appare un modal con l'esito e le ricompense
+
+### Griglia abilità (10 per classe)
+
+| Livello | Abilità sbloccata |
+|---------|-------------------|
+| Lv. 1 | ⚔️ Attacca (universale) |
+| Lv. 2 | 🏃 Fuggi (universale) |
+| Lv. 3–10 | 8 abilità esclusive di classe |
+
+Le abilità bloccate sono **sempre visibili** ma appaiono grigie con 🔒 e l'indicazione del livello richiesto. Si sbloccano automaticamente salendo di livello.
+
+### Calcolo del tiro (D20)
+
+Ogni attacco mostra nel log il calcolo completo:
+
+```
+🎲[14] +3FOR +2(Prof) = 19 vs CA 15 → 8 danni
+```
+
+- **D20** + **modificatore stat** + **bonus competenza** (se proficiente nella stat usata)
+- Confrontato con la **CA (Classe Armatura)** del nemico
+- **Critico (20 naturale)**: danno raddoppiato
+- **Fallimento automatico (1 naturale)**: manca sempre
+
+### Effetti di stato
+
+| Effetto | Icona | Effetto |
+|---------|-------|---------|
+| Avvelenato | ☠️ | −1d4 HP a fine turno |
+| Stordito | 💫 | Salta un turno |
+| Accecato | 🕶️ | −4 ai tiri per colpire |
+| Rigenerazione | 🌿 | +1d6 HP a inizio turno |
+| Posizione Difensiva | 🛡️ | +3 CA |
+| Scudo Arcano | ✨ | Dimezza il prossimo danno subìto |
+
+### Nemici (8 totali, 3 tier)
+
+| Tier | Nemici |
+|------|--------|
+| 1 | Ratto Gigante, Goblin Ladro, Guardia Corrotta |
+| 2 | Mercenario Oscuro, Cultista del Vuoto, Orco Teppista |
+| 3 | Cavaliere Caduto, Negromante Minore |
+
+### Puntate — cosa si vince e cosa si perde
+
+**In caso di vittoria:**
+- XP e oro (importo variabile per tier)
+- Un oggetto con bonus nelle stat in cui sei competente (filtrato per classe)
+
+**In caso di sconfitta:**
+- −3 Fama
+- −10/20% dell'oro posseduto
+- Perdi un oggetto casuale (inventario o equipaggiamento)
+
+> ⚠️ Il pannello lobby mostra sempre le puntate **prima** di avviare il combattimento.
+
+### Abilità per classe
+
+#### 🗡️ Ladro
+| Lv | Abilità | Tipo |
+|----|---------|------|
+| 3 | Colpo alle Spalle (2d6 DES) | Fisico |
+| 4 | Polvere Accecante | Acceca nemico |
+| 5 | Veleno sulla Lama (1d4 + veleno) | Fisico+Status |
+| 6 | Nebbia Fumogena | Difesa personale |
+| 7 | Doppio Pugnale (3d4 DES) | Fisico |
+| 8 | Ombra Letale (3d6 + acceca) | Fisico+Status |
+| 9 | Colpo Mortale (4d6 DES) | Fisico |
+| 10 | Esecuzione (5d6 DES) | Fisico |
+
+#### ⚔️ Guerriero
+| Lv | Abilità | Tipo |
+|----|---------|------|
+| 3 | Fendente Poderoso (2d8+2, −2 colpire) | Fisico |
+| 4 | Posizione Difensiva | Difesa personale |
+| 5 | Secondo Vento (cura 2d6+COS) | Cura |
+| 6 | Urlo di Guerra | Stordisce nemico |
+| 7 | Tempesta di Lame (3d6+2 FOR) | Fisico |
+| 8 | Colpo Devastante (3d8+3, −3 colpire) | Fisico |
+| 9 | Resistenza Totale | Difesa personale |
+| 10 | Assalto Finale (4d8+4 FOR) | Fisico |
+
+#### 🔮 Mago
+| Lv | Abilità | Tipo |
+|----|---------|------|
+| 3 | Palla di Fuoco (2d6+3 INT, 4 MP) | Magico |
+| 4 | Scudo Arcano (3 MP) | Difesa personale |
+| 5 | Dardo di Ghiaccio (2d4+2 + stordisce, 3 MP) | Magico+Status |
+| 6 | Saetta Arcana (3d6 INT, 5 MP) | Magico |
+| 7 | Drenaggio Arcano (2d6 INT, 2 MP) | Magico (drain) |
+| 8 | Congelamento (2d8+2 + stordisce, 5 MP) | Magico+Status |
+| 9 | Meteora Arcana (4d6+3 INT, 7 MP) | Magico |
+| 10 | Arcano Supremo (5d6+5 INT, 8 MP) | Magico |
+
+#### 🛡️ Paladino
+| Lv | Abilità | Tipo |
+|----|---------|------|
+| 3 | Colpo Sacro (1d8+1d6 divino, 2 MP) | Fisico+Divino |
+| 4 | Imponiti (stordisce, 2 MP) | Utility |
+| 5 | Luce Divina (2d6 CAR + acceca, 3 MP) | Magico+Status |
+| 6 | Guarigione Divina (cura 3d6+SAG, 4 MP) | Cura |
+| 7 | Aura di Protezione (3 MP) | Difesa personale |
+| 8 | Punizione Divina (3d8 FOR, 5 MP) | Magico |
+| 9 | Invocazione Sacra (2d10 CAR, 6 MP) | Magico |
+| 10 | Ira Divina (4d8 FOR, 7 MP) | Magico |
+
+#### 🌿 Druido
+| Lv | Abilità | Tipo |
+|----|---------|------|
+| 3 | Folgore Naturale (2d4+2 SAG, 3 MP) | Magico |
+| 4 | Rigenerazione (2 MP) | Status personale |
+| 5 | Radici Intrecciate (stordisce, 3 MP) | Utility |
+| 6 | Guarigione Naturale (cura 2d6+SAG, 4 MP) | Cura |
+| 7 | Tempesta di Spine (3d4+2 + veleno, 4 MP) | Magico+Status |
+| 8 | Forma Bestiale (2d8 COS, fisico) | Fisico |
+| 9 | Tempesta di Tuoni (4d4+2 SAG, 6 MP) | Magico |
+| 10 | Cataclisma Naturale (3d8+3 SAG, 7 MP) | Magico |
+
+#### ✝️ Chierico
+| Lv | Abilità | Tipo |
+|----|---------|------|
+| 3 | Martello Divino (1d8+2 SAG, 2 MP) | Fisico |
+| 4 | Cura Ferite (cura 2d6+SAG, 3 MP) | Cura |
+| 5 | Luce Sacra (2d6 SAG, 3 MP) | Magico |
+| 6 | Benedizione (2 MP) | Difesa personale |
+| 7 | Parola di Potere (stordisce, 4 MP) | Utility |
+| 8 | Cura Maggiore (cura 4d6+SAG, 6 MP) | Cura |
+| 9 | Martello Sacro (3d8+2 SAG, 5 MP) | Fisico |
+| 10 | Miracolo (4d6+3 CAR, 8 MP) | Magico |
 
 ---
 
