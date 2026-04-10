@@ -1439,8 +1439,8 @@ const UI = {
     const outcomeEl = document.getElementById('wanted-outcome');
     outcomeEl.className = `mission-outcome ${won ? 'outcome-success' : 'outcome-failure'}`;
     outcomeEl.textContent = won
-      ? 'Il cacciatore è a terra. La tua taglia è stata ridotta.'
-      : 'Sei riuscito a fuggire, ma hai perso metà del tuo oro.';
+      ? 'Il cacciatore è a terra. La tua taglia è stata ridotta drasticamente.'
+      : 'Sei riuscito a fuggire, ma hai perso metà del tuo oro. La taglia è comunque diminuita.';
 
     const rewardEl = document.getElementById('wanted-rewards');
     rewardEl.classList.remove('d-none');
@@ -1448,10 +1448,11 @@ const UI = {
       rewardEl.innerHTML =
         `<div class="reward-row"><span class="reward-icon">⭐</span> +${result.xp} PE</div>` +
         `<div class="reward-row"><span class="reward-icon">👁️</span> +${result.fame} fama</div>` +
-        `<div class="reward-row text-warning"><span class="reward-icon">🎯</span> Taglia: ${result.wantedAfter} pt</div>`;
+        `<div class="reward-row text-success"><span class="reward-icon">🎯</span> Taglia −${result.wantedLost} pt → ${result.wantedAfter} pt rimasti</div>`;
     } else {
       rewardEl.innerHTML =
-        `<div class="reward-row text-danger"><span class="reward-icon">💰</span> -${result.goldLost} monete d'oro</div>`;
+        `<div class="reward-row text-danger"><span class="reward-icon">💰</span> -${result.goldLost} monete d'oro</div>` +
+        `<div class="reward-row text-success"><span class="reward-icon">🎯</span> Taglia −${result.wantedLost} pt → ${result.wantedAfter} pt rimasti</div>`;
     }
   },
 

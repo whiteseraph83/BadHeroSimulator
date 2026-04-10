@@ -1360,27 +1360,33 @@ const Game = {
     const fame = 80 + char.level * 12 + Math.floor((char.wanted || 0) / 3);
     char.xp   += xp;
     char.fame += fame;
-    char.wanted = Math.floor((char.wanted || 0) * 0.5);
+    // Vittoria: taglia ridotta del 75% (rimane solo il 25%)
+    const wantedBefore = char.wanted || 0;
+    char.wanted = Math.floor(wantedBefore * 0.25);
+    const wantedLost = wantedBefore - char.wanted;
     this.state.wantedMissionCompleted = true;
-    const logEntry = { day: char.day, text: 'Cacciatore di taglie sconfitto! Taglia ridotta.', type: 'success' };
+    const logEntry = { day: char.day, text: `Cacciatore di taglie sconfitto! Taglia −${wantedLost} (da ${wantedBefore} a ${char.wanted}).`, type: 'success' };
     char.log.unshift(logEntry);
     if (char.log.length > 500) char.log.pop();
     const completedChallenges = this.checkChallenges('passive');
     this.save();
-    return { xp, fame, wantedAfter: char.wanted, completedChallenges };
+    return { xp, fame, wantedAfter: char.wanted, wantedLost, completedChallenges };
   },
 
   applyWantedLoss() {
     const char = this.state.character;
     const goldLost = Math.floor(char.gold / 2);
     char.gold = char.gold - goldLost;
-    char.wanted = (char.wanted || 0) + 15;
+    // Sconfitta: taglia ridotta del 50% (il cacciatore ha comunque riscosso parte della taglia)
+    const wantedBefore = char.wanted || 0;
+    char.wanted = Math.floor(wantedBefore * 0.50);
+    const wantedLost = wantedBefore - char.wanted;
     this.state.wantedMissionCompleted = true;
-    const logEntry = { day: char.day, text: 'Sconfitto dal cacciatore di taglie! Metà oro perduto.', type: 'fail' };
+    const logEntry = { day: char.day, text: `Sconfitto dal cacciatore di taglie! −${goldLost} mo, taglia −${wantedLost} (da ${wantedBefore} a ${char.wanted}).`, type: 'fail' };
     char.log.unshift(logEntry);
     if (char.log.length > 500) char.log.pop();
     this.save();
-    return { goldLost };
+    return { goldLost, wantedAfter: char.wanted, wantedLost };
   },
 
   /* ─── Arena limit (Guerriero) ───────────────────────────── */
