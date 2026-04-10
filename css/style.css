@@ -2316,6 +2316,38 @@ body {
 .fighter-avatar       { animation: combatBob 3s ease-in-out infinite; }
 .fighter-enemy-icon   { animation: combatBob 3.4s ease-in-out infinite; }
 
+/* ─ Coda nemici ─ */
+.combat-enemy-queue {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 3px;
+  margin-top: 4px;
+  min-height: 22px;
+}
+.eq-item {
+  display: inline-block;
+  font-size: 1.25rem;
+  line-height: 1;
+  border-radius: 4px;
+  padding: 1px 3px;
+  transition: transform .2s;
+}
+.eq-current {
+  background: rgba(201,168,76,.18);
+  border: 1px solid rgba(201,168,76,.5);
+  transform: scale(1.15);
+  filter: drop-shadow(0 0 4px rgba(201,168,76,.5));
+}
+.eq-waiting {
+  opacity: .45;
+  filter: grayscale(60%);
+}
+.eq-dead {
+  opacity: .35;
+  font-size: 1rem;
+}
+
 /* ─ Responsive: su schermi stretti 2 colonne ─ */
 @media (max-width: 480px) {
   .combat-actions-grid { grid-template-columns: repeat(5, 1fr); }

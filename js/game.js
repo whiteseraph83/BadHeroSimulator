@@ -1930,33 +1930,69 @@ const Game = {
     return baseMP + spellMod * char.level;
   },
 
+  _rollEnemyCount(level) {
+    // Pesi per [1,2,3,4,5] nemici in base al livello
+    const tables = [
+      [80, 20,  0,  0,  0],  // lv1
+      [65, 30,  5,  0,  0],  // lv2
+      [50, 35, 12,  3,  0],  // lv3
+      [40, 30, 18,  9,  3],  // lv4
+      [30, 28, 22, 14,  6],  // lv5
+      [22, 25, 25, 18, 10],  // lv6
+      [15, 20, 25, 25, 15],  // lv7
+      [10, 18, 25, 28, 19],  // lv8
+      [ 8, 14, 22, 30, 26],  // lv9
+      [ 5, 10, 20, 30, 35],  // lv10
+    ];
+    const w = tables[Math.min(9, Math.max(0, level - 1))];
+    const r = Math.random() * 100;
+    let cum = 0;
+    for (let i = 0; i < w.length; i++) { cum += w[i]; if (r < cum) return i + 1; }
+    return 1;
+  },
+
+  _makeEnemy(template) {
+    return { ...template, hpMax: template.hp, hp: template.hp,
+             mpMax: template.mp || 0, mp: template.mp || 0, statusEffects: [] };
+  },
+
   startCombat() {
     if (this.combatRemaining() <= 0) return { ok: false, reason: 'Hai già combattuto oggi. Torna domani.' };
-    const char = this.state.character;
+    const char  = this.state.character;
     const maxTier = Math.min(3, Math.ceil(char.level / 3));
-    const pool = ENEMIES.filter(e => e.tier <= maxTier);
-    const template = pool[Math.floor(Math.random() * pool.length)];
-    const enemy = { ...template, hpMax: template.hp, hp: template.hp, mpMax: template.mp, mp: template.mp, statusEffects: [] };
+    const pool  = ENEMIES.filter(e => e.tier <= maxTier);
+
+    // Genera la coda nemici
+    const count = this._rollEnemyCount(char.level);
+    const templates = Array.from({ length: count }, () => pool[Math.floor(Math.random() * pool.length)]);
+    const [firstTemplate, ...restTemplates] = templates;
+    const enemy = this._makeEnemy(firstTemplate);
+    const enemyQueue = restTemplates.map(t => this._makeEnemy(t));
 
     const playerDexMod = this.modifier(this.effectiveStat('dex'));
     const playerRoll = rollDice('1d20') + playerDexMod;
-    const enemyRoll  = rollDice('1d20') + this.modifier(template.stats.dex);
+    const enemyRoll  = rollDice('1d20') + this.modifier(firstTemplate.stats.dex);
     const playerGoesFirst = playerRoll >= enemyRoll;
 
     const hpMax = this.calcPlayerHPMax();
     const mpMax = this.calcPlayerMPMax();
 
+    const countLabel = count > 1 ? ` (${count} nemici in arrivo!)` : '';
     this.state.combat = {
       active: true,
       phase: playerGoesFirst ? 'player_choice' : 'enemy_turn',
       turn: 1,
       playerGoesFirst,
       enemy,
+      enemyQueue,
+      totalEnemies: count,
+      defeatedEnemies: [],
+      accumulatedRewards: { xp: 0, gold: 0, fame: 0, topTier: 0 },
       playerHP: hpMax, playerHPMax: hpMax,
       playerMP: mpMax, playerMPMax: mpMax,
       playerStatusEffects: [],
       skillCooldowns: {},
-      log: [{ turn: 0, text: `Iniziativa: tu ${playerRoll} vs ${enemy.name} ${enemyRoll}. ${playerGoesFirst ? 'Vai per primo!' : 'Il nemico attacca per primo!'}`, type: 'info' }],
+      log: [{ turn: 0, text: `Iniziativa: tu ${playerRoll} vs ${enemy.name} ${enemyRoll}. ${playerGoesFirst ? 'Vai per primo!' : 'Il nemico attacca per primo!'}${countLabel}`, type: 'info' }],
       outcome: null,
       rewards: null
     };
@@ -2174,7 +2210,7 @@ const Game = {
       c.phase = 'enemy_turn';
     }
     this.save();
-    return { ok: true, hit, critical, enemyTurnPending: !ended };
+    return { ok: true, hit, critical, enemyTurnPending: !ended && ended !== 'next', nextEnemy: ended === 'next' };
   },
 
   runEnemyTurn() {
@@ -2322,15 +2358,50 @@ const Game = {
     return opts[Math.floor(Math.random() * opts.length)];
   },
 
+  _accumulateEnemyRewards() {
+    const c    = this.state.combat;
+    const char = this.state.character;
+    const enemy = c.enemy;
+    const abilities = this.getEquipmentAbilities();
+    const levelFactor = Math.max(0.2, 1 - (char.level - enemy.tier * 2) * 0.1);
+    const xp  = Math.round(enemy.xpReward * levelFactor * (1 + (abilities.xpBonus || 0)));
+    const goldMin = enemy.goldReward?.min || 5;
+    const goldMax = enemy.goldReward?.max || 15;
+    const gold = Math.round((goldMin + Math.floor(Math.random() * (goldMax - goldMin + 1))) * (1 + (abilities.goldBonus || 0)));
+    const fame = enemy.fameReward || 0;
+    if (!c.accumulatedRewards) c.accumulatedRewards = { xp: 0, gold: 0, fame: 0, topTier: 0 };
+    c.accumulatedRewards.xp   += xp;
+    c.accumulatedRewards.gold += gold;
+    c.accumulatedRewards.fame += fame;
+    c.accumulatedRewards.topTier = Math.max(c.accumulatedRewards.topTier, enemy.tier);
+    this._addLog(`${enemy.name} sconfitto! +${xp} PE, +${gold} mo, +${fame} fama`, 'hit');
+  },
+
   _checkCombatEnd() {
     const c = this.state.combat;
     if (!c || c.outcome) return true;
+
     if (c.enemy.hp <= 0) {
+      // Accumula ricompense del nemico appena sconfitto
+      this._accumulateEnemyRewards();
+      if (!c.defeatedEnemies) c.defeatedEnemies = [];
+      c.defeatedEnemies.push({ icon: c.enemy.icon, name: c.enemy.name });
+
+      if (c.enemyQueue && c.enemyQueue.length > 0) {
+        // Prossimo nemico in coda
+        const next = c.enemyQueue.shift();
+        this._addLog(`Avanza ${next.name}!`, 'info');
+        c.enemy = next;
+        c.phase = 'player_choice';
+        return 'next'; // truthy ma non true — segnala "prossimo nemico caricato"
+      }
+      // Tutti i nemici sconfitti → vittoria
       c.outcome = 'victory';
       c.phase = 'end';
       this._applyCombatVictory();
       return true;
     }
+
     if (c.playerHP <= 0) {
       c.outcome = 'defeat';
       c.phase = 'end';
@@ -2359,28 +2430,22 @@ const Game = {
   },
 
   _applyCombatVictory() {
-    const c = this.state.combat;
+    const c    = this.state.combat;
     const char = this.state.character;
-    const enemy = c.enemy;
-    const levelFactor = Math.max(0.2, 1 - (char.level - enemy.tier * 2) * 0.1);
-    const abilities = this.getEquipmentAbilities();
-    const xp   = Math.round(enemy.xpReward * levelFactor * (1 + (abilities.xpBonus || 0)));
-    const goldMin = enemy.goldReward?.min || 5;
-    const goldMax = enemy.goldReward?.max || 15;
-    const gold = Math.round((goldMin + Math.floor(Math.random() * (goldMax - goldMin + 1))) * (1 + (abilities.goldBonus || 0)));
-    const fame = enemy.fameReward || 0;
-    char.xp   += xp;
-    char.gold += gold;
-    char.fame += fame;
-    // Oggetto garantito con stat delle competenze del personaggio
-    const droppedItem = this._selectVictoryItem(enemy.tier);
+    const acc  = c.accumulatedRewards || { xp: 0, gold: 0, fame: 0, topTier: 1 };
+    char.xp   += acc.xp;
+    char.gold += acc.gold;
+    char.fame += acc.fame;
+    // Oggetto garantito con stat delle competenze del personaggio (tier massimo incontrato)
+    const droppedItem = this._selectVictoryItem(acc.topTier || 1);
     if (droppedItem) char.inventory.push(droppedItem.id);
-    c.rewards = { xp, gold, fame, droppedItem };
-    const completedChallenges = this.checkChallenges('combat_victory', { tier: enemy.tier });
+    c.rewards = { xp: acc.xp, gold: acc.gold, fame: acc.fame, droppedItem };
+    const completedChallenges = this.checkChallenges('combat_victory', { tier: acc.topTier || 1 });
     const levelUpResult = this.checkLevelUp();
     if (levelUpResult) this.state._lastLevelUp = levelUpResult;
     const itemNote = droppedItem ? `, ottieni ${droppedItem.name}` : '';
-    this._addLog(`Vittoria! +${xp} PE, +${gold} mo, +${fame} fama${itemNote}.`, 'info');
+    const total = c.totalEnemies || 1;
+    this._addLog(`Vittoria! Totale: +${acc.xp} PE, +${acc.gold} mo, +${acc.fame} fama${itemNote}.`, 'info');
     return { completedChallenges, levelUpResult };
   },
 

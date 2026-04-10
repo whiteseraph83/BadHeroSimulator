@@ -1050,6 +1050,10 @@ const App = {
       if (c.outcome) {
         UI.showCombatResult(c.outcome, c.rewards);
         UI.refresh();
+      } else if (result.nextEnemy) {
+        // Nemico sconfitto, breve pausa poi mostra il prossimo
+        UI.renderCombatScreen(c);
+        setTimeout(() => { UI.renderCombatScreen(Game.state.combat); }, 700);
       } else if (result.enemyTurnPending) {
         // Blocca i bottoni durante il turno nemico
         document.querySelectorAll('#combat-actions button').forEach(b => b.disabled = true);

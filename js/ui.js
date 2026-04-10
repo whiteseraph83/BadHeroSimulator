@@ -1925,9 +1925,12 @@ const UI = {
     document.getElementById('combat-result').classList.add('d-none');
     document.getElementById('combat-screen').classList.remove('d-none');
 
-    // Turn badge
+    // Turn badge con contatore nemici
     const badge = document.getElementById('combat-turn-badge');
-    if (badge) badge.textContent = `Turno ${combat.turn}`;
+    const total = combat.totalEnemies || 1;
+    const defeated = (combat.defeatedEnemies || []).length;
+    const enemyIdx = defeated + 1;
+    if (badge) badge.textContent = total > 1 ? `Turno ${combat.turn}  ·  Nemico ${enemyIdx}/${total}` : `Turno ${combat.turn}`;
 
     // Player sprite
     const cls = Game.getClasse();
@@ -1958,6 +1961,25 @@ const UI = {
     eHpBar.style.width = `${enemyPct}%`;
     eHpBar.className = `combat-hp-bar ${enemyPct <= 25 ? 'danger' : enemyPct <= 50 ? 'warning' : ''}`;
     document.getElementById('combat-enemy-status-pills').innerHTML = this._renderStatusPills(combat.enemy.statusEffects);
+
+    // Coda nemici
+    const queueEl = document.getElementById('combat-enemy-queue');
+    if (queueEl) {
+      const defeated = combat.defeatedEnemies || [];
+      const queued   = combat.enemyQueue      || [];
+      const parts = [];
+      // Nemici già sconfitti (☠️ con icona)
+      for (const d of defeated) {
+        parts.push(`<span class="eq-item eq-dead" title="${d.name}">☠️</span>`);
+      }
+      // Nemico corrente (evidenziato)
+      parts.push(`<span class="eq-item eq-current" title="${combat.enemy.name} (in corso)">${combat.enemy.icon}</span>`);
+      // Nemici in attesa
+      for (const q of queued) {
+        parts.push(`<span class="eq-item eq-waiting" title="${q.name}">${q.icon}</span>`);
+      }
+      queueEl.innerHTML = parts.length > 1 ? parts.join('') : '';
+    }
 
     // Log
     this.renderCombatLog(combat.log);
