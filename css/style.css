@@ -2275,6 +2275,14 @@ body {
   color: #7a6a8a;
   opacity: .55;
 }
+.combat-action-btn.on-cooldown {
+  background: rgba(20,15,35,.85);
+  border-color: rgba(80,60,120,.4);
+  color: #8a7a9a;
+  opacity: .65;
+}
+.cd-counter { color: #c97070; font-weight: 600; }
+.synergy-hint { color: #7ab8a0; font-size: .62rem; line-height: 1.2; opacity: .85; }
 
 /* ─ Status pills ─ */
 .combat-status-pill {

@@ -1910,7 +1910,7 @@ const Game = {
   /* ─── COMBATTIMENTO A TURNI ────────────────────────────── */
 
   combatRemaining() {
-    return Math.max(0, 2 - (this.state.combatUsed || 0));
+    return Math.max(0, 1 - (this.state.combatUsed || 0));
   },
 
   calcPlayerHPMax() {
@@ -1931,7 +1931,7 @@ const Game = {
   },
 
   startCombat() {
-    if (this.combatRemaining() <= 0) return { ok: false, reason: 'Hai già combattuto 2 volte oggi.' };
+    if (this.combatRemaining() <= 0) return { ok: false, reason: 'Hai già combattuto oggi. Torna domani.' };
     const char = this.state.character;
     const maxTier = Math.min(3, Math.ceil(char.level / 3));
     const pool = ENEMIES.filter(e => e.tier <= maxTier);
@@ -1955,6 +1955,7 @@ const Game = {
       playerHP: hpMax, playerHPMax: hpMax,
       playerMP: mpMax, playerMPMax: mpMax,
       playerStatusEffects: [],
+      skillCooldowns: {},
       log: [{ turn: 0, text: `Iniziativa: tu ${playerRoll} vs ${enemy.name} ${enemyRoll}. ${playerGoesFirst ? 'Vai per primo!' : 'Il nemico attacca per primo!'}`, type: 'info' }],
       outcome: null,
       rewards: null
@@ -2057,10 +2058,28 @@ const Game = {
     const charLevel = this.state.character.level || 1;
     if ((skill.unlockLevel || 1) > charLevel) return { ok: false, reason: `Sblocchi questa abilità al livello ${skill.unlockLevel}.` };
 
+    // Controlla cooldown
+    if (!c.skillCooldowns) c.skillCooldowns = {};
+    const cdRemaining = c.skillCooldowns[skill.id] || 0;
+    if (cdRemaining > 0) return { ok: false, reason: `${skill.name} in recupero: ancora ${cdRemaining} turno/i.` };
+
     // Controlla MP
     if ((skill.mpCost || 0) > c.playerMP) return { ok: false, reason: 'MP insufficienti.' };
 
     c.playerMP -= (skill.mpCost || 0);
+
+    // Imposta cooldown dell'abilità usata
+    if ((skill.cooldown || 0) > 0) {
+      c.skillCooldowns[skill.id] = skill.cooldown;
+    }
+    // Sinergia: se questa abilità è la synergySkill di un'altra, riduci il suo cooldown di 1
+    const _clsId = this.getClasse().id;
+    for (const s of COMBAT_SKILLS) {
+      if (s.synergySkill === skill.id && (c.skillCooldowns[s.id] || 0) > 0) {
+        const isAvail = s.availableFor === 'all' || (Array.isArray(s.availableFor) && s.availableFor.includes(_clsId));
+        if (isAvail) c.skillCooldowns[s.id] = Math.max(0, c.skillCooldowns[s.id] - 1);
+      }
+    }
 
     let actionLog = '';
 
@@ -2238,6 +2257,12 @@ const Game = {
       // 5. Decrement durations
       c.enemy.statusEffects = c.enemy.statusEffects.map(s => ({ ...s, duration: s.duration - 1 })).filter(s => s.duration > 0);
       c.playerStatusEffects = c.playerStatusEffects.map(s => ({ ...s, duration: s.duration - 1 })).filter(s => s.duration > 0);
+      // Decrementa cooldown abilità giocatore
+      if (c.skillCooldowns) {
+        for (const id in c.skillCooldowns) {
+          if (c.skillCooldowns[id] > 0) c.skillCooldowns[id]--;
+        }
+      }
       c.turn++;
       if (!this._checkCombatEnd()) {
         c.phase = 'player_choice';

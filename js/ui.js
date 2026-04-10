@@ -1970,15 +1970,30 @@ const UI = {
       if (s.availableFor === 'all') return true;
       return Array.isArray(s.availableFor) && s.availableFor.includes(cls.id);
     });
+    const skillCooldowns = combat.skillCooldowns || {};
     actionsEl.innerHTML = classSkills.map(s => {
       const locked = (s.unlockLevel || 1) > charLevel;
+      const cdLeft = skillCooldowns[s.id] || 0;
+      const onCooldown = !locked && cdLeft > 0;
       const notEnoughMP = (s.mpCost || 0) > combat.playerMP;
-      const dis = !isPlayerTurn || notEnoughMP || locked ? 'disabled' : '';
-      const lockClass = locked ? ' locked' : '';
+      const dis = !isPlayerTurn || notEnoughMP || locked || onCooldown ? 'disabled' : '';
+
+      const lockClass = locked ? ' locked' : onCooldown ? ' on-cooldown' : '';
       const mpLabel = s.mpCost > 0 ? `<br><small style="opacity:.55">${s.mpCost} MP</small>` : '';
-      const lockLabel = locked ? `<br><small style="opacity:.6">Lv.${s.unlockLevel}</small>` : '';
-      const lockIcon = locked ? '🔒 ' : '';
-      return `<button class="combat-action-btn${lockClass}" data-skill="${s.id}" ${dis}>${lockIcon}${s.icon}<br><span style="font-size:.72rem">${s.name}</span>${mpLabel}${lockLabel}</button>`;
+      const lockLabel  = locked     ? `<br><small style="opacity:.6">Lv.${s.unlockLevel}</small>` : '';
+      const cdLabel    = onCooldown ? `<br><small class="cd-counter">🕐 ${cdLeft}</small>` : '';
+      const lockIcon   = locked     ? '🔒 ' : '';
+
+      // Sinergia: mostra solo se sbloccata e non è la stessa skill
+      let synergyHtml = '';
+      if (!locked && s.synergySkill) {
+        const synDef = COMBAT_SKILLS.find(x => x.id === s.synergySkill);
+        if (synDef && (synDef.unlockLevel || 1) <= charLevel) {
+          synergyHtml = `<br><small class="synergy-hint">−1 CD con ${synDef.name}</small>`;
+        }
+      }
+
+      return `<button class="combat-action-btn${lockClass}" data-skill="${s.id}" ${dis}>${lockIcon}${s.icon}<br><span style="font-size:.72rem">${s.name}</span>${mpLabel}${lockLabel}${cdLabel}${synergyHtml}</button>`;
     }).join('');
   },
 
