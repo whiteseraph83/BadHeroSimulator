@@ -666,7 +666,7 @@ const UI = {
             <span class="mission-tag tag-gold"><i class="bi bi-coin"></i> ${m.rewards.goldMin}-${m.rewards.goldMax} mo</span>
             <span class="mission-tag tag-fame"><i class="bi bi-eye"></i> +${m.rewards.fameXp} fama</span>
             ${m.rewards.itemChance > 0 ? `<span class="mission-tag tag-item"><i class="bi bi-gem"></i> oggetto possibile</span>` : ''}
-            <span class="mission-tag tag-dc">CD ${m.approaches.map(a => a.dc).join('/')}</span>
+            <span class="mission-tag tag-dc"><i class="bi bi-dice-6"></i> ${(() => { const STAT_ABBR = { str:'FOR', dex:'DES', con:'COS', int:'INT', wis:'SAG', cha:'CAR' }; const stats = [...new Set(m.approaches.map(a => STAT_ABBR[a.stat] || a.stat.toUpperCase()))]; const dcs = m.approaches.map(a => a.dc); return stats.join('/') + ' CD ' + dcs.join('/'); })()}</span>
           </div>
           ${done
             ? '<div class="text-muted small text-center">Completata</div>'
@@ -1472,7 +1472,6 @@ const UI = {
       if (tmpl.reward.xp)   rwdParts.push(`<span class="challenge-rwd"><i class="bi bi-star-fill text-warning"></i> +${tmpl.reward.xp} PE</span>`);
       if (tmpl.reward.gold) rwdParts.push(`<span class="challenge-rwd"><i class="bi bi-coin text-warning"></i> +${tmpl.reward.gold} mo</span>`);
       if (tmpl.reward.fame) rwdParts.push(`<span class="challenge-rwd"><i class="bi bi-eye text-info"></i> +${tmpl.reward.fame} fama</span>`);
-
       return `<div class="challenge-card ${dc.completed ? 'completed' : ''}">
         <div class="d-flex align-items-start gap-2">
           <span class="challenge-icon">${tmpl.icon}</span>

@@ -876,6 +876,7 @@ body {
 .challenge-desc { font-size: 0.92rem; color: #d4c5a0; }
 .challenge-rewards { display: flex; flex-wrap: wrap; gap: 8px; }
 .challenge-rwd { font-size: 0.78rem; color: #aaa; }
+.challenge-stat-badge { font-size: 0.72rem; background: rgba(120,80,200,.25); color: #c9a8ff; border: 1px solid rgba(120,80,200,.4); padding: 2px 7px; border-radius: 4px; }
 .btn-xs { padding: 2px 7px; font-size: 0.75rem; line-height: 1.4; }
 
 /* ── Modal confronto ── */

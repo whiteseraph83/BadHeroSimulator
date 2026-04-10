@@ -45,7 +45,7 @@ const Game = {
           if (this.state.stableUsed === undefined)  this.state.stableUsed = 0;
           if (this.state.rescueUsed === undefined)  this.state.rescueUsed = 0;
           if (this.state.combatUsed === undefined)  this.state.combatUsed = 0;
-          if (this.state.goldXPOffer === undefined)  this.generateGoldXPOffer();
+          if (this.state.goldXPOffer === undefined) { this.generateGoldXPOffer(); this.save(); }
           if (this.state.combat === undefined)      this.state.combat = null;
           if (this.state.marketStealBanned === undefined) this.state.marketStealBanned = false;
           if (this.state.character.equipment.shield === undefined) this.state.character.equipment.shield = null;
@@ -109,6 +109,7 @@ const Game = {
       rescueUsed: 0,
       combatUsed: 0,
       combat: null,
+      goldXPOffer: undefined,
       gameOver: false
     };
     this.generateDailyMissions();
@@ -1289,6 +1290,8 @@ const Game = {
 
   acceptGoldXPOffer() {
     const char  = this.state.character;
+    // Defensive: regenerate if somehow missing but player has gold
+    if (!this.state.goldXPOffer && (char.gold || 0) >= 1) this.generateGoldXPOffer();
     const offer = this.state.goldXPOffer;
     if (!offer || offer.used)             return { ok: false, reason: 'Offerta non disponibile.' };
     if (char.gold < offer.goldCost)       return { ok: false, reason: 'Oro insufficiente.' };
@@ -2016,7 +2019,17 @@ const Game = {
       playerHP: hpMax, playerHPMax: hpMax,
       playerMP: mpMax, playerMPMax: mpMax,
       playerStatusEffects: [],
-      skillCooldowns: {},
+      skillCooldowns: (() => {
+        const cd = {};
+        const clsId = this.getClasse().id;
+        const charLevel = this.state.character.level;
+        for (const s of COMBAT_SKILLS) {
+          if (!s.cooldown) continue;
+          const avail = s.availableFor === 'all' || (Array.isArray(s.availableFor) && s.availableFor.includes(clsId));
+          if (avail && (s.unlockLevel || 1) <= charLevel) cd[s.id] = s.cooldown;
+        }
+        return cd;
+      })(),
       log: [{ turn: 0, text: `Iniziativa: tu ${playerRoll} vs ${enemy.name} ${enemyRoll}. ${playerGoesFirst ? 'Vai per primo!' : 'Il nemico attacca per primo!'}${countLabel}`, type: 'info' }],
       outcome: null,
       rewards: null
@@ -2260,7 +2273,7 @@ const Game = {
       if (action.action === 'attack' || (action.action === 'skill' && ENEMY_SKILLS[action.skill]?.type === 'offensive')) {
         const eSkill = action.action === 'skill' ? ENEMY_SKILLS[action.skill] : null;
         const hitStat = eSkill?.hitStat || 'str';
-        const dice = eSkill?.damageDice || '1d6';
+        const dice = eSkill?.damageDice || c.enemy.damageDice || '1d6';
         const dmgStat = eSkill?.stat || 'str';
         const hitPenalty = eSkill?.hitPenalty || 0;
 
