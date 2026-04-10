@@ -1283,8 +1283,12 @@ const Game = {
   generateGoldXPOffer() {
     const gold = this.state.character.gold || 0;
     if (gold < 1) { this.state.goldXPOffer = null; return; }
-    // goldCost sempre <= oro attuale (1..gold)
-    const goldCost = 1 + Math.floor(Math.random() * gold);
+    // 70% chance: 10–30% of gold; 30% chance: 30–50% of gold (rarer)
+    const pctRoll = Math.random();
+    const pct = pctRoll < 0.70
+      ? 0.10 + Math.random() * 0.20   // 10%–30%
+      : 0.30 + Math.random() * 0.20;  // 30%–50%
+    const goldCost = Math.max(1, Math.round(gold * pct));
     // ×3 comune (55%), ×4 raro (30%), ×5 rarissimo (15%)
     const r = Math.random();
     const multiplier = r < 0.55 ? 3 : r < 0.85 ? 4 : 5;
@@ -1989,7 +1993,15 @@ const Game = {
   },
 
   _makeEnemy(template) {
-    return { ...template, hpMax: template.hp, hp: template.hp,
+    const level = (this.state.character || {}).level || 1;
+    // Scale factor: ~0.70 at lv1, 1.0 at lv5, ~1.30 at lv10 (capped)
+    const scale = Math.min(1.30, 0.70 + (level - 1) * 0.075);
+    const scaledHP = Math.max(template.hp, Math.round(template.hp * scale));
+    // Scale offensive stats (STR and INT) to adjust damage output per level
+    const scaledStr = Math.round((template.stats.str || 10) * scale);
+    const scaledInt = Math.round((template.stats.int || 10) * scale);
+    const scaledStats = { ...template.stats, str: scaledStr, int: scaledInt };
+    return { ...template, stats: scaledStats, hpMax: scaledHP, hp: scaledHP,
              mpMax: template.mp || 0, mp: template.mp || 0, statusEffects: [] };
   },
 
@@ -2248,6 +2260,11 @@ const Game = {
         const effect = STATUS_EFFECTS[skill.statusApply];
         this._addLog(`↳ ${c.enemy.name} subisce ${effect?.name || skill.statusApply}!`, 'status');
       }
+      if (skill.drain) {
+        const drainAmt = Math.floor(dmg / 2);
+        c.playerHP = Math.min(c.playerHPMax, c.playerHP + drainAmt);
+        this._addLog(`↳ Drenaggio: recuperi ${drainAmt} HP!`, 'status');
+      }
     } else {
       this._addLog(`${skill.name}: ${rollDesc} → Mancato!`, 'miss');
     }
@@ -2289,7 +2306,10 @@ const Game = {
         const roll = rollDice('1d20');
         const mod = this.modifier(c.enemy.stats[hitStat] || 10);
         const total = roll + mod + hitPenalty;
-        const playerCA = 10 + this.modifier(this.effectiveStat('dex'));
+        const caBonus = c.playerStatusEffects
+          .filter(s => s.duration > 0)
+          .reduce((sum, s) => sum + (STATUS_EFFECTS[s.id]?.caBonus || 0), 0);
+        const playerCA = 10 + this.modifier(this.effectiveStat('dex')) + caBonus;
         const hit = roll === 20 || (roll !== 1 && total >= playerCA);
         const critical = roll === 20;
         const label = eSkill ? eSkill.name : 'Attacco';
