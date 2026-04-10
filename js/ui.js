@@ -1964,15 +1964,20 @@ const UI = {
     // Action buttons
     const actionsEl = document.getElementById('combat-actions');
     const isPlayerTurn = combat.phase === 'player_choice' && !combat.outcome;
-    const availableSkills = COMBAT_SKILLS.filter(s => {
+    const charLevel = Game.state.character.level || 1;
+    const classSkills = COMBAT_SKILLS.filter(s => {
       if (s.availableFor === 'all') return true;
       return Array.isArray(s.availableFor) && s.availableFor.includes(cls.id);
     });
-    actionsEl.innerHTML = availableSkills.map(s => {
-      const mpLabel = s.mpCost > 0 ? `<br><small style="opacity:.55">${s.mpCost} MP</small>` : '';
+    actionsEl.innerHTML = classSkills.map(s => {
+      const locked = (s.unlockLevel || 1) > charLevel;
       const notEnoughMP = (s.mpCost || 0) > combat.playerMP;
-      const dis = !isPlayerTurn || notEnoughMP ? 'disabled' : '';
-      return `<button class="combat-action-btn" data-skill="${s.id}" ${dis}>${s.icon}<br><span style="font-size:.72rem">${s.name}</span>${mpLabel}</button>`;
+      const dis = !isPlayerTurn || notEnoughMP || locked ? 'disabled' : '';
+      const lockClass = locked ? ' locked' : '';
+      const mpLabel = s.mpCost > 0 ? `<br><small style="opacity:.55">${s.mpCost} MP</small>` : '';
+      const lockLabel = locked ? `<br><small style="opacity:.6">Lv.${s.unlockLevel}</small>` : '';
+      const lockIcon = locked ? '🔒 ' : '';
+      return `<button class="combat-action-btn${lockClass}" data-skill="${s.id}" ${dis}>${lockIcon}${s.icon}<br><span style="font-size:.72rem">${s.name}</span>${mpLabel}${lockLabel}</button>`;
     }).join('');
   },
 

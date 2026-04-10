@@ -2053,6 +2053,10 @@ const Game = {
     const skill = COMBAT_SKILLS.find(s => s.id === skillId);
     if (!skill) return { ok: false, reason: 'Azione sconosciuta.' };
 
+    // Controlla livello sblocco
+    const charLevel = this.state.character.level || 1;
+    if ((skill.unlockLevel || 1) > charLevel) return { ok: false, reason: `Sblocchi questa abilità al livello ${skill.unlockLevel}.` };
+
     // Controlla MP
     if ((skill.mpCost || 0) > c.playerMP) return { ok: false, reason: 'MP insufficienti.' };
 
@@ -2081,7 +2085,7 @@ const Game = {
       }
     }
 
-    if (skill.id === 'cura_ferite') {
+    if (skill.healSelf) {
       const abbr = { str:'FOR', dex:'DES', con:'COS', int:'INT', wis:'SAG', cha:'CAR' };
       const statKey  = skill.stat;
       const statMod  = this.modifier(this.effectiveStat(statKey));

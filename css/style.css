@@ -2243,7 +2243,7 @@ body {
 /* ─ Griglia azioni ─ */
 .combat-actions-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   gap: 6px;
 }
 
@@ -2268,6 +2268,12 @@ body {
 }
 .combat-action-btn:active:not(:disabled) { transform: translateY(0); }
 .combat-action-btn:disabled { opacity: .38; cursor: not-allowed; }
+.combat-action-btn.locked {
+  background: rgba(30,20,40,.7);
+  border-color: rgba(120,100,140,.3);
+  color: #7a6a8a;
+  opacity: .55;
+}
 
 /* ─ Status pills ─ */
 .combat-status-pill {
@@ -2303,7 +2309,7 @@ body {
 
 /* ─ Responsive: su schermi stretti 2 colonne ─ */
 @media (max-width: 480px) {
-  .combat-actions-grid { grid-template-columns: repeat(2, 1fr); }
+  .combat-actions-grid { grid-template-columns: repeat(5, 1fr); }
   .fighter-avatar      { width: 72px; height: 72px; }
   .fighter-enemy-icon  { font-size: 3.8rem; }
 }
