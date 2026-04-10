@@ -611,12 +611,46 @@ const UI = {
         : 'badge bg-dark border border-secondary text-light small';
     }
 
+    // Card speciale: Investimento XP
+    const offer       = Game.state.goldXPOffer;
+    const charGold    = Game.state.character.gold || 0;
+    let investHtml = '';
+    if (!offer) {
+      investHtml = `<div class="col-12"><div class="mission-card mission-invest">
+        <div class="mission-title">💰 Investimento in Conoscenza</div>
+        <div class="mission-desc text-muted small mt-1">Non hai abbastanza oro per investire oggi.</div>
+      </div></div>`;
+    } else if (offer.used) {
+      investHtml = `<div class="col-12"><div class="mission-card mission-invest completed">
+        <div class="mission-title">💰 Investimento in Conoscenza</div>
+        <div class="mission-desc small mt-1">Hai già investito oggi: −${offer.goldCost} mo → +${offer.xpGain} PE (×${offer.multiplier})</div>
+        <div class="text-muted small text-center mt-1">Completato</div>
+      </div></div>`;
+    } else {
+      const canAfford = charGold >= offer.goldCost;
+      investHtml = `<div class="col-12"><div class="mission-card mission-invest">
+        <div class="d-flex justify-content-between align-items-start mb-1">
+          <div class="mission-title">💰 Investimento in Conoscenza</div>
+          <span class="mission-tag tag-xp">×${offer.multiplier}</span>
+        </div>
+        <div class="mission-desc">Spendi <strong>${offer.goldCost} mo</strong> in libri, mentori e contatti per ottenere <strong>${offer.xpGain} PE</strong>.</div>
+        <div class="mission-tags mt-1">
+          <span class="mission-tag tag-gold"><i class="bi bi-coin"></i> −${offer.goldCost} mo</span>
+          <span class="mission-tag tag-xp"><i class="bi bi-star-fill"></i> +${offer.xpGain} PE</span>
+        </div>
+        <button class="btn btn-gold w-100 btn-sm mt-2" id="btn-gold-xp-accept" ${canAfford ? '' : 'disabled'}>
+          ${canAfford ? '<i class="bi bi-mortarboard"></i> Investi' : 'Oro insufficiente'}
+        </button>
+      </div></div>`;
+    }
+
     if (!ids || ids.length === 0) {
-      container.innerHTML = '<div class="col-12 text-center text-muted py-4"><i class="bi bi-hourglass-split fs-3"></i><p class="mt-2">Nessuna missione disponibile.</p></div>';
+      container.innerHTML = investHtml + '<div class="col-12 text-center text-muted py-4"><i class="bi bi-hourglass-split fs-3"></i><p class="mt-2">Nessuna missione disponibile.</p></div>';
+      this._bindInvestBtn();
       return;
     }
 
-    container.innerHTML = ids.map(id => {
+    container.innerHTML = investHtml + ids.map(id => {
       const m    = DB.missions.find(mis => mis.id === id);
       const done = Game.isMissionCompleted(id);
       const blocked = !done && atLimit;
@@ -648,6 +682,19 @@ const UI = {
 
     container.querySelectorAll('.mission-action').forEach(btn => {
       btn.addEventListener('click', () => App.openMissionModal(parseInt(btn.dataset.mission)));
+    });
+    this._bindInvestBtn();
+  },
+
+  _bindInvestBtn() {
+    const btn = document.getElementById('btn-gold-xp-accept');
+    if (!btn) return;
+    btn.addEventListener('click', () => {
+      const result = Game.acceptGoldXPOffer();
+      if (!result.ok) { UI.toast(result.reason, 'danger'); return; }
+      UI.toast(`Investimento: −${result.goldCost} mo → +${result.xpGain} PE!`, 'success');
+      UI.refresh();
+      if (result.levelUpResult) App._triggerLevelUp(result.levelUpResult);
     });
   },
 

@@ -353,6 +353,10 @@ const App = {
 
       UI.refresh();
 
+      // Torna automaticamente al tab missioni
+      const missionsTab = document.querySelector('[data-bs-target="#tab-missions"]');
+      if (missionsTab) bootstrap.Tab.getOrCreateInstance(missionsTab).show();
+
       const taxResult = result.taxResult;
       if (!taxResult.paid) {
         UI.toast(`Impossibile pagare la tassa! -${taxResult.fameLost} fama. Giorno ${Game.state.character.day}.`, 4000);

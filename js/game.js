@@ -45,6 +45,7 @@ const Game = {
           if (this.state.stableUsed === undefined)  this.state.stableUsed = 0;
           if (this.state.rescueUsed === undefined)  this.state.rescueUsed = 0;
           if (this.state.combatUsed === undefined)  this.state.combatUsed = 0;
+          if (this.state.goldXPOffer === undefined)  this.generateGoldXPOffer();
           if (this.state.combat === undefined)      this.state.combat = null;
           if (this.state.marketStealBanned === undefined) this.state.marketStealBanned = false;
           if (this.state.character.equipment.shield === undefined) this.state.character.equipment.shield = null;
@@ -1275,6 +1276,30 @@ const Game = {
 
     this.state.dailyMissions  = selected;
     this.state.completedToday = [];
+    this.generateGoldXPOffer();
+  },
+
+  generateGoldXPOffer() {
+    const gold = this.state.character.gold || 0;
+    if (gold < 1) { this.state.goldXPOffer = null; return; }
+    const goldCost   = 1 + Math.floor(Math.random() * gold);
+    const multiplier = 3 + Math.floor(Math.random() * 4); // 3–6×
+    this.state.goldXPOffer = { goldCost, multiplier, xpGain: goldCost * multiplier, used: false };
+  },
+
+  acceptGoldXPOffer() {
+    const char  = this.state.character;
+    const offer = this.state.goldXPOffer;
+    if (!offer || offer.used)             return { ok: false, reason: 'Offerta non disponibile.' };
+    if (char.gold < offer.goldCost)       return { ok: false, reason: 'Oro insufficiente.' };
+    char.gold -= offer.goldCost;
+    char.xp   += offer.xpGain;
+    offer.used = true;
+    this.addLog(`Investimento: −${offer.goldCost} mo → +${offer.xpGain} PE (×${offer.multiplier}).`, 'gold');
+    const levelUpResult = this.checkLevelUp();
+    if (levelUpResult) this.state._lastLevelUp = levelUpResult;
+    this.save();
+    return { ok: true, goldCost: offer.goldCost, xpGain: offer.xpGain, multiplier: offer.multiplier, levelUpResult };
   },
 
   missionsCompletableToday() {

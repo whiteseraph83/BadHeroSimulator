@@ -325,6 +325,8 @@ body {
 .mission-card:hover::before { background: var(--gold); }
 .mission-card.completed { opacity: 0.45; pointer-events: none; }
 .mission-card.completed::before { background: var(--text-muted); }
+.mission-card.mission-invest::before { background: #c9a84c; }
+.mission-card.mission-invest { border-color: rgba(201,168,76,.35); }
 
 .mission-title {
   font-family: 'Cinzel', serif;
