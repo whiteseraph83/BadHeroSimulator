@@ -598,11 +598,16 @@ const UI = {
       const mb = DB.missions.find(m => m.id === b);
       return (ma?.tier ?? 0) - (mb?.tier ?? 0);
     });
-    const completed = Game.state.completedToday.length;
-    const limit     = Game.missionsCompletableToday();
-    const atLimit   = completed >= limit;
+    // Card speciale: Investimento XP
+    const offer        = Game.state.goldXPOffer;
+    const charGold     = Game.state.character.gold || 0;
+    const investUsed   = !!(offer && offer.used);
+    // L'investimento conta come una missione nel limite giornaliero
+    const completed    = Game.state.completedToday.length + (investUsed ? 1 : 0);
+    const limit        = Game.missionsCompletableToday();
+    const atLimit      = completed >= limit;
 
-    // Aggiorna il counter
+    // Aggiorna il counter (override quello calcolato sopra)
     const counter = document.getElementById('missions-completed-counter');
     if (counter) {
       counter.textContent = `Completate: ${completed} / ${limit}`;
@@ -611,9 +616,6 @@ const UI = {
         : 'badge bg-dark border border-secondary text-light small';
     }
 
-    // Card speciale: Investimento XP
-    const offer       = Game.state.goldXPOffer;
-    const charGold    = Game.state.character.gold || 0;
     let investHtml = '';
     if (!offer) {
       investHtml = `<div class="col-12"><div class="mission-card mission-invest">
@@ -628,6 +630,11 @@ const UI = {
       </div></div>`;
     } else {
       const canAfford = charGold >= offer.goldCost;
+      const blocked   = !offer.used && atLimit;
+      let btnLabel, btnDisabled;
+      if (blocked)        { btnLabel = '<i class="bi bi-lock-fill"></i> Limite giornaliero raggiunto'; btnDisabled = true; }
+      else if (!canAfford){ btnLabel = 'Oro insufficiente'; btnDisabled = true; }
+      else                { btnLabel = '<i class="bi bi-mortarboard"></i> Investi'; btnDisabled = false; }
       investHtml = `<div class="col-12"><div class="mission-card mission-invest">
         <div class="d-flex justify-content-between align-items-start mb-1">
           <div class="mission-title">💰 Investimento in Conoscenza</div>
@@ -638,8 +645,8 @@ const UI = {
           <span class="mission-tag tag-gold"><i class="bi bi-coin"></i> −${offer.goldCost} mo</span>
           <span class="mission-tag tag-xp"><i class="bi bi-star-fill"></i> +${offer.xpGain} PE</span>
         </div>
-        <button class="btn btn-gold w-100 btn-sm mt-2" id="btn-gold-xp-accept" ${canAfford ? '' : 'disabled'}>
-          ${canAfford ? '<i class="bi bi-mortarboard"></i> Investi' : 'Oro insufficiente'}
+        <button class="btn btn-gold w-100 btn-sm mt-2" id="btn-gold-xp-accept" ${btnDisabled ? 'disabled' : ''}>
+          ${btnLabel}
         </button>
       </div></div>`;
     }
@@ -688,14 +695,15 @@ const UI = {
 
   _bindInvestBtn() {
     const btn = document.getElementById('btn-gold-xp-accept');
-    if (!btn) return;
+    if (!btn || btn.disabled) return;
     btn.addEventListener('click', () => {
+      btn.disabled = true;
       const result = Game.acceptGoldXPOffer();
-      if (!result.ok) { UI.toast(result.reason, 'danger'); return; }
+      if (!result.ok) { btn.disabled = false; UI.toast(result.reason, 'danger'); return; }
       UI.toast(`Investimento: −${result.goldCost} mo → +${result.xpGain} PE!`, 'success');
       UI.refresh();
       if (result.levelUpResult) App._triggerLevelUp(result.levelUpResult);
-    });
+    }, { once: true });
   },
 
   /* ─── Mercato ──────────────────────────────────────────── */
