@@ -717,6 +717,7 @@ const UI = {
             <div class="item-slot-label text-muted small">${slotMeta.label}</div>
             <div class="item-stats-row mt-1">${statsHtml}</div>
             ${abilitiesHtml ? `<div class="item-abilities-row mt-1">${abilitiesHtml}</div>` : ''}
+            ${item.consumable && item.desc ? `<div class="item-desc-text mt-1">${item.desc}</div>` : ''}
             ${warningHtml}
             <div class="d-flex justify-content-between align-items-center mt-2 gap-1">
               <span class="item-price"><i class="bi bi-coin"></i> ${entry.buyPrice} mo</span>

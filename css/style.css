@@ -416,6 +416,7 @@ body {
 .item-slot-label { font-size: 0.75rem; }
 .item-stats-row { display: flex; flex-wrap: wrap; gap: 4px; }
 .item-abilities-row { display: flex; flex-wrap: wrap; gap: 4px; }
+.item-desc-text { font-size: .75rem; color: #b0a090; font-style: italic; line-height: 1.35; }
 .item-stat-pill {
   font-size: 0.7rem;
   padding: 1px 6px;
