@@ -1273,8 +1273,8 @@ const App = {
     const player = document.getElementById('wanted-cursor-player');
     const enemy  = document.getElementById('wanted-cursor-enemy');
 
-    const speed1 = 0.25 + Math.random() * 0.35;  // giocatore
-    const speed2 = 0.20 + Math.random() * 0.40;  // nemico (diversa)
+    const speed1 = 0.55 + Math.random() * 0.65;  // giocatore
+    const speed2 = 0.50 + Math.random() * 0.70;  // nemico (diversa)
     const TOUCH  = 0.10;  // 10% della barra = "si toccano"
 
     let pos1 = 0.02, dir1 = 1;   // giocatore: parte da sinistra
