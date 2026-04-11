@@ -1994,18 +1994,18 @@ const Game = {
   },
 
   _rollEnemyCount(level) {
-    // Pesi per [1,2,3,4,5] nemici in base al livello
+    // Pesi per [1,2,3,4,5] nemici in base al livello (spostati verso gruppi più grandi)
     const tables = [
-      [80, 20,  0,  0,  0],  // lv1
-      [65, 30,  5,  0,  0],  // lv2
-      [50, 35, 12,  3,  0],  // lv3
-      [40, 30, 18,  9,  3],  // lv4
-      [30, 28, 22, 14,  6],  // lv5
-      [22, 25, 25, 18, 10],  // lv6
-      [15, 20, 25, 25, 15],  // lv7
-      [10, 18, 25, 28, 19],  // lv8
-      [ 8, 14, 22, 30, 26],  // lv9
-      [ 5, 10, 20, 30, 35],  // lv10
+      [65, 30,  5,  0,  0],  // lv1
+      [50, 35, 12,  3,  0],  // lv2
+      [35, 35, 20,  8,  2],  // lv3
+      [25, 30, 25, 14,  6],  // lv4
+      [18, 25, 28, 20,  9],  // lv5
+      [12, 20, 28, 25, 15],  // lv6
+      [ 8, 15, 27, 28, 22],  // lv7
+      [ 5, 12, 23, 32, 28],  // lv8
+      [ 3,  8, 20, 34, 35],  // lv9
+      [ 2,  5, 16, 33, 44],  // lv10
     ];
     const w = tables[Math.min(9, Math.max(0, level - 1))];
     const r = Math.random() * 100;
@@ -2016,8 +2016,8 @@ const Game = {
 
   _makeEnemy(template) {
     const level = (this.state.character || {}).level || 1;
-    // Scale factor: ~0.70 at lv1, 1.0 at lv5, ~1.30 at lv10 (capped)
-    const scale = Math.min(1.30, 0.70 + (level - 1) * 0.075);
+    // Scale factor: ~0.75 at lv1, 1.0 at lv4, ~1.50 at lv10 (capped)
+    const scale = Math.min(1.50, 0.75 + (level - 1) * 0.083);
     const scaledHP = Math.max(template.hp, Math.round(template.hp * scale));
     // Scale offensive stats (STR and INT) to adjust damage output per level
     const scaledStr = Math.round((template.stats.str || 10) * scale);
@@ -2430,21 +2430,30 @@ const Game = {
     const c = this.state.combat;
     const ai = c.enemy.ai_type;
     const skills = c.enemy.skills || [];
+    const hpPct = c.enemy.hp / c.enemy.hpMax;
+
     if (ai === 'aggressive') {
+      // Usa skill offensiva 65% del tempo se disponibile
       const off = skills.filter(s => ENEMY_SKILLS[s]?.type === 'offensive');
-      if (off.length && Math.random() < 0.4) return { action: 'skill', skill: off[Math.floor(Math.random() * off.length)] };
+      if (off.length && Math.random() < 0.65) return { action: 'skill', skill: off[Math.floor(Math.random() * off.length)] };
       return { action: 'attack' };
     }
     if (ai === 'defensive') {
-      if (c.enemy.hp / c.enemy.hpMax < 0.3) {
+      // Sotto il 50% HP usa skill difensiva/utility se disponibile
+      if (hpPct < 0.50) {
         const def = skills.find(s => ENEMY_SKILLS[s]?.type !== 'offensive');
         if (def) return { action: 'skill', skill: def };
       }
+      // Sopra soglia usa skill offensiva 45% del tempo
+      const off = skills.filter(s => ENEMY_SKILLS[s]?.type === 'offensive');
+      if (off.length && Math.random() < 0.45) return { action: 'skill', skill: off[Math.floor(Math.random() * off.length)] };
       return { action: 'attack' };
     }
-    // random
-    const opts = [{ action: 'attack' }, ...skills.map(s => ({ action: 'skill', skill: s }))];
-    return opts[Math.floor(Math.random() * opts.length)];
+    // random: skill 60% del tempo, attacco 40%
+    if (skills.length && Math.random() < 0.60) {
+      return { action: 'skill', skill: skills[Math.floor(Math.random() * skills.length)] };
+    }
+    return { action: 'attack' };
   },
 
   _accumulateEnemyRewards() {
