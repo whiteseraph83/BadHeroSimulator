@@ -2327,7 +2327,8 @@ const Game = {
 
         const roll = rollDice('1d20');
         const mod = this.modifier(c.enemy.stats[hitStat] || 10);
-        const total = roll + mod + hitPenalty;
+        const baseAttackBonus = c.enemy.attackBonus || 0;
+        const total = roll + mod + hitPenalty + baseAttackBonus;
         const caBonus = c.playerStatusEffects
           .filter(s => s.duration > 0)
           .reduce((sum, s) => sum + (STATUS_EFFECTS[s.id]?.caBonus || 0), 0);
