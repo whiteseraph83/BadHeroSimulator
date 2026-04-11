@@ -1478,6 +1478,7 @@ const UI = {
       return;
     }
 
+    const today = (Game.state.character || {}).day || 1;
     container.innerHTML = daily.map((dc, idx) => {
       const tmpl = DB.challenges.find(c => c.id === dc.challengeId);
       if (!tmpl) return '';
@@ -1486,6 +1487,22 @@ const UI = {
       if (tmpl.reward.xp)   rwdParts.push(`<span class="challenge-rwd"><i class="bi bi-star-fill text-warning"></i> +${tmpl.reward.xp} PE</span>`);
       if (tmpl.reward.gold) rwdParts.push(`<span class="challenge-rwd"><i class="bi bi-coin text-warning"></i> +${tmpl.reward.gold} mo</span>`);
       if (tmpl.reward.fame) rwdParts.push(`<span class="challenge-rwd"><i class="bi bi-eye text-info"></i> +${tmpl.reward.fame} fama</span>`);
+
+      // Badge scadenza
+      let expiryBadge = '';
+      if (!dc.completed && dc.expiresDay) {
+        const daysLeft = dc.expiresDay - today;
+        if (daysLeft <= 0) {
+          expiryBadge = `<span class="badge bg-danger"><i class="bi bi-clock"></i> Scade oggi</span>`;
+        } else if (daysLeft === 1) {
+          expiryBadge = `<span class="badge bg-danger"><i class="bi bi-clock"></i> 1 giorno</span>`;
+        } else if (daysLeft <= 3) {
+          expiryBadge = `<span class="badge bg-warning text-dark"><i class="bi bi-clock"></i> ${daysLeft} giorni</span>`;
+        } else {
+          expiryBadge = `<span class="badge bg-secondary" style="opacity:.7"><i class="bi bi-clock"></i> ${daysLeft} giorni</span>`;
+        }
+      }
+
       return `<div class="challenge-card ${dc.completed ? 'completed' : ''}">
         <div class="d-flex align-items-start gap-2">
           <span class="challenge-icon">${tmpl.icon}</span>
@@ -1497,6 +1514,7 @@ const UI = {
             ${dc.completed
               ? '<span class="badge bg-success"><i class="bi bi-check-lg"></i> Completata</span>'
               : '<span class="badge bg-secondary">In corso</span>'}
+            ${expiryBadge}
             ${canRefresh
               ? `<button class="btn btn-outline-secondary btn-xs btn-challenge-refresh" data-idx="${idx}" title="Sostituisci con una nuova sfida"><i class="bi bi-arrow-repeat"></i></button>`
               : ''}

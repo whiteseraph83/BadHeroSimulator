@@ -26,6 +26,13 @@ const Game = {
           if (this.state.wantedMissionPending === undefined)   this.state.wantedMissionPending = false;
           if (this.state.wantedMissionCompleted === undefined) this.state.wantedMissionCompleted = false;
           if (!this.state.activeBoosts)                        this.state.activeBoosts = [];
+          // Migrazione: assegna expiresDay alle sfide che ne sono prive
+          if (this.state.dailyChallenges) {
+            const day = this.state.character.day || 1;
+            this.state.dailyChallenges.forEach(dc => {
+              if (!dc.expiresDay) dc.expiresDay = day + 3 + Math.floor(Math.random() * 8);
+            });
+          }
           if (this.state.diceRerollsUsed === undefined)        this.state.diceRerollsUsed = 0;
           if (!this.state.character.classe)                    this.state.character.classe = 'ladro';
           if (this.state.studyUsed === undefined)              this.state.studyUsed = 0;
@@ -1704,23 +1711,32 @@ const Game = {
     return true;
   },
 
+  _newChallenge(c) {
+    const day = (this.state.character || {}).day || 1;
+    // Scadenza casuale da 3 a 10 giorni
+    const expiresDay = day + 3 + Math.floor(Math.random() * 8);
+    return { challengeId: c.id, completed: false, expiresDay };
+  },
+
   generateDailyChallenges() {
     const count = 5 + (this.getEquipmentAbilities().challengeBonus || 0);
     const pool  = DB.challenges.filter(c => this._challengeFilter(c));
     const shuffled = [...pool].sort(() => Math.random() - 0.5);
-    this.state.dailyChallenges       = shuffled.slice(0, count).map(c => ({ challengeId: c.id, completed: false }));
+    this.state.dailyChallenges       = shuffled.slice(0, count).map(c => this._newChallenge(c));
     this.state.challengeRefreshUsed  = 0;
   },
 
   refreshDailyChallenges() {
     if (!this.state.dailyChallenges) { this.generateDailyChallenges(); return; }
+    const day    = (this.state.character || {}).day || 1;
     const count  = 5 + (this.getEquipmentAbilities().challengeBonus || 0);
-    const kept   = this.state.dailyChallenges.filter(dc => !dc.completed);
+    // Scarta le completate E le scadute
+    const kept   = this.state.dailyChallenges.filter(dc => !dc.completed && (!dc.expiresDay || dc.expiresDay > day));
     const usedIds = kept.map(dc => dc.challengeId);
     const pool   = DB.challenges.filter(c => !usedIds.includes(c.id) && this._challengeFilter(c));
     const shuffled = [...pool].sort(() => Math.random() - 0.5);
     const toAdd  = Math.max(0, count - kept.length);
-    this.state.dailyChallenges      = [...kept, ...shuffled.slice(0, toAdd).map(c => ({ challengeId: c.id, completed: false }))];
+    this.state.dailyChallenges      = [...kept, ...shuffled.slice(0, toAdd).map(c => this._newChallenge(c))];
     this.state.challengeRefreshUsed = 0;
   },
 
@@ -1737,7 +1753,7 @@ const Game = {
     const pool = DB.challenges.filter(c => !usedIds.includes(c.id) && this._challengeFilter(c));
     if (!pool.length) return { ok: false, reason: 'Nessuna sfida alternativa disponibile.' };
     const newC = pool[Math.floor(Math.random() * pool.length)];
-    this.state.dailyChallenges[index] = { challengeId: newC.id, completed: false };
+    this.state.dailyChallenges[index] = this._newChallenge(newC);
     this.state.challengeRefreshUsed = (this.state.challengeRefreshUsed || 0) + 1;
     this.save();
     return { ok: true };
