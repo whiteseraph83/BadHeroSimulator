@@ -1995,24 +1995,23 @@ const Game = {
   },
 
   _rollEnemyCount(level) {
-    // Pesi per [1,2,3,4,5] nemici in base al livello (spostati verso gruppi più grandi)
+    // lv1-3: sempre 1 nemico
+    if (level <= 3) return 1;
+    // lv4-6: sempre 2 nemici
+    if (level <= 6) return 2;
+    // lv7+: 2-5 nemici con pesi crescenti
+    // Pesi per [2,3,4,5] nemici in base al livello
     const tables = [
-      [65, 30,  5,  0,  0],  // lv1
-      [50, 35, 12,  3,  0],  // lv2
-      [35, 35, 20,  8,  2],  // lv3
-      [25, 30, 25, 14,  6],  // lv4
-      [18, 25, 28, 20,  9],  // lv5
-      [12, 20, 28, 25, 15],  // lv6
-      [ 8, 15, 27, 28, 22],  // lv7
-      [ 5, 12, 23, 32, 28],  // lv8
-      [ 3,  8, 20, 34, 35],  // lv9
-      [ 2,  5, 16, 33, 44],  // lv10
+      [50, 30, 15,  5],  // lv7
+      [40, 32, 18, 10],  // lv8
+      [30, 33, 23, 14],  // lv9
+      [22, 32, 28, 18],  // lv10+
     ];
-    const w = tables[Math.min(9, Math.max(0, level - 1))];
+    const w = tables[Math.min(3, level - 7)];
     const r = Math.random() * 100;
     let cum = 0;
-    for (let i = 0; i < w.length; i++) { cum += w[i]; if (r < cum) return i + 1; }
-    return 1;
+    for (let i = 0; i < w.length; i++) { cum += w[i]; if (r < cum) return i + 2; }
+    return 2;
   },
 
   _makeEnemy(template) {
