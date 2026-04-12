@@ -3518,7 +3518,7 @@ const COMBAT_SKILLS = [
     damageDice: null,  damageBonus: 0, mpCost: 0,
     target: 'self',  availableFor: ['guerriero'], statusApply: 'defense_up', hitPenalty: 0, unlockLevel: 4,
     cooldown: 3, synergySkill: 'fendente_poderoso' },
-  { id: 'secondo_vento',       name: 'Secondo Vento',        icon: '💪',
+  { id: 'secondo_vento',       name: 'Aria Fresca',          icon: '💪',
     type: 'utility',  stat: 'con', hitStat: 'con',
     damageDice: '2d6', damageBonus: 0, mpCost: 0,
     target: 'self',  availableFor: ['guerriero'], healSelf: true, hitPenalty: 0, unlockLevel: 5,
