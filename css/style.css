@@ -2370,9 +2370,19 @@ body {
   font-size: 1rem;
 }
 
-/* ─ Responsive: su schermi stretti 2 colonne ─ */
+/* ─ Responsive mobile: 4 skill per riga, ultima riga centrata ─ */
+@media (max-width: 600px) {
+  .combat-actions-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+  }
+  .combat-actions-grid .skill-wrap {
+    width: calc((100% - 18px) / 4); /* 4 per riga, 3 gap da 6px */
+  }
+}
 @media (max-width: 480px) {
-  .combat-actions-grid { grid-template-columns: repeat(5, 1fr); }
   .fighter-avatar      { width: 72px; height: 72px; }
   .fighter-enemy-icon  { font-size: 3.8rem; }
 }
