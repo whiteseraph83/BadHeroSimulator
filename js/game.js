@@ -1979,18 +1979,19 @@ const Game = {
   calcPlayerHPMax() {
     const char = this.state.character;
     const cls = this.getClasse();
-    const baseHP = { guerriero: 12, paladino: 10, chierico: 9, druido: 8, ladro: 8, mago: 6 }[cls.id] || 8;
+    const baseHP = { guerriero: 12, paladino: 10, chierico: 9, druido: 9, ladro: 9, mago: 8 }[cls.id] || 8;
     const conMod = this.modifier(this.effectiveStat('con'));
     return baseHP + baseHP * (char.level - 1) + conMod * char.level;
   },
 
-  calcPlayerMPMax() {
-    const char = this.state.character;
+  calcPlayerCA() {
+    const c = this.state.combat;
+    const caBonus = c ? c.playerStatusEffects
+      .filter(s => s.duration > 0)
+      .reduce((sum, s) => sum + (s.caBonus ?? STATUS_EFFECTS[s.id]?.caBonus ?? 0), 0) : 0;
     const cls = this.getClasse();
-    const baseMP = { mago: 10, chierico: 8, druido: 7, paladino: 4, ladro: 2, guerriero: 0 }[cls.id] || 0;
-    const spellStatKey = { mago: 'int', chierico: 'wis', druido: 'wis', paladino: 'cha', ladro: 'int', guerriero: 'con' }[cls.id] || 'int';
-    const spellMod = Math.max(0, this.modifier(this.effectiveStat(spellStatKey)));
-    return baseMP + spellMod * char.level;
+    const armorBonus = { guerriero: 5, paladino: 5, chierico: 3, druido: 3, ladro: 2, mago: 0 }[cls.id] ?? 0;
+    return 10 + this.modifier(this.effectiveStat('dex')) + caBonus + armorBonus;
   },
 
   _rollEnemyCount(level) {
@@ -2023,14 +2024,13 @@ const Game = {
     const scaledStr = Math.round((template.stats.str || 10) * scale);
     const scaledInt = Math.round((template.stats.int || 10) * scale);
     const scaledStats = { ...template.stats, str: scaledStr, int: scaledInt };
-    return { ...template, stats: scaledStats, hpMax: scaledHP, hp: scaledHP,
-             mpMax: template.mp || 0, mp: template.mp || 0, statusEffects: [] };
+    return { ...template, stats: scaledStats, hpMax: scaledHP, hp: scaledHP, statusEffects: [] };
   },
 
   startCombat() {
     if (this.combatRemaining() <= 0) return { ok: false, reason: 'Hai già combattuto oggi. Torna domani.' };
     const char  = this.state.character;
-    const maxTier = Math.min(3, Math.ceil(char.level / 3));
+    const maxTier = char.level >= 6 ? 3 : char.level >= 4 ? 2 : 1;
     const pool  = ENEMIES.filter(e => e.tier <= maxTier);
 
     // Genera la coda nemici
@@ -2046,7 +2046,6 @@ const Game = {
     const playerGoesFirst = playerRoll >= enemyRoll;
 
     const hpMax = this.calcPlayerHPMax();
-    const mpMax = this.calcPlayerMPMax();
 
     const countLabel = count > 1 ? ` (${count} nemici in arrivo!)` : '';
     this.state.combat = {
@@ -2060,7 +2059,6 @@ const Game = {
       defeatedEnemies: [],
       accumulatedRewards: { xp: 0, gold: 0, fame: 0, topTier: 0 },
       playerHP: hpMax, playerHPMax: hpMax,
-      playerMP: mpMax, playerMPMax: mpMax,
       playerStatusEffects: [],
       skillCooldowns: (() => {
         const cd = {};
@@ -2179,11 +2177,6 @@ const Game = {
     if (!c.skillCooldowns) c.skillCooldowns = {};
     const cdRemaining = c.skillCooldowns[skill.id] || 0;
     if (cdRemaining > 0) return { ok: false, reason: `${skill.name} in recupero: ancora ${cdRemaining} turno/i.` };
-
-    // Controlla MP
-    if ((skill.mpCost || 0) > c.playerMP) return { ok: false, reason: 'MP insufficienti.' };
-
-    c.playerMP -= (skill.mpCost || 0);
 
     // Imposta cooldown dell'abilità usata
     if ((skill.cooldown || 0) > 0) {
@@ -2334,10 +2327,7 @@ const Game = {
         const mod = this.modifier(c.enemy.stats[hitStat] || 10);
         const baseAttackBonus = c.enemy.attackBonus || 0;
         const total = roll + mod + hitPenalty + baseAttackBonus;
-        const caBonus = c.playerStatusEffects
-          .filter(s => s.duration > 0)
-          .reduce((sum, s) => sum + (s.caBonus ?? STATUS_EFFECTS[s.id]?.caBonus ?? 0), 0);
-        const playerCA = 10 + this.modifier(this.effectiveStat('dex')) + caBonus;
+        const playerCA = this.calcPlayerCA();
         const hit = roll === 20 || (roll !== 1 && total >= playerCA);
         const critical = roll === 20;
         const label = eSkill ? eSkill.name : 'Attacco';

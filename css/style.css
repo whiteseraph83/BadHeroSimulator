@@ -2209,7 +2209,17 @@ body {
   flex-shrink: 0;
 }
 .hud-hp { color: #e63946; }
-.hud-mp { color: #4a90d9; }
+.hud-ca { color: #c9a84c; font-size: .72rem; }
+.hud-ca-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 3px;
+}
+.hud-ca-val {
+  font-weight: 700;
+  color: #c9a84c;
+}
 
 .hud-val {
   font-size: .7rem;
@@ -2219,8 +2229,7 @@ body {
   text-align: right;
 }
 
-.combat-hp-bar-wrap,
-.combat-mp-bar-wrap {
+.combat-hp-bar-wrap {
   height: 10px;
   background: rgba(255,255,255,.08);
   border-radius: 5px;
@@ -2235,13 +2244,6 @@ body {
 }
 .combat-hp-bar.warning { background: #f0a500; }
 .combat-hp-bar.danger  { background: #e63946; }
-.combat-mp-bar {
-  height: 100%;
-  border-radius: 5px;
-  background: #4a90d9;
-  transition: width .4s ease;
-}
-
 .hud-pills { min-height: 16px; margin-top: 2px; }
 
 /* ─ Griglia azioni ─ */

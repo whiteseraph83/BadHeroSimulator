@@ -1980,9 +1980,7 @@ const UI = {
   renderCombatLobby() {
     if (!Game.state) return;
     const hpMax = Game.calcPlayerHPMax();
-    const mpMax = Game.calcPlayerMPMax();
     document.getElementById('combat-hp-preview').textContent = hpMax;
-    document.getElementById('combat-mp-preview').textContent = mpMax;
     document.getElementById('combat-uses-left').textContent = Game.combatRemaining();
     document.getElementById('btn-combat-start').disabled = Game.combatRemaining() <= 0 || Game.state.gameOver;
 
@@ -2021,22 +2019,13 @@ const UI = {
 
     // Player HUD
     const playerPct = Math.max(0, Math.round((combat.playerHP / combat.playerHPMax) * 100));
-    const mpPct     = combat.playerMPMax > 0 ? Math.max(0, Math.round((combat.playerMP / combat.playerMPMax) * 100)) : 0;
     document.getElementById('combat-player-name').textContent = Game.state.character.name;
     document.getElementById('combat-player-hp-text').textContent = `${combat.playerHP}/${combat.playerHPMax}`;
-    document.getElementById('combat-player-mp-text').textContent = `${combat.playerMP}/${combat.playerMPMax}`;
     const hpBar = document.getElementById('combat-player-hp-bar');
     hpBar.style.width = `${playerPct}%`;
     hpBar.className = `combat-hp-bar ${playerPct <= 25 ? 'danger' : playerPct <= 50 ? 'warning' : ''}`;
-    document.getElementById('combat-player-mp-bar').style.width = `${mpPct}%`;
-
-    // Nasconde la barra MP se nessuna skill della classe richiede MP
-    const hasMP = COMBAT_SKILLS.some(s => {
-      if ((s.mpCost || 0) === 0) return false;
-      return s.availableFor === 'all' || (Array.isArray(s.availableFor) && s.availableFor.includes(cls.id));
-    });
-    const mpRow = document.getElementById('combat-mp-row');
-    if (mpRow) mpRow.classList.toggle('d-none', !hasMP);
+    const caEl = document.getElementById('combat-player-ca-text');
+    if (caEl) caEl.textContent = Game.calcPlayerCA();
 
     document.getElementById('combat-player-status-pills').innerHTML = this._renderStatusPills(combat.playerStatusEffects);
 
@@ -2084,11 +2073,9 @@ const UI = {
       const locked = (s.unlockLevel || 1) > charLevel;
       const cdLeft = skillCooldowns[s.id] || 0;
       const onCooldown = !locked && cdLeft > 0;
-      const notEnoughMP = (s.mpCost || 0) > combat.playerMP;
-      const dis = !isPlayerTurn || notEnoughMP || locked || onCooldown ? 'disabled' : '';
+      const dis = !isPlayerTurn || locked || onCooldown ? 'disabled' : '';
 
       const lockClass = locked ? ' locked' : onCooldown ? ' on-cooldown' : '';
-      const mpLabel = s.mpCost > 0 ? `<br><small style="opacity:.55">${s.mpCost} MP</small>` : '';
       const lockLabel  = locked     ? `<br><small style="opacity:.6">Lv.${s.unlockLevel}</small>` : '';
       const cdLabel    = onCooldown ? `<br><small class="cd-counter">🕐 ${cdLeft}</small>` : '';
       const lockIcon   = locked     ? '🔒 ' : '';
@@ -2102,7 +2089,7 @@ const UI = {
         }
       }
 
-      return `<div class="skill-wrap"><button class="combat-action-btn${lockClass}" data-skill="${s.id}" ${dis}>${lockIcon}${s.icon}<br><span style="font-size:.72rem">${s.name}</span>${mpLabel}${lockLabel}${cdLabel}${synergyHtml}</button><button class="skill-info-btn" type="button" data-skill-info="${s.id}" tabindex="-1" title="${s.name}">i</button></div>`;
+      return `<div class="skill-wrap"><button class="combat-action-btn${lockClass}" data-skill="${s.id}" ${dis}>${lockIcon}${s.icon}<br><span style="font-size:.72rem">${s.name}</span>${lockLabel}${cdLabel}${synergyHtml}</button><button class="skill-info-btn" type="button" data-skill-info="${s.id}" tabindex="-1" title="${s.name}">i</button></div>`;
     }).join('');
 
     // Inizializza popover Bootstrap su ogni skill-info-btn
