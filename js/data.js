@@ -3376,7 +3376,7 @@ const ENEMIES = [
     xpReward: 90, goldReward: { min:18, max:40 }, fameReward: 7,
     dropTable: [], ai_type: 'aggressive', skills: [] },
 
-  { id: 'guardia_corrotta',  name: 'Guardia Corrotta',    tier: 1, icon: '💂',
+  { id: 'guardia_corrotta',  name: 'Guardia Corrotta',    tier: 1, icon: '🤺',
     hp: 62, mp: 0, stats: { str:16, dex:8, con:15, int:8, wis:8, cha:8 },
     defense: 3, magicResist: 0, accuracy: 0, evasion: 0, attackBonus: 2, damageDice: '1d10',
     xpReward: 80, goldReward: { min:14, max:32 }, fameReward: 7,
