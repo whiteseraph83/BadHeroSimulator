@@ -2147,10 +2147,10 @@ const Game = {
     return (this.state.combat?.enemy?.statusEffects || []).some(s => s.id === id && s.duration > 0);
   },
 
-  _applyStatusToPlayer(statusId, duration) {
+  _applyStatusToPlayer(statusId, duration, extra = {}) {
     const c = this.state.combat;
     c.playerStatusEffects = c.playerStatusEffects.filter(s => s.id !== statusId);
-    c.playerStatusEffects.push({ id: statusId, duration: duration || 2 });
+    c.playerStatusEffects.push({ id: statusId, duration: duration || 2, ...extra });
   },
 
   _applyStatusToEnemy(statusId, duration) {
@@ -2236,7 +2236,12 @@ const Game = {
     }
 
     if (skill.type === 'utility' && skill.target === 'self') {
-      if (skill.statusApply) {
+      if (skill.scalingCA) {
+        const level = this.state.character.level || 1;
+        const caBonus = Math.floor(level / 2) + 2; // lv1=+2, lv5=+4, lv10=+7
+        this._applyStatusToPlayer(skill.id, 3, { caBonus });
+        this._addLog(`${skill.name}: +${caBonus} CA per 3 turni!`, 'status');
+      } else if (skill.statusApply) {
         this._applyStatusToPlayer(skill.statusApply, 2);
         const effect = STATUS_EFFECTS[skill.statusApply];
         this._addLog(`${skill.name}: ottieni ${effect?.name || skill.statusApply}! (nessun tiro)`, 'status');
@@ -2331,7 +2336,7 @@ const Game = {
         const total = roll + mod + hitPenalty + baseAttackBonus;
         const caBonus = c.playerStatusEffects
           .filter(s => s.duration > 0)
-          .reduce((sum, s) => sum + (STATUS_EFFECTS[s.id]?.caBonus || 0), 0);
+          .reduce((sum, s) => sum + (s.caBonus ?? STATUS_EFFECTS[s.id]?.caBonus ?? 0), 0);
         const playerCA = 10 + this.modifier(this.effectiveStat('dex')) + caBonus;
         const hit = roll === 20 || (roll !== 1 && total >= playerCA);
         const critical = roll === 20;

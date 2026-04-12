@@ -2093,8 +2093,70 @@ const UI = {
         }
       }
 
-      return `<button class="combat-action-btn${lockClass}" data-skill="${s.id}" ${dis}>${lockIcon}${s.icon}<br><span style="font-size:.72rem">${s.name}</span>${mpLabel}${lockLabel}${cdLabel}${synergyHtml}</button>`;
+      return `<div class="skill-wrap"><button class="combat-action-btn${lockClass}" data-skill="${s.id}" ${dis}>${lockIcon}${s.icon}<br><span style="font-size:.72rem">${s.name}</span>${mpLabel}${lockLabel}${cdLabel}${synergyHtml}</button><button class="skill-info-btn" type="button" data-skill-info="${s.id}" tabindex="-1" title="${s.name}">i</button></div>`;
     }).join('');
+
+    // Inizializza popover Bootstrap su ogni skill-info-btn
+    actionsEl.querySelectorAll('.skill-info-btn').forEach(btn => {
+      const sid   = btn.dataset.skillInfo;
+      const skill = COMBAT_SKILLS.find(x => x.id === sid);
+      if (!skill) return;
+      new bootstrap.Popover(btn, {
+        html: true,
+        trigger: 'focus',   // si chiude automaticamente cliccando altrove
+        placement: 'top',
+        container: 'body',
+        title: `<b>${skill.icon} ${skill.name}</b>`,
+        content: this._buildSkillInfo(skill),
+      });
+    });
+  },
+
+  _buildSkillInfo(s) {
+    const char  = Game.state.character;
+    const cls   = Game.getClasse();
+    const profs = cls.proficiencies || [];
+    const level = char.level || 1;
+    const abbr  = { str:'FOR', dex:'DES', con:'COS', int:'INT', wis:'SAG', cha:'CAR' };
+    const fmt   = n => n >= 0 ? `+${n}` : `${n}`;
+    const hitA  = s.hitStat || s.stat || 'str';
+    const hitMod = Game.modifier(Game.effectiveStat(hitA));
+    const prof   = profs.includes(hitA) ? (char.proficiency || 2) : 0;
+    const profTxt = prof > 0 ? ` ${fmt(prof)} comp.` : '';
+    const hitTxt  = `1d20 ${fmt(hitMod)}${abbr[hitA]}${profTxt}`;
+    const lines = [];
+
+    if (s.scalingCA) {
+      const ca = Math.floor(level / 2) + 2;
+      lines.push(`Aumenta la tua CA di <b>+${ca}</b> per 3 turni.`);
+      lines.push(`Scala con il livello (lv1=+2, lv5=+4, lv10=+7).`);
+    } else if (s.healSelf) {
+      const hMod = Game.modifier(Game.effectiveStat(s.stat));
+      lines.push(`Cura: <b>${s.damageDice}</b> ${fmt(hMod)}${abbr[s.stat]} → recupero HP.`);
+    } else if (s.type === 'utility' && s.target === 'self') {
+      const eff = STATUS_EFFECTS?.[s.statusApply];
+      lines.push(`Applica <b>${eff?.name || s.statusApply || '—'}</b> su di te.`);
+    } else if (s.type === 'utility' && s.target === 'enemy') {
+      lines.push(`Prova: <b>${hitTxt}</b> vs CA nemica.`);
+      if (s.statusApply) {
+        const eff = STATUS_EFFECTS?.[s.statusApply];
+        lines.push(`Effetto: <b>${eff?.name || s.statusApply}</b> sul nemico.`);
+      }
+    } else {
+      const typeL = s.type === 'magical' ? 'Attacco magico' : 'Attacco fisico';
+      lines.push(`${typeL}: <b>${hitTxt}</b> vs CA nemica.`);
+      if (s.damageDice === 'weapon') lines.push(`Danno: arma ${fmt(Game.modifier(Game.effectiveStat(s.stat)))}${abbr[s.stat]}.`);
+      else if (s.damageDice) {
+        const dMod = Game.modifier(Game.effectiveStat(s.stat));
+        lines.push(`Danno: <b>${s.damageDice}</b> ${fmt(dMod)}${abbr[s.stat]}${s.damageBonus > 0 ? ' +'+s.damageBonus : ''}.`);
+      }
+      if (s.statusApply) { const e = STATUS_EFFECTS?.[s.statusApply]; lines.push(`Se colpisci: ${e?.name || s.statusApply}.`); }
+      if (s.drain) lines.push(`Drenaggio: recuperi metà del danno inflitto.`);
+    }
+    if (s.hitPenalty < 0) lines.push(`Penalità al tiro: ${s.hitPenalty}.`);
+    if (s.mpCost > 0)     lines.push(`Costo: <b>${s.mpCost} MP</b>.`);
+    if (s.cooldown)       lines.push(`Cooldown: <b>${s.cooldown} turni</b>.`);
+    return lines.join('<br>');
   },
 
   renderCombatLog(entries) {
