@@ -2112,6 +2112,19 @@ const UI = {
     });
   },
 
+  _statusEffectDesc(eff) {
+    if (!eff) return '';
+    const parts = [];
+    if (eff.defenseBonus)    parts.push(`+${eff.defenseBonus} CA`);
+    if (eff.caBonus)         parts.push(`+${eff.caBonus} CA`);
+    if (eff.hitPenalty)      parts.push(`${eff.hitPenalty} ai tiri del bersaglio`);
+    if (eff.skipTurn)        parts.push(`salta il turno`);
+    if (eff.healDice)        parts.push(`cura ${eff.healDice} HP a inizio turno`);
+    if (eff.damageDice)      parts.push(`${eff.damageDice} danni a fine turno`);
+    if (eff.damageReduction) parts.push(`dimezza il prossimo danno subito`);
+    return parts.length ? parts.join(', ') + '.' : '';
+  },
+
   _buildSkillInfo(s) {
     const char  = Game.state.character;
     const cls   = Game.getClasse();
@@ -2135,7 +2148,10 @@ const UI = {
       lines.push(`Cura: <b>${s.damageDice}</b> ${fmt(hMod)}${abbr[s.stat]} → recupero HP.`);
     } else if (s.type === 'utility' && s.target === 'self') {
       const eff = STATUS_EFFECTS?.[s.statusApply];
-      lines.push(`Applica <b>${eff?.name || s.statusApply || '—'}</b> su di te.`);
+      const effDesc = this._statusEffectDesc(eff);
+      lines.push(`Applica <b>${eff?.name || s.statusApply || '—'}</b> su di te${effDesc ? ': ' + effDesc : '.'}`);
+      const selfDur = s.statusDuration || 2;
+      lines.push(`Durata: <b>${selfDur} turni</b>.`);
     } else if (s.type === 'utility' && s.target === 'enemy') {
       lines.push(`Prova: <b>${hitTxt}</b> vs CA nemica.`);
       if (s.statusApply) {
