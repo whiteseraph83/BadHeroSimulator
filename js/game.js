@@ -2230,7 +2230,8 @@ const Game = {
     if (skill.type === 'utility' && skill.target === 'self') {
       if (skill.scalingCA) {
         const level = this.state.character.level || 1;
-        const caBonus = Math.floor(level / 2) + 2; // lv1=+2, lv5=+4, lv10=+7
+        const statMod = skill.scalingCAStat ? this.modifier(this.effectiveStat(skill.scalingCAStat)) : 0;
+        const caBonus = Math.floor(level / 2) + 2 + statMod; // lv1=+2, lv5=+4, lv10=+7, +mod stat
         this._applyStatusToPlayer(skill.id, 3, { caBonus });
         this._addLog(`${skill.name}: +${caBonus} CA per 3 turni!`, 'status');
       } else if (skill.statusApply) {

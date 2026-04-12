@@ -3459,7 +3459,7 @@ const COMBAT_SKILLS = [
   { id: 'scudo_magico',        name: 'Scudo Magico',         icon: '✨',
     type: 'utility',  stat: 'int', hitStat: 'int',
     damageDice: null,  damageBonus: 0,
-    target: 'self',  availableFor: ['mago'], scalingCA: true, hitPenalty: 0, unlockLevel: 1 },
+    target: 'self',  availableFor: ['mago'], scalingCA: true, scalingCAStat: 'int', hitPenalty: 0, unlockLevel: 1 },
   { id: 'manovra_difensiva',   name: 'Manovra Difensiva',    icon: '🛡️',
     type: 'utility',  stat: 'con', hitStat: 'con',
     damageDice: null,  damageBonus: 0,
