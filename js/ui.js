@@ -2031,7 +2031,6 @@ const UI = {
     document.getElementById('combat-player-mp-bar').style.width = `${mpPct}%`;
 
     // Nasconde la barra MP se nessuna skill della classe richiede MP
-    const cls = Game.getClasse();
     const hasMP = COMBAT_SKILLS.some(s => {
       if ((s.mpCost || 0) === 0) return false;
       return s.availableFor === 'all' || (Array.isArray(s.availableFor) && s.availableFor.includes(cls.id));
