@@ -2029,6 +2029,16 @@ const UI = {
     hpBar.style.width = `${playerPct}%`;
     hpBar.className = `combat-hp-bar ${playerPct <= 25 ? 'danger' : playerPct <= 50 ? 'warning' : ''}`;
     document.getElementById('combat-player-mp-bar').style.width = `${mpPct}%`;
+
+    // Nasconde la barra MP se nessuna skill della classe richiede MP
+    const cls = Game.getClasse();
+    const hasMP = COMBAT_SKILLS.some(s => {
+      if ((s.mpCost || 0) === 0) return false;
+      return s.availableFor === 'all' || (Array.isArray(s.availableFor) && s.availableFor.includes(cls.id));
+    });
+    const mpRow = document.getElementById('combat-mp-row');
+    if (mpRow) mpRow.classList.toggle('d-none', !hasMP);
+
     document.getElementById('combat-player-status-pills').innerHTML = this._renderStatusPills(combat.playerStatusEffects);
 
     // Enemy HUD
