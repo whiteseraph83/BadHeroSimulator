@@ -3479,7 +3479,7 @@ const COMBAT_SKILLS = [
   { id: 'veleno_lama',         name: 'Veleno sulla Lama',    icon: '🧪',
     type: 'physical', stat: 'dex', hitStat: 'dex',
     damageDice: '1d4', damageBonus: 0, mpCost: 0,
-    target: 'enemy', availableFor: ['ladro'], statusApply: 'poison', hitPenalty: 0, unlockLevel: 5,
+    target: 'enemy', availableFor: ['ladro'], statusApply: 'poison', statusDuration: 3, hitPenalty: 0, unlockLevel: 5,
     cooldown: 4, synergySkill: 'nasconditi_piena_vista' },
   { id: 'nebbia_fumogena',     name: 'Nebbia Fumogena',      icon: '🌫️',
     type: 'utility',  stat: 'dex', hitStat: 'dex',

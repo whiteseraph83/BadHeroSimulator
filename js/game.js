@@ -2256,7 +2256,7 @@ const Game = {
       const rollDesc = this._rollSummary(rollR);
       if (rollR.hit) {
         if (skill.statusApply) {
-          this._applyStatusToEnemy(skill.statusApply, 2);
+          this._applyStatusToEnemy(skill.statusApply, skill.statusDuration || 2);
           const effect = STATUS_EFFECTS[skill.statusApply];
           this._addLog(`${skill.name}: ${rollDesc} → ${effect?.name || skill.statusApply}!`, 'status');
         }
