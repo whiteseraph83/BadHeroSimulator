@@ -2136,9 +2136,15 @@ const UI = {
     const lines = [];
 
     if (s.scalingCA) {
-      const ca = Math.floor(level / 2) + 2;
+      const statMod = s.scalingCAStat ? Game.modifier(Game.effectiveStat(s.scalingCAStat)) : 0;
+      const ca = Math.floor(level / 2) + 2 + statMod;
+      const statLabel = s.scalingCAStat ? ` + ${fmt(statMod)}${abbr[s.scalingCAStat]}` : '';
       lines.push(`Aumenta la tua CA di <b>+${ca}</b> per 3 turni.`);
-      lines.push(`Scala con il livello (lv1=+2, lv5=+4, lv10=+7).`);
+      if (s.scalingCAStat) {
+        lines.push(`Formula: lv/2+2${statLabel} (attuale: +${ca}).`);
+      } else {
+        lines.push(`Scala con il livello (lv1=+2, lv5=+4, lv10=+7).`);
+      }
     } else if (s.healSelf) {
       const hMod = Game.modifier(Game.effectiveStat(s.stat));
       lines.push(`Cura: <b>${s.damageDice}</b> ${fmt(hMod)}${abbr[s.stat]} → recupero HP.`);
