@@ -2140,7 +2140,8 @@ const UI = {
       lines.push(`Prova: <b>${hitTxt}</b> vs CA nemica.`);
       if (s.statusApply) {
         const eff = STATUS_EFFECTS?.[s.statusApply];
-        lines.push(`Effetto: <b>${eff?.name || s.statusApply}</b> sul nemico.`);
+        const dur = s.statusDuration || 2;
+        lines.push(`Effetto: <b>${eff?.name || s.statusApply}</b> sul nemico per ${dur} turni.`);
       }
     } else {
       const typeL = s.type === 'magical' ? 'Attacco magico' : 'Attacco fisico';
@@ -2150,7 +2151,7 @@ const UI = {
         const dMod = Game.modifier(Game.effectiveStat(s.stat));
         lines.push(`Danno: <b>${s.damageDice}</b> ${fmt(dMod)}${abbr[s.stat]}${s.damageBonus > 0 ? ' +'+s.damageBonus : ''}.`);
       }
-      if (s.statusApply) { const e = STATUS_EFFECTS?.[s.statusApply]; lines.push(`Se colpisci: ${e?.name || s.statusApply}.`); }
+      if (s.statusApply) { const e = STATUS_EFFECTS?.[s.statusApply]; const dur = s.statusDuration || 2; lines.push(`Se colpisci: <b>${e?.name || s.statusApply}</b> per ${dur} turni.`); }
       if (s.drain) lines.push(`Drenaggio: recuperi metà del danno inflitto.`);
     }
     if (s.hitPenalty < 0) lines.push(`Penalità al tiro: ${s.hitPenalty}.`);
