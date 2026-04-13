@@ -190,7 +190,7 @@ const Game = {
 
   /* ─── Abilità aggregate equipaggiamento ─────────────────── */
   getEquipmentAbilities() {
-    const result = { pickpocketBonus: 0, rerollBonus: 0, taxDiscount: 0, goldBonus: 0, xpBonus: 0, missionBonus: 0, challengeBonus: 0, challengeRefresh: 0, diceRerollBonus: 0, studyBonus: 0, arenaBonus: 0, arenaDoubleHit: false, conversionBonus: 0, conversionSpeed: 0, stableBonus: 0, rescueBonus: 0, rescueStrengthBonus: 0 };
+    const result = { pickpocketBonus: 0, rerollBonus: 0, taxDiscount: 0, goldBonus: 0, xpBonus: 0, missionBonus: 0, challengeBonus: 0, challengeRefresh: 0, diceRerollBonus: 0, studyBonus: 0, arenaBonus: 0, arenaDoubleHit: false, conversionBonus: 0, conversionSpeed: 0, stableBonus: 0, rescueBonus: 0, rescueStrengthBonus: 0, hpBonus: 0 };
     for (const itemId of Object.values(this.state.character.equipment)) {
       if (!itemId) continue;
       const item = DB.items.find(i => i.id === itemId);
@@ -212,6 +212,7 @@ const Game = {
       result.stableBonus         += item.abilities.stableBonus         || 0;
       result.rescueBonus         += item.abilities.rescueBonus         || 0;
       result.rescueStrengthBonus += item.abilities.rescueStrengthBonus || 0;
+      result.hpBonus             += item.abilities.hpBonus             || 0;
     }
     return result;
   },
@@ -219,8 +220,8 @@ const Game = {
   /* ─── Boost attivi (consumabili) ───────────────────────── */
   getActiveBoostMultipliers() {
     return (this.state.activeBoosts || []).reduce(
-      (acc, b) => ({ xp: acc.xp + (b.xpBoost||0), gold: acc.gold + (b.goldBoost||0), fame: acc.fame + (b.fameBoost||0) }),
-      { xp: 0, gold: 0, fame: 0 }
+      (acc, b) => ({ xp: acc.xp + (b.xpBoost||0), gold: acc.gold + (b.goldBoost||0), fame: acc.fame + (b.fameBoost||0), hp: acc.hp + (b.hpBoost||0) }),
+      { xp: 0, gold: 0, fame: 0, hp: 0 }
     );
   },
 
@@ -246,7 +247,7 @@ const Game = {
         return { ok: false, reason: `"${item.name}" è già attivo! Aspetta che scada prima di usarne un altro.` };
       }
       const boost = { id: `b_${Date.now()}`, itemId, name: item.name,
-        xpBoost: e.xpBoost||0, goldBoost: e.goldBoost||0, fameBoost: e.fameBoost||0, daysLeft: e.duration };
+        xpBoost: e.xpBoost||0, goldBoost: e.goldBoost||0, fameBoost: e.fameBoost||0, hpBoost: e.hpBoost||0, daysLeft: e.duration };
       this.state.activeBoosts.push(boost);
       result = { boost };
     }
@@ -1981,7 +1982,11 @@ const Game = {
     const cls = this.getClasse();
     const baseHP = { guerriero: 12, paladino: 10, chierico: 9, druido: 9, ladro: 9, mago: 8 }[cls.id] || 8;
     const conMod = this.modifier(this.effectiveStat('con'));
-    return baseHP + baseHP * (char.level - 1) + conMod * char.level;
+    const base = baseHP + baseHP * (char.level - 1) + conMod * char.level;
+    const abilities = this.getEquipmentAbilities();
+    const boosts    = this.getActiveBoostMultipliers();
+    const hpPct = (abilities.hpBonus || 0) + (boosts.hp || 0);
+    return hpPct > 0 ? Math.round(base * (1 + hpPct)) : base;
   },
 
   calcPlayerCA() {

@@ -2886,7 +2886,7 @@ const DB = {
     { id: 1106, name: "Armatura del Cavaliere",   slot: "torso",   quality: 3, tier: 2, reqLevel: 4, reqStat: { key: 'str', val: 12 },
       desc: "Corazza che porta fierezza e sicurezza in sella. Garantisce una sessione extra di cura della cavalcatura.",
       stats: { str: 3, con: 3 },
-      abilities: { pickpocketBonus: 0, rerollBonus: 0, taxDiscount: 0, goldBonus: 0, xpBonus: 0, stableBonus: 1 },
+      abilities: { pickpocketBonus: 0, rerollBonus: 0, taxDiscount: 0, goldBonus: 0, xpBonus: 0, stableBonus: 1, hpBonus: 0.10 },
       buyPrice: 520, sellPrice: 208 },
 
     /* ── PALADINO — Salva i Prigionieri ──────────────────── */
@@ -2905,7 +2905,7 @@ const DB = {
     { id: 1112, name: "Armatura del Crociato",   slot: "torso",   quality: 4, tier: 3, reqLevel: 7, reqStat: { key: 'str', val: 15 },
       desc: "Forgiata per i crociati leggendari. La benedizione incisa regala forza sovrumana e consente una missione extra ogni giorno.",
       stats: { str: 4, con: 4, cha: 1 },
-      abilities: { pickpocketBonus: 0, rerollBonus: 0, taxDiscount: 0, goldBonus: 0, xpBonus: 0, rescueBonus: 1, rescueStrengthBonus: 8 },
+      abilities: { pickpocketBonus: 0, rerollBonus: 0, taxDiscount: 0, goldBonus: 0, xpBonus: 0, rescueBonus: 1, rescueStrengthBonus: 8, hpBonus: 0.20 },
       buyPrice: 1200, sellPrice: 480 },
 
     { id: 1113, name: "Stivali della Carica Santa", slot: "boots", quality: 3, tier: 2, reqLevel: 5, reqStat: null,
@@ -3042,7 +3042,7 @@ const DB = {
       quality: 5, tier: 3, reqLevel: 8, reqStat: null,
       desc: "Una reliquia sacra ai ladri. Chi la usa è benedetto dagli dèi del crimine.",
       stats: {}, abilities: {},
-      effect: { type: 'boost', duration: 5, xpBoost: 0.50, goldBoost: 0.30, fameBoost: 0.20 },
+      effect: { type: 'boost', duration: 5, xpBoost: 0.50, goldBoost: 0.30, fameBoost: 0.20, hpBoost: 0.25 },
       buyPrice: 600, sellPrice: 200 },
 
   ],
