@@ -208,7 +208,7 @@ const DB = {
           partialText: "Prendi metà del contenuto prima di sentire una mano sulla spalla. Ti dilégui.",
           failText: "Le sue urla attirano l'attenzione. Fuggi a mani vuote tra le bancarelle." }
       ],
-      rewards: { xp: 60, goldMin: 8, goldMax: 20, fameXp: 5, itemChance: 0.1, itemTier: 1 }
+      rewards: { xp: 90, goldMin: 12, goldMax: 30, fameXp: 6, itemChance: 0.1, itemTier: 1 
     },
     {
       id: 2, tier: 1, minFame: 0,
@@ -225,7 +225,7 @@ const DB = {
           partialText: "Il tuo metodo funziona a metà: accesso parziale prima che arrivi qualcuno.",
           failText: "La tua analisi era sbagliata. Perdi tempo prezioso." }
       ],
-      rewards: { xp: 70, goldMin: 12, goldMax: 25, fameXp: 6, itemChance: 0.2, itemTier: 1 }
+      rewards: { xp: 105, goldMin: 18, goldMax: 38, fameXp: 8, itemChance: 0.2, itemTier: 1 
     },
     {
       id: 3, tier: 1, minFame: 0,
@@ -242,7 +242,7 @@ const DB = {
           partialText: "Le dita toccano la borsa ma l'oste si gira. Recuperi solo un po'.",
           failText: "Lui abbassa lo sguardo proprio mentre stai allungando la mano. Fuggi." }
       ],
-      rewards: { xp: 65, goldMin: 15, goldMax: 30, fameXp: 6, itemChance: 0.1, itemTier: 1 }
+      rewards: { xp: 98, goldMin: 22, goldMax: 45, fameXp: 8, itemChance: 0.1, itemTier: 1 
     },
     {
       id: 4, tier: 1, minFame: 0,
@@ -255,7 +255,7 @@ const DB = {
           partialText: "Lo segui per un po', poi lo perdi di vista. Riferisci quel che hai visto.",
           failText: "Si accorge di essere seguito e cambia percorso." }
       ],
-      rewards: { xp: 55, goldMin: 10, goldMax: 18, fameXp: 5, itemChance: 0.05, itemTier: 1 }
+      rewards: { xp: 82, goldMin: 15, goldMax: 27, fameXp: 6, itemChance: 0.05, itemTier: 1 
     },
     {
       id: 5, tier: 1, minFame: 0,
@@ -272,7 +272,7 @@ const DB = {
           partialText: "Capisci l'argomento ma non i dettagli.",
           failText: "Troppo distante. Non riesci a capire nulla di utile." }
       ],
-      rewards: { xp: 50, goldMin: 8, goldMax: 15, fameXp: 4, itemChance: 0.05, itemTier: 1 }
+      rewards: { xp: 75, goldMin: 12, goldMax: 22, fameXp: 5, itemChance: 0.05, itemTier: 1 
     },
     {
       id: 6, tier: 1, minFame: 0,
@@ -289,7 +289,7 @@ const DB = {
           partialText: "Passate, ma una guardia nota qualcosa. Fretta, fretta.",
           failText: "Il rumore delle ruote vi tradisce." }
       ],
-      rewards: { xp: 75, goldMin: 20, goldMax: 35, fameXp: 7, itemChance: 0.15, itemTier: 1 }
+      rewards: { xp: 112, goldMin: 30, goldMax: 52, fameXp: 9, itemChance: 0.15, itemTier: 1 
     },
     {
       id: 7, tier: 1, minFame: 0,
@@ -306,7 +306,7 @@ const DB = {
           partialText: "Guadagni qualcosa ma lui se ne va prima della mano finale.",
           failText: "Lui bleffa meglio di te. Perdi la puntata." }
       ],
-      rewards: { xp: 70, goldMin: 25, goldMax: 50, fameXp: 6, itemChance: 0.1, itemTier: 1 }
+      rewards: { xp: 105, goldMin: 38, goldMax: 75, fameXp: 8, itemChance: 0.1, itemTier: 1 
     },
     {
       id: 8, tier: 1, minFame: 0,
@@ -323,7 +323,7 @@ const DB = {
           partialText: "Trovi il nascondiglio ma il ladro è sveglio. Prendi il pacco e fuggi.",
           failText: "Lo perdi di vista per le vie del quartiere." }
       ],
-      rewards: { xp: 65, goldMin: 18, goldMax: 30, fameXp: 6, itemChance: 0.1, itemTier: 1 }
+      rewards: { xp: 98, goldMin: 27, goldMax: 45, fameXp: 8, itemChance: 0.1, itemTier: 1 
     },
     {
       id: 9, tier: 1, minFame: 0,
@@ -336,7 +336,7 @@ const DB = {
           partialText: "Sabotaggio parziale: il carro si fermerà ma riparabile.",
           failText: "Non trovi il punto giusto nel tempo disponibile." }
       ],
-      rewards: { xp: 60, goldMin: 15, goldMax: 25, fameXp: 5, itemChance: 0.1, itemTier: 1 }
+      rewards: { xp: 90, goldMin: 22, goldMax: 38, fameXp: 6, itemChance: 0.1, itemTier: 1 
     },
     {
       id: 10, tier: 1, minFame: 0,
@@ -349,7 +349,7 @@ const DB = {
           partialText: "Entri ma fai rumore. Prendi quel che riesci prima di fuggire.",
           failText: "Un vicino ti vede. Non è il momento." }
       ],
-      rewards: { xp: 80, goldMin: 25, goldMax: 45, fameXp: 7, itemChance: 0.25, itemTier: 1 }
+      rewards: { xp: 120, goldMin: 38, goldMax: 68, fameXp: 9, itemChance: 0.25, itemTier: 1 
     },
 
     /* ═══════════════  TIER 2 — Conosciuto/Noto (50+ fama) ═══════════════ */
@@ -368,7 +368,7 @@ const DB = {
           partialText: "Il tuo piano funziona a metà. Informazioni parziali.",
           failText: "Le rotazioni cambiano. Il tuo piano crolla." }
       ],
-      rewards: { xp: 130, goldMin: 35, goldMax: 60, fameXp: 12, itemChance: 0.3, itemTier: 2 }
+      rewards: { xp: 195, goldMin: 52, goldMax: 90, fameXp: 16, itemChance: 0.3, itemTier: 2 
     },
     {
       id: 12, tier: 2, minFame: 50,
@@ -385,7 +385,7 @@ const DB = {
           partialText: "Il servitore ti aiuta a metà, poi si spaventa.",
           failText: "Il servitore ti denuncia al maggiordomo." }
       ],
-      rewards: { xp: 150, goldMin: 50, goldMax: 90, fameXp: 15, itemChance: 0.3, itemTier: 2 }
+      rewards: { xp: 225, goldMin: 75, goldMax: 135, fameXp: 20, itemChance: 0.3, itemTier: 2 
     },
     {
       id: 13, tier: 2, minFame: 50,
@@ -402,7 +402,7 @@ const DB = {
           partialText: "La guardia è neutralizzata ma hai delle ferite. Ricompensa ridotta.",
           failText: "La guardia chiama rinforzi. Fuga precipitosa." }
       ],
-      rewards: { xp: 160, goldMin: 45, goldMax: 80, fameXp: 14, itemChance: 0.25, itemTier: 2 }
+      rewards: { xp: 240, goldMin: 68, goldMax: 120, fameXp: 18, itemChance: 0.25, itemTier: 2 
     },
     {
       id: 14, tier: 2, minFame: 50,
@@ -419,7 +419,7 @@ const DB = {
           partialText: "Trovi la metà prima che il tempo si esaurisca.",
           failText: "I documenti sono stati spostati. Pista sbagliata." }
       ],
-      rewards: { xp: 140, goldMin: 60, goldMax: 100, fameXp: 13, itemChance: 0.2, itemTier: 2 }
+      rewards: { xp: 210, goldMin: 90, goldMax: 150, fameXp: 17, itemChance: 0.2, itemTier: 2 
     },
     {
       id: 15, tier: 2, minFame: 50,
@@ -436,7 +436,7 @@ const DB = {
           partialText: "Decifri metà del messaggio. Informazioni parziali ma utili.",
           failText: "Il codice è arcano. Troppo difficile senza magia." }
       ],
-      rewards: { xp: 145, goldMin: 55, goldMax: 95, fameXp: 14, itemChance: 0.35, itemTier: 2 }
+      rewards: { xp: 218, goldMin: 82, goldMax: 142, fameXp: 18, itemChance: 0.35, itemTier: 2 
     },
     {
       id: 16, tier: 2, minFame: 50,
@@ -453,7 +453,7 @@ const DB = {
           partialText: "Un piccolo errore di calcolo. Prendi meno del previsto.",
           failText: "La finestra di opportunità era un'ora prima." }
       ],
-      rewards: { xp: 180, goldMin: 80, goldMax: 150, fameXp: 18, itemChance: 0.3, itemTier: 2 }
+      rewards: { xp: 270, goldMin: 120, goldMax: 225, fameXp: 23, itemChance: 0.3, itemTier: 2 
     },
     {
       id: 17, tier: 2, minFame: 50,
@@ -470,7 +470,7 @@ const DB = {
           partialText: "Alcuni diversivi funzionano. Pattuglie ridotte.",
           failText: "Il comandante riconosce la trappola." }
       ],
-      rewards: { xp: 155, goldMin: 50, goldMax: 85, fameXp: 15, itemChance: 0.2, itemTier: 2 }
+      rewards: { xp: 232, goldMin: 75, goldMax: 128, fameXp: 20, itemChance: 0.2, itemTier: 2 
     },
     {
       id: 18, tier: 2, minFame: 50,
@@ -487,7 +487,7 @@ const DB = {
           partialText: "Lo fermi ma lui riesce a fuggire ferito.",
           failText: "Più forte di quanto pensassi. Fuggi." }
       ],
-      rewards: { xp: 170, goldMin: 70, goldMax: 120, fameXp: 16, itemChance: 0.3, itemTier: 2 }
+      rewards: { xp: 255, goldMin: 105, goldMax: 180, fameXp: 21, itemChance: 0.3, itemTier: 2 
     },
     {
       id: 19, tier: 2, minFame: 50,
@@ -500,7 +500,7 @@ const DB = {
           partialText: "Lo trovi ma deve essere negoziato. Commissione ridotta.",
           failText: "Il ricettatore lo ha già rivenduto. Pista persa." }
       ],
-      rewards: { xp: 135, goldMin: 40, goldMax: 70, fameXp: 12, itemChance: 0.4, itemTier: 2 }
+      rewards: { xp: 202, goldMin: 60, goldMax: 105, fameXp: 16, itemChance: 0.4, itemTier: 2 
     },
     {
       id: 20, tier: 2, minFame: 50,
@@ -517,7 +517,7 @@ const DB = {
           partialText: "Entri ma sei costretto a uscire prima del previsto.",
           failText: "La sicurezza è impenetrabile per via furtiva." }
       ],
-      rewards: { xp: 175, goldMin: 65, goldMax: 110, fameXp: 17, itemChance: 0.35, itemTier: 2 }
+      rewards: { xp: 262, goldMin: 98, goldMax: 165, fameXp: 22, itemChance: 0.35, itemTier: 2 
     },
     {
       id: 21, tier: 2, minFame: 50,
@@ -534,7 +534,7 @@ const DB = {
           partialText: "L'intermediario consegna ma con ritardo.",
           failText: "L'intermediario apre il messaggio e ne svela il contenuto." }
       ],
-      rewards: { xp: 120, goldMin: 30, goldMax: 55, fameXp: 10, itemChance: 0.15, itemTier: 2 }
+      rewards: { xp: 180, goldMin: 45, goldMax: 82, fameXp: 13, itemChance: 0.15, itemTier: 2 
     },
     {
       id: 22, tier: 2, minFame: 50,
@@ -551,7 +551,7 @@ const DB = {
           partialText: "Il palafreniere è sospettoso ma ti lascia passare con il cavallo.",
           failText: "Il palafreniere chiama la guardia." }
       ],
-      rewards: { xp: 160, goldMin: 60, goldMax: 100, fameXp: 15, itemChance: 0.2, itemTier: 2 }
+      rewards: { xp: 240, goldMin: 90, goldMax: 150, fameXp: 20, itemChance: 0.2, itemTier: 2 
     },
 
     /* ═══════════════  TIER 3 — Noto+ (150+ fama) ═══════════════ */
@@ -566,7 +566,7 @@ const DB = {
           partialText: "Prendi la corona ma scatta un allarme. Fuga acrobatica.",
           failText: "Le misure di sicurezza erano state raddoppiate." }
       ],
-      rewards: { xp: 280, goldMin: 150, goldMax: 300, fameXp: 35, itemChance: 0.5, itemTier: 3 }
+      rewards: { xp: 420, goldMin: 225, goldMax: 450, fameXp: 46, itemChance: 0.5, itemTier: 3 
     },
     {
       id: 24, tier: 3, minFame: 150,
@@ -583,7 +583,7 @@ const DB = {
           partialText: "Lo batti ma con gravi conseguenze. Ricompensa ridotta.",
           failText: "Mordrek era un guerriero esperto. Non era abbastanza." }
       ],
-      rewards: { xp: 320, goldMin: 180, goldMax: 350, fameXp: 40, itemChance: 0.5, itemTier: 3 }
+      rewards: { xp: 480, goldMin: 270, goldMax: 525, fameXp: 52, itemChance: 0.5, itemTier: 3 
     },
     {
       id: 25, tier: 3, minFame: 150,
@@ -600,7 +600,7 @@ const DB = {
           partialText: "Il passaggio esiste ma porta in una stanza secondaria.",
           failText: "Il passaggio era stato murato. I tuoi piani erano obsoleti." }
       ],
-      rewards: { xp: 300, goldMin: 160, goldMax: 280, fameXp: 38, itemChance: 0.55, itemTier: 3 }
+      rewards: { xp: 450, goldMin: 240, goldMax: 420, fameXp: 49, itemChance: 0.55, itemTier: 3 
     },
     {
       id: 26, tier: 3, minFame: 150,
@@ -617,7 +617,7 @@ const DB = {
           partialText: "Disattivi metà delle protezioni. Riesci a prendere il grimorio di corsa.",
           failText: "Le protezioni erano troppo complesse. La magia ti respinge." }
       ],
-      rewards: { xp: 290, goldMin: 140, goldMax: 260, fameXp: 36, itemChance: 0.6, itemTier: 3 }
+      rewards: { xp: 435, goldMin: 210, goldMax: 390, fameXp: 47, itemChance: 0.6, itemTier: 3 
     },
     {
       id: 27, tier: 3, minFame: 150,
@@ -630,7 +630,7 @@ const DB = {
           partialText: "Il veleno è stato diluito. Sopravviverà ma è neutralizzato.",
           failText: "L'assaggiatore reale intercetta il calice avvelenato." }
       ],
-      rewards: { xp: 310, goldMin: 200, goldMax: 400, fameXp: 42, itemChance: 0.5, itemTier: 3 }
+      rewards: { xp: 465, goldMin: 300, goldMax: 600, fameXp: 55, itemChance: 0.5, itemTier: 3 
     },
     {
       id: 28, tier: 3, minFame: 150,
@@ -647,7 +647,7 @@ const DB = {
           partialText: "Apri il forziere ma una trappola si attiva. Prendi quel che puoi.",
           failText: "Il forziere aveva tre serrature. Ne apri solo due." }
       ],
-      rewards: { xp: 350, goldMin: 250, goldMax: 500, fameXp: 45, itemChance: 0.6, itemTier: 3 }
+      rewards: { xp: 525, goldMin: 375, goldMax: 750, fameXp: 58, itemChance: 0.6, itemTier: 3 
     },
     {
       id: 29, tier: 3, minFame: 150,
@@ -664,7 +664,7 @@ const DB = {
           partialText: "Falsifichi alcuni documenti chiave. Il piano è ritardato.",
           failText: "La tua calligrafia non regge all'ispezione." }
       ],
-      rewards: { xp: 330, goldMin: 170, goldMax: 320, fameXp: 40, itemChance: 0.5, itemTier: 3 }
+      rewards: { xp: 495, goldMin: 255, goldMax: 480, fameXp: 52, itemChance: 0.5, itemTier: 3 
     },
     {
       id: 30, tier: 3, minFame: 150,
@@ -681,7 +681,7 @@ const DB = {
           partialText: "La anticipi ma hai solo un breve scontro. Il sigillo è tuo.",
           failText: "La tua analisi era sbagliata. Troppo tardi." }
       ],
-      rewards: { xp: 400, goldMin: 300, goldMax: 600, fameXp: 50, itemChance: 0.65, itemTier: 3 }
+      rewards: { xp: 600, goldMin: 450, goldMax: 900, fameXp: 65, itemChance: 0.65, itemTier: 3 
     },
 
     /* ═══════════════  MAGO — TIER 1 (0+ fama) ═══════════════ */
@@ -700,7 +700,7 @@ const DB = {
           partialText: "Trovi il ladro ma fa resistenza. Il libro è tuo, ma con qualche danno.",
           failText: "Il ladro ti vede e fugge con il grimorio." }
       ],
-      rewards: { xp: 60, goldMin: 10, goldMax: 22, fameXp: 5, itemChance: 0.1, itemTier: 1, ingredientChance: 0.4, ingredientTierMax: 1 }
+      rewards: { xp: 90, goldMin: 15, goldMax: 33, fameXp: 6, itemChance: 0.1, itemTier: 1, ingredientChance: 0.4, ingredientTierMax: 1 
     },
     {
       id: 202, tier: 1, minFame: 0, classMission: 'mago',
@@ -713,7 +713,7 @@ const DB = {
           partialText: "Riesci a capire che non è pericoloso, ma i dettagli ti sfuggono.",
           failText: "L'analisi fallisce. L'oggetto rimane un mistero e il mercante non ti paga." }
       ],
-      rewards: { xp: 65, goldMin: 12, goldMax: 28, fameXp: 5, itemChance: 0.1, itemTier: 1, ingredientChance: 0.4, ingredientTierMax: 1 }
+      rewards: { xp: 98, goldMin: 18, goldMax: 42, fameXp: 6, itemChance: 0.1, itemTier: 1, ingredientChance: 0.4, ingredientTierMax: 1 
     },
     {
       id: 203, tier: 1, minFame: 0, classMission: 'mago',
@@ -730,7 +730,7 @@ const DB = {
           partialText: "Lo danneggi abbastanza da bloccarlo, ma rischi qualche graffio.",
           failText: "Il costrutto è troppo resistente. Ti allontani sconfitto." }
       ],
-      rewards: { xp: 70, goldMin: 14, goldMax: 30, fameXp: 6, itemChance: 0.15, itemTier: 1, ingredientChance: 0.4, ingredientTierMax: 1 }
+      rewards: { xp: 105, goldMin: 21, goldMax: 45, fameXp: 8, itemChance: 0.15, itemTier: 1, ingredientChance: 0.4, ingredientTierMax: 1 
     },
     {
       id: 204, tier: 1, minFame: 0, classMission: 'mago',
@@ -747,7 +747,7 @@ const DB = {
           partialText: "La tua previsione era quasi giusta. Lo trovi ma ha già usato l'incantesimo.",
           failText: "Le tue deduzioni erano errate. Le tracce si perdono." }
       ],
-      rewards: { xp: 60, goldMin: 10, goldMax: 22, fameXp: 5, itemChance: 0.1, itemTier: 1, ingredientChance: 0.4, ingredientTierMax: 1 }
+      rewards: { xp: 90, goldMin: 15, goldMax: 33, fameXp: 6, itemChance: 0.1, itemTier: 1, ingredientChance: 0.4, ingredientTierMax: 1 
     },
     {
       id: 205, tier: 1, minFame: 0, classMission: 'mago',
@@ -764,7 +764,7 @@ const DB = {
           partialText: "Quasi silenzioso, ma una bestia ti sente. Scappi con qualche raccolta.",
           failText: "Fai troppo rumore. Le bestie ti cacciano via." }
       ],
-      rewards: { xp: 55, goldMin: 8, goldMax: 20, fameXp: 5, itemChance: 0.05, itemTier: 1, ingredientChance: 0.6, ingredientTierMax: 1 }
+      rewards: { xp: 82, goldMin: 12, goldMax: 30, fameXp: 6, itemChance: 0.05, itemTier: 1, ingredientChance: 0.6, ingredientTierMax: 1 
     },
     {
       id: 206, tier: 1, minFame: 0, classMission: 'mago',
@@ -777,7 +777,7 @@ const DB = {
           partialText: "Ne disattivi la maggior parte. La piccola esplosione rimanente non fa danni gravi.",
           failText: "Tocchi la sequenza sbagliata. La porta esplode, per fortuna senza feriti." }
       ],
-      rewards: { xp: 70, goldMin: 15, goldMax: 30, fameXp: 6, itemChance: 0.15, itemTier: 1, ingredientChance: 0.4, ingredientTierMax: 1 }
+      rewards: { xp: 105, goldMin: 22, goldMax: 45, fameXp: 8, itemChance: 0.15, itemTier: 1, ingredientChance: 0.4, ingredientTierMax: 1 
     },
     {
       id: 207, tier: 1, minFame: 0, classMission: 'mago',
@@ -794,7 +794,7 @@ const DB = {
           partialText: "Trovi l'artefatto ma non riesci a distruggerlo completamente.",
           failText: "I segni sono troppo oscuri per la tua comprensione attuale." }
       ],
-      rewards: { xp: 65, goldMin: 12, goldMax: 25, fameXp: 5, itemChance: 0.1, itemTier: 1, ingredientChance: 0.4, ingredientTierMax: 1 }
+      rewards: { xp: 98, goldMin: 18, goldMax: 38, fameXp: 6, itemChance: 0.1, itemTier: 1, ingredientChance: 0.4, ingredientTierMax: 1 
     },
     {
       id: 208, tier: 1, minFame: 0, classMission: 'mago',
@@ -807,7 +807,7 @@ const DB = {
           partialText: "Traduci parzialmente. Abbastanza da capire i punti salienti.",
           failText: "Il linguaggio è troppo arcaico anche per te." }
       ],
-      rewards: { xp: 60, goldMin: 10, goldMax: 22, fameXp: 5, itemChance: 0.1, itemTier: 1, ingredientChance: 0.4, ingredientTierMax: 1 }
+      rewards: { xp: 90, goldMin: 15, goldMax: 33, fameXp: 6, itemChance: 0.1, itemTier: 1, ingredientChance: 0.4, ingredientTierMax: 1 
     },
     {
       id: 209, tier: 1, minFame: 0, classMission: 'mago',
@@ -824,7 +824,7 @@ const DB = {
           partialText: "Indebolisci la magia ma non la elimini del tutto.",
           failText: "L'oscurità è troppo profonda per essere percepita." }
       ],
-      rewards: { xp: 65, goldMin: 12, goldMax: 26, fameXp: 5, itemChance: 0.1, itemTier: 1, ingredientChance: 0.5, ingredientTierMax: 1 }
+      rewards: { xp: 98, goldMin: 18, goldMax: 39, fameXp: 6, itemChance: 0.1, itemTier: 1, ingredientChance: 0.5, ingredientTierMax: 1 
     },
     {
       id: 210, tier: 1, minFame: 0, classMission: 'mago',
@@ -841,7 +841,7 @@ const DB = {
           partialText: "Qualche deviazione necessaria, ma ci arrivi.",
           failText: "La via è bloccata. Non riesci a consegnare." }
       ],
-      rewards: { xp: 55, goldMin: 10, goldMax: 20, fameXp: 5, itemChance: 0.05, itemTier: 1, ingredientChance: 0.4, ingredientTierMax: 1 }
+      rewards: { xp: 82, goldMin: 15, goldMax: 30, fameXp: 6, itemChance: 0.05, itemTier: 1, ingredientChance: 0.4, ingredientTierMax: 1 
     },
 
     /* ═══════════════  MAGO — TIER 2 (50+ fama) ═══════════════ */
@@ -860,7 +860,7 @@ const DB = {
           partialText: "Ci vuole molto sforzo fisico. Esci con qualche ferita ma vittorioso.",
           failText: "I mostri non si fermano. Sei costretto a ritiراrti." }
       ],
-      rewards: { xp: 120, goldMin: 30, goldMax: 70, fameXp: 12, itemChance: 0.3, itemTier: 2, ingredientChance: 0.5, ingredientTierMax: 2 }
+      rewards: { xp: 180, goldMin: 45, goldMax: 105, fameXp: 16, itemChance: 0.3, itemTier: 2, ingredientChance: 0.5, ingredientTierMax: 2 
     },
     {
       id: 212, tier: 2, minFame: 50, classMission: 'mago',
@@ -877,7 +877,7 @@ const DB = {
           partialText: "Decifri parte del codice. Abbastanza per un avvertimento.",
           failText: "Il loro sistema crittografico supera la tua comprensione." }
       ],
-      rewards: { xp: 130, goldMin: 35, goldMax: 80, fameXp: 13, itemChance: 0.3, itemTier: 2, ingredientChance: 0.5, ingredientTierMax: 2 }
+      rewards: { xp: 195, goldMin: 52, goldMax: 120, fameXp: 17, itemChance: 0.3, itemTier: 2, ingredientChance: 0.5, ingredientTierMax: 2 
     },
     {
       id: 213, tier: 2, minFame: 50, classMission: 'mago',
@@ -894,7 +894,7 @@ const DB = {
           partialText: "Lo danneggi seriamente. Non può più attaccare, ma è ancora in piedi.",
           failText: "È troppo resistente. Ti schivi appena in tempo." }
       ],
-      rewards: { xp: 125, goldMin: 32, goldMax: 75, fameXp: 12, itemChance: 0.3, itemTier: 2, ingredientChance: 0.5, ingredientTierMax: 2 }
+      rewards: { xp: 188, goldMin: 48, goldMax: 112, fameXp: 16, itemChance: 0.3, itemTier: 2, ingredientChance: 0.5, ingredientTierMax: 2 
     },
     {
       id: 214, tier: 2, minFame: 50, classMission: 'mago',
@@ -911,7 +911,7 @@ const DB = {
           partialText: "Senti la sua angoscia. Lo calmi parzialmente.",
           failText: "La follia è troppo profonda per essere percepita." }
       ],
-      rewards: { xp: 115, goldMin: 28, goldMax: 65, fameXp: 11, itemChance: 0.3, itemTier: 2, ingredientChance: 0.5, ingredientTierMax: 2 }
+      rewards: { xp: 172, goldMin: 42, goldMax: 98, fameXp: 14, itemChance: 0.3, itemTier: 2, ingredientChance: 0.5, ingredientTierMax: 2 
     },
     {
       id: 215, tier: 2, minFame: 50, classMission: 'mago',
@@ -928,7 +928,7 @@ const DB = {
           partialText: "Ne elimini la metà prima che l'allarme scatti.",
           failText: "Sei troppo lento. I ragni ti circondano e fuggi." }
       ],
-      rewards: { xp: 120, goldMin: 30, goldMax: 70, fameXp: 12, itemChance: 0.3, itemTier: 2, ingredientChance: 0.5, ingredientTierMax: 2 }
+      rewards: { xp: 180, goldMin: 45, goldMax: 105, fameXp: 16, itemChance: 0.3, itemTier: 2, ingredientChance: 0.5, ingredientTierMax: 2 
     },
     {
       id: 216, tier: 2, minFame: 50, classMission: 'mago',
@@ -945,7 +945,7 @@ const DB = {
           partialText: "Quasi giusto: trovi il nascondiglio ma il ladro è già partito. La sfera c'è.",
           failText: "La tua percezione ti tradisce. Il ladro scompare." }
       ],
-      rewards: { xp: 125, goldMin: 32, goldMax: 75, fameXp: 12, itemChance: 0.3, itemTier: 2, ingredientChance: 0.5, ingredientTierMax: 2 }
+      rewards: { xp: 188, goldMin: 48, goldMax: 112, fameXp: 16, itemChance: 0.3, itemTier: 2, ingredientChance: 0.5, ingredientTierMax: 2 
     },
     {
       id: 217, tier: 2, minFame: 50, classMission: 'mago',
@@ -962,7 +962,7 @@ const DB = {
           partialText: "Modifichi parzialmente il contratto. Le condizioni migliorano.",
           failText: "Il demonio si accorge del tentativo. Il contratto si inasprisce." }
       ],
-      rewards: { xp: 130, goldMin: 35, goldMax: 80, fameXp: 14, itemChance: 0.35, itemTier: 2, ingredientChance: 0.5, ingredientTierMax: 2 }
+      rewards: { xp: 195, goldMin: 52, goldMax: 120, fameXp: 18, itemChance: 0.35, itemTier: 2, ingredientChance: 0.5, ingredientTierMax: 2 
     },
     {
       id: 218, tier: 2, minFame: 50, classMission: 'mago',
@@ -979,7 +979,7 @@ const DB = {
           partialText: "Interrompi parzialmente la connessione. Il flusso si riduce.",
           failText: "Le frequenze sono incoerenti. Perdi l'orientamento." }
       ],
-      rewards: { xp: 135, goldMin: 38, goldMax: 85, fameXp: 14, itemChance: 0.35, itemTier: 2, ingredientChance: 0.5, ingredientTierMax: 2 }
+      rewards: { xp: 202, goldMin: 57, goldMax: 128, fameXp: 18, itemChance: 0.35, itemTier: 2, ingredientChance: 0.5, ingredientTierMax: 2 
     },
     {
       id: 219, tier: 2, minFame: 50, classMission: 'mago',
@@ -996,7 +996,7 @@ const DB = {
           partialText: "La luna risponde, ma solo in parte.",
           failText: "Le sfere celestiali non rispondono." }
       ],
-      rewards: { xp: 125, goldMin: 30, goldMax: 72, fameXp: 13, itemChance: 0.3, itemTier: 2, ingredientChance: 0.5, ingredientTierMax: 2 }
+      rewards: { xp: 188, goldMin: 45, goldMax: 108, fameXp: 17, itemChance: 0.3, itemTier: 2, ingredientChance: 0.5, ingredientTierMax: 2 
     },
     {
       id: 220, tier: 2, minFame: 50, classMission: 'mago',
@@ -1013,7 +1013,7 @@ const DB = {
           partialText: "Fai una buona impressione. Qualche punto bonus.",
           failText: "I giudici non sono impressionati dall'apparenza." }
       ],
-      rewards: { xp: 120, goldMin: 30, goldMax: 70, fameXp: 15, itemChance: 0.3, itemTier: 2, ingredientChance: 0.5, ingredientTierMax: 2 }
+      rewards: { xp: 180, goldMin: 45, goldMax: 105, fameXp: 20, itemChance: 0.3, itemTier: 2, ingredientChance: 0.5, ingredientTierMax: 2 
     },
 
     /* ═══════════════  MAGO — TIER 3 (150+ fama) ═══════════════ */
@@ -1032,7 +1032,7 @@ const DB = {
           partialText: "Lo ferisci abbastanza da farlo fuggire. L'esercito si disperде.",
           failText: "I non-morti ti bloccano. Fuggi a stento con la vita." }
       ],
-      rewards: { xp: 200, goldMin: 80, goldMax: 180, fameXp: 25, itemChance: 0.5, itemTier: 3, ingredientChance: 0.6, ingredientTierMax: 3 }
+      rewards: { xp: 300, goldMin: 120, goldMax: 270, fameXp: 32, itemChance: 0.5, itemTier: 3, ingredientChance: 0.6, ingredientTierMax: 3 
     },
     {
       id: 222, tier: 3, minFame: 150, classMission: 'mago',
@@ -1049,7 +1049,7 @@ const DB = {
           partialText: "Lo stabilizzi, ma non lo ripristini completamente.",
           failText: "L'essenza è troppo antica per essere percepita." }
       ],
-      rewards: { xp: 210, goldMin: 85, goldMax: 190, fameXp: 26, itemChance: 0.5, itemTier: 3, ingredientChance: 0.6, ingredientTierMax: 3 }
+      rewards: { xp: 315, goldMin: 128, goldMax: 285, fameXp: 34, itemChance: 0.5, itemTier: 3, ingredientChance: 0.6, ingredientTierMax: 3 
     },
     {
       id: 223, tier: 3, minFame: 150, classMission: 'mago',
@@ -1066,7 +1066,7 @@ const DB = {
           partialText: "Trovi alcune prove ma non abbastanza per smascherare il colpevole.",
           failText: "Ogni pista porta a un vicolo cieco." }
       ],
-      rewards: { xp: 220, goldMin: 90, goldMax: 200, fameXp: 28, itemChance: 0.5, itemTier: 3, ingredientChance: 0.6, ingredientTierMax: 3 }
+      rewards: { xp: 330, goldMin: 135, goldMax: 300, fameXp: 36, itemChance: 0.5, itemTier: 3, ingredientChance: 0.6, ingredientTierMax: 3 
     },
     {
       id: 224, tier: 3, minFame: 150, classMission: 'mago',
@@ -1083,7 +1083,7 @@ const DB = {
           partialText: "Senti l'artefatto ma stai per perderti. Escی appena in tempo con esso.",
           failText: "La risonanza svanisce prima che tu possa seguirla." }
       ],
-      rewards: { xp: 230, goldMin: 95, goldMax: 210, fameXp: 30, itemChance: 0.55, itemTier: 3, ingredientChance: 0.6, ingredientTierMax: 3 }
+      rewards: { xp: 345, goldMin: 142, goldMax: 315, fameXp: 39, itemChance: 0.55, itemTier: 3, ingredientChance: 0.6, ingredientTierMax: 3 
     },
     {
       id: 225, tier: 3, minFame: 150, classMission: 'mago',
@@ -1100,7 +1100,7 @@ const DB = {
           partialText: "La danneggi ma non la distruggi. Il dracolich è indebolito.",
           failText: "La phylactery è troppo resistente per le tue forze." }
       ],
-      rewards: { xp: 280, goldMin: 120, goldMax: 280, fameXp: 40, itemChance: 0.6, itemTier: 3, ingredientChance: 0.7, ingredientTierMax: 4 }
+      rewards: { xp: 420, goldMin: 180, goldMax: 420, fameXp: 52, itemChance: 0.6, itemTier: 3, ingredientChance: 0.7, ingredientTierMax: 4 
     },
     {
       id: 226, tier: 3, minFame: 150, classMission: 'mago',
@@ -1117,7 +1117,7 @@ const DB = {
           partialText: "Quasi perfetto. Qualche sigillo ti sfiora ma non si attiva.",
           failText: "I sigilli sono troppo densi. Non c'è spazio tra di essi." }
       ],
-      rewards: { xp: 215, goldMin: 88, goldMax: 195, fameXp: 27, itemChance: 0.5, itemTier: 3, ingredientChance: 0.6, ingredientTierMax: 3 }
+      rewards: { xp: 322, goldMin: 132, goldMax: 292, fameXp: 35, itemChance: 0.5, itemTier: 3, ingredientChance: 0.6, ingredientTierMax: 3 
     },
     {
       id: 227, tier: 3, minFame: 150, classMission: 'mago',
@@ -1134,7 +1134,7 @@ const DB = {
           partialText: "Decifri il 60% delle comunicazioni. Abbastanza per uno scopo.",
           failText: "Il codice è al di là di ogni comprensione umana." }
       ],
-      rewards: { xp: 260, goldMin: 110, goldMax: 250, fameXp: 38, itemChance: 0.55, itemTier: 3, ingredientChance: 0.65, ingredientTierMax: 4 }
+      rewards: { xp: 390, goldMin: 165, goldMax: 375, fameXp: 49, itemChance: 0.55, itemTier: 3, ingredientChance: 0.65, ingredientTierMax: 4 
     },
     {
       id: 228, tier: 3, minFame: 150, classMission: 'mago',
@@ -1151,7 +1151,7 @@ const DB = {
           partialText: "La senti ma la tua mente non regge l'intensità. Ne recuperi un frammento.",
           failText: "L'intensità della pietra sopraffà la tua mente." }
       ],
-      rewards: { xp: 250, goldMin: 100, goldMax: 230, fameXp: 35, itemChance: 0.55, itemTier: 3, ingredientChance: 0.65, ingredientTierMax: 4 }
+      rewards: { xp: 375, goldMin: 150, goldMax: 345, fameXp: 46, itemChance: 0.55, itemTier: 3, ingredientChance: 0.65, ingredientTierMax: 4 
     },
     {
       id: 229, tier: 3, minFame: 150, classMission: 'mago',
@@ -1168,7 +1168,7 @@ const DB = {
           partialText: "Hai un'intuizione ma non riesci ad agire in tempo.",
           failText: "La sua aura magica è troppo densa. Non percepisci nulla." }
       ],
-      rewards: { xp: 270, goldMin: 115, goldMax: 260, fameXp: 40, itemChance: 0.6, itemTier: 3, ingredientChance: 0.65, ingredientTierMax: 4 }
+      rewards: { xp: 405, goldMin: 172, goldMax: 390, fameXp: 52, itemChance: 0.6, itemTier: 3, ingredientChance: 0.65, ingredientTierMax: 4 
     },
     {
       id: 230, tier: 3, minFame: 150, classMission: 'mago',
@@ -1185,7 +1185,7 @@ const DB = {
           partialText: "Assorbi parte dell'energia. La catastrofe si ridimensiona.",
           failText: "L'energia è troppa. Il tuo corpo non regge. Fuggi." }
       ],
-      rewards: { xp: 400, goldMin: 300, goldMax: 600, fameXp: 55, itemChance: 0.65, itemTier: 3, ingredientChance: 0.7, ingredientTierMax: 4 }
+      rewards: { xp: 600, goldMin: 450, goldMax: 900, fameXp: 72, itemChance: 0.65, itemTier: 3, ingredientChance: 0.7, ingredientTierMax: 4 
     },
 
     /* ═══════════════  DRUIDO — TIER 1 (0+ fama) ═══════════════ */
@@ -1204,7 +1204,7 @@ const DB = {
           partialText: "La tua analisi è corretta ma le radici scarseggiavano comunque.",
           failText: "Hai identificato le piante sbagliate. Tempo perso." }
       ],
-      rewards: { xp: 60, goldMin: 8, goldMax: 20, fameXp: 5, itemChance: 0.1, itemTier: 1, ingredientChance: 1.0, ingredientTierMax: 2 }
+      rewards: { xp: 90, goldMin: 12, goldMax: 30, fameXp: 6, itemChance: 0.1, itemTier: 1, ingredientChance: 1.0, ingredientTierMax: 2 
     },
     {
       id: 302, tier: 1, minFame: 0, classMission: 'druido',
@@ -1221,7 +1221,7 @@ const DB = {
           partialText: "Trovi la fonte ma non riesci a rimuoverla del tutto.",
           failText: "La fonte è troppo ben nascosta. Non la trovi." }
       ],
-      rewards: { xp: 65, goldMin: 10, goldMax: 22, fameXp: 5, itemChance: 0.15, itemTier: 1, ingredientChance: 1.0, ingredientTierMax: 2 }
+      rewards: { xp: 98, goldMin: 15, goldMax: 33, fameXp: 6, itemChance: 0.15, itemTier: 1, ingredientChance: 1.0, ingredientTierMax: 2 
     },
     {
       id: 303, tier: 1, minFame: 0, classMission: 'druido',
@@ -1238,7 +1238,7 @@ const DB = {
           partialText: "Il cataplasma rallenta la diffusione. Servirà del tempo.",
           failText: "Non trovi gli ingredienti giusti nelle vicinanze." }
       ],
-      rewards: { xp: 60, goldMin: 8, goldMax: 18, fameXp: 5, itemChance: 0.1, itemTier: 1, ingredientChance: 1.0, ingredientTierMax: 2 }
+      rewards: { xp: 90, goldMin: 12, goldMax: 27, fameXp: 6, itemChance: 0.1, itemTier: 1, ingredientChance: 1.0, ingredientTierMax: 2 
     },
     {
       id: 304, tier: 1, minFame: 0, classMission: 'druido',
@@ -1255,7 +1255,7 @@ const DB = {
           partialText: "Neutralizzi le spore nell'area centrale. I bordi rimangono pericolosi.",
           failText: "La composizione delle spore è troppo complessa da analizzare." }
       ],
-      rewards: { xp: 65, goldMin: 10, goldMax: 24, fameXp: 6, itemChance: 0.15, itemTier: 1, ingredientChance: 1.0, ingredientTierMax: 2 }
+      rewards: { xp: 98, goldMin: 15, goldMax: 36, fameXp: 8, itemChance: 0.15, itemTier: 1, ingredientChance: 1.0, ingredientTierMax: 2 
     },
     {
       id: 305, tier: 1, minFame: 0, classMission: 'druido',
@@ -1272,7 +1272,7 @@ const DB = {
           partialText: "Rimuovi le reti principali ma ti impiastri nelle secondarie. Parziale successo.",
           failText: "Finisci incollato in una rete. Ci vuole tempo per liberarti." }
       ],
-      rewards: { xp: 60, goldMin: 8, goldMax: 20, fameXp: 5, itemChance: 0.1, itemTier: 1, ingredientChance: 1.0, ingredientTierMax: 2 }
+      rewards: { xp: 90, goldMin: 12, goldMax: 30, fameXp: 6, itemChance: 0.1, itemTier: 1, ingredientChance: 1.0, ingredientTierMax: 2 
     },
     {
       id: 306, tier: 1, minFame: 0, classMission: 'druido',
@@ -1285,7 +1285,7 @@ const DB = {
           partialText: "Capisci il problema ma non riesci a risolverlo subito. Dai tempo al bosco.",
           failText: "Il bosco è silenzioso. Non risponde ai tuoi tentativi." }
       ],
-      rewards: { xp: 70, goldMin: 12, goldMax: 26, fameXp: 6, itemChance: 0.15, itemTier: 1, ingredientChance: 1.0, ingredientTierMax: 2 }
+      rewards: { xp: 105, goldMin: 18, goldMax: 39, fameXp: 8, itemChance: 0.15, itemTier: 1, ingredientChance: 1.0, ingredientTierMax: 2 
     },
     {
       id: 307, tier: 1, minFame: 0, classMission: 'druido',
@@ -1302,7 +1302,7 @@ const DB = {
           partialText: "La tua mappa mentale ha lacune ma basta per trovare la via.",
           failText: "Anche la tua memoria cede. La foresta sembra cambiata." }
       ],
-      rewards: { xp: 60, goldMin: 8, goldMax: 18, fameXp: 5, itemChance: 0.1, itemTier: 1, ingredientChance: 1.0, ingredientTierMax: 2 }
+      rewards: { xp: 90, goldMin: 12, goldMax: 27, fameXp: 6, itemChance: 0.1, itemTier: 1, ingredientChance: 1.0, ingredientTierMax: 2 
     },
     {
       id: 308, tier: 1, minFame: 0, classMission: 'druido',
@@ -1319,7 +1319,7 @@ const DB = {
           partialText: "L'uccello lo raccoglie ma lo danneggia leggermente.",
           failText: "Nessun uccello nelle vicinanze risponde." }
       ],
-      rewards: { xp: 65, goldMin: 10, goldMax: 22, fameXp: 5, itemChance: 0.15, itemTier: 1, ingredientChance: 1.0, ingredientTierMax: 2 }
+      rewards: { xp: 98, goldMin: 15, goldMax: 33, fameXp: 6, itemChance: 0.15, itemTier: 1, ingredientChance: 1.0, ingredientTierMax: 2 
     },
     {
       id: 309, tier: 1, minFame: 0, classMission: 'druido',
@@ -1336,7 +1336,7 @@ const DB = {
           partialText: "Ripari il danno principale ma non i secondari. Risultato parziale.",
           failText: "Il sabotaggio era troppo elaborato. Non riesci a capirlo in tempo." }
       ],
-      rewards: { xp: 70, goldMin: 12, goldMax: 28, fameXp: 6, itemChance: 0.2, itemTier: 1, ingredientChance: 1.0, ingredientTierMax: 2 }
+      rewards: { xp: 105, goldMin: 18, goldMax: 42, fameXp: 8, itemChance: 0.2, itemTier: 1, ingredientChance: 1.0, ingredientTierMax: 2 
     },
     {
       id: 310, tier: 1, minFame: 0, classMission: 'druido',
@@ -1353,7 +1353,7 @@ const DB = {
           partialText: "Il rituale funziona parzialmente. La corruzione rallenta.",
           failText: "Ti mancano le componenti necessarie per il rituale." }
       ],
-      rewards: { xp: 65, goldMin: 10, goldMax: 24, fameXp: 5, itemChance: 0.15, itemTier: 1, ingredientChance: 1.0, ingredientTierMax: 2 }
+      rewards: { xp: 98, goldMin: 15, goldMax: 36, fameXp: 6, itemChance: 0.15, itemTier: 1, ingredientChance: 1.0, ingredientTierMax: 2 
     },
 
     /* ═══════════════  DRUIDO — TIER 2 (50+ fama) ═══════════════ */
@@ -1372,7 +1372,7 @@ const DB = {
           partialText: "Pochi spiriti rispondono. La situazione migliora ma non risolve.",
           failText: "Gli spiriti sono fuggiti o corrotti. Non puoi contare su di loro." }
       ],
-      rewards: { xp: 120, goldMin: 35, goldMax: 80, fameXp: 12, itemChance: 0.3, itemTier: 2, ingredientChance: 1.0, ingredientTierMax: 3 }
+      rewards: { xp: 180, goldMin: 52, goldMax: 120, fameXp: 16, itemChance: 0.3, itemTier: 2, ingredientChance: 1.0, ingredientTierMax: 3 
     },
     {
       id: 312, tier: 2, minFame: 50, classMission: 'druido',
@@ -1389,7 +1389,7 @@ const DB = {
           partialText: "Il cacciatore si pente a metà. Lo spirito accetta un compromesso.",
           failText: "Il cacciatore non vuole davvero cambiare. Lo spirito lo percepisce." }
       ],
-      rewards: { xp: 110, goldMin: 30, goldMax: 70, fameXp: 10, itemChance: 0.25, itemTier: 2, ingredientChance: 1.0, ingredientTierMax: 3 }
+      rewards: { xp: 165, goldMin: 45, goldMax: 105, fameXp: 13, itemChance: 0.25, itemTier: 2, ingredientChance: 1.0, ingredientTierMax: 3 
     },
     {
       id: 313, tier: 2, minFame: 50, classMission: 'druido',
@@ -1406,7 +1406,7 @@ const DB = {
           partialText: "Individui la struttura ma ne distruggi solo una parte. La siccità si riduce.",
           failText: "Non riesci a individuare la causa. La siccità continua." }
       ],
-      rewards: { xp: 115, goldMin: 32, goldMax: 75, fameXp: 11, itemChance: 0.28, itemTier: 2, ingredientChance: 1.0, ingredientTierMax: 3 }
+      rewards: { xp: 172, goldMin: 48, goldMax: 112, fameXp: 14, itemChance: 0.28, itemTier: 2, ingredientChance: 1.0, ingredientTierMax: 3 
     },
     {
       id: 314, tier: 2, minFame: 50, classMission: 'druido',
@@ -1423,7 +1423,7 @@ const DB = {
           partialText: "L'offerta è accettata in parte. Gli spiriti si calmano parzialmente.",
           failText: "L'offerta è considerata insufficiente. Gli spiriti si infuriano." }
       ],
-      rewards: { xp: 120, goldMin: 35, goldMax: 80, fameXp: 12, itemChance: 0.3, itemTier: 2, ingredientChance: 1.0, ingredientTierMax: 3 }
+      rewards: { xp: 180, goldMin: 52, goldMax: 120, fameXp: 16, itemChance: 0.3, itemTier: 2, ingredientChance: 1.0, ingredientTierMax: 3 
     },
     {
       id: 315, tier: 2, minFame: 50, classMission: 'druido',
@@ -1440,7 +1440,7 @@ const DB = {
           partialText: "Riesci a contenerlo ma sei ferito. Il ciclo si indebolisce.",
           failText: "Il lupo è troppo forte. Fuggi giusto in tempo." }
       ],
-      rewards: { xp: 125, goldMin: 36, goldMax: 82, fameXp: 12, itemChance: 0.3, itemTier: 2, ingredientChance: 1.0, ingredientTierMax: 3 }
+      rewards: { xp: 188, goldMin: 54, goldMax: 123, fameXp: 16, itemChance: 0.3, itemTier: 2, ingredientChance: 1.0, ingredientTierMax: 3 
     },
     {
       id: 316, tier: 2, minFame: 50, classMission: 'druido',
@@ -1457,7 +1457,7 @@ const DB = {
           partialText: "Capisci solo parte del simbolismo. Rimuovi metà delle rune.",
           failText: "Le rune sono in un dialetto magico che non conosci." }
       ],
-      rewards: { xp: 130, goldMin: 38, goldMax: 88, fameXp: 13, itemChance: 0.32, itemTier: 2, ingredientChance: 1.0, ingredientTierMax: 3 }
+      rewards: { xp: 195, goldMin: 57, goldMax: 132, fameXp: 17, itemChance: 0.32, itemTier: 2, ingredientChance: 1.0, ingredientTierMax: 3 
     },
     {
       id: 317, tier: 2, minFame: 50, classMission: 'druido',
@@ -1474,7 +1474,7 @@ const DB = {
           partialText: "Recidi parte dei fusti ma sei inseguito. Il campo è parzialmente liberato.",
           failText: "Un tentacolo ti afferra. Ti liberi ma non puoi avanzare." }
       ],
-      rewards: { xp: 118, goldMin: 34, goldMax: 76, fameXp: 11, itemChance: 0.28, itemTier: 2, ingredientChance: 1.0, ingredientTierMax: 3 }
+      rewards: { xp: 177, goldMin: 51, goldMax: 114, fameXp: 14, itemChance: 0.28, itemTier: 2, ingredientChance: 1.0, ingredientTierMax: 3 
     },
     {
       id: 318, tier: 2, minFame: 50, classMission: 'druido',
@@ -1491,7 +1491,7 @@ const DB = {
           partialText: "Il rituale collettivo è debole senza il loro capo. Lo spirito torna menomato.",
           failText: "Il villaggio è troppo scoraggiato. Il rituale fallisce per mancanza di fede." }
       ],
-      rewards: { xp: 122, goldMin: 35, goldMax: 80, fameXp: 12, itemChance: 0.3, itemTier: 2, ingredientChance: 1.0, ingredientTierMax: 3 }
+      rewards: { xp: 183, goldMin: 52, goldMax: 120, fameXp: 16, itemChance: 0.3, itemTier: 2, ingredientChance: 1.0, ingredientTierMax: 3 
     },
     {
       id: 319, tier: 2, minFame: 50, classMission: 'druido',
@@ -1508,7 +1508,7 @@ const DB = {
           partialText: "Individui la fonte ma non riesci a neutralizzarla del tutto.",
           failText: "La malattia è troppo complessa da analizzare in campo." }
       ],
-      rewards: { xp: 115, goldMin: 33, goldMax: 74, fameXp: 11, itemChance: 0.27, itemTier: 2, ingredientChance: 1.0, ingredientTierMax: 3 }
+      rewards: { xp: 172, goldMin: 50, goldMax: 111, fameXp: 14, itemChance: 0.27, itemTier: 2, ingredientChance: 1.0, ingredientTierMax: 3 
     },
     {
       id: 320, tier: 2, minFame: 50, classMission: 'druido',
@@ -1525,7 +1525,7 @@ const DB = {
           partialText: "Capisci il dolore ma non riesci ad alleviarlo completamente.",
           failText: "Il suo dolore è troppo profondo. Nessuna parola sembra toccarla." }
       ],
-      rewards: { xp: 130, goldMin: 38, goldMax: 88, fameXp: 13, itemChance: 0.32, itemTier: 2, ingredientChance: 1.0, ingredientTierMax: 3 }
+      rewards: { xp: 195, goldMin: 57, goldMax: 132, fameXp: 17, itemChance: 0.32, itemTier: 2, ingredientChance: 1.0, ingredientTierMax: 3 
     },
 
     /* ═══════════════  DRUIDO — TIER 3 (150+ fama) ═══════════════ */
@@ -1544,7 +1544,7 @@ const DB = {
           partialText: "Lo ferisci abbastanza da rallentarlo. Non hai vinto ma non sei sconfitto.",
           failText: "È troppo potente. La foresta stessa combatte contro di te." }
       ],
-      rewards: { xp: 250, goldMin: 100, goldMax: 230, fameXp: 35, itemChance: 0.55, itemTier: 3, ingredientChance: 1.0, ingredientTierMax: 4 }
+      rewards: { xp: 375, goldMin: 150, goldMax: 345, fameXp: 46, itemChance: 0.55, itemTier: 3, ingredientChance: 1.0, ingredientTierMax: 4 
     },
     {
       id: 322, tier: 3, minFame: 150, classMission: 'druido',
@@ -1561,7 +1561,7 @@ const DB = {
           partialText: "I testi sono incompleti. Hai abbastanza per attenuare la catastrofe.",
           failText: "I testi sono perduti o in lingua incomprensibile." }
       ],
-      rewards: { xp: 270, goldMin: 115, goldMax: 260, fameXp: 40, itemChance: 0.6, itemTier: 3, ingredientChance: 1.0, ingredientTierMax: 4 }
+      rewards: { xp: 405, goldMin: 172, goldMax: 390, fameXp: 52, itemChance: 0.6, itemTier: 3, ingredientChance: 1.0, ingredientTierMax: 4 
     },
     {
       id: 323, tier: 3, minFame: 150, classMission: 'druido',
@@ -1578,7 +1578,7 @@ const DB = {
           partialText: "Lo indebolisci abbastanza che la corruzione non può più manifestarsi pienamente.",
           failText: "La pietra è troppo dura, le radici troppo resistenti." }
       ],
-      rewards: { xp: 260, goldMin: 108, goldMax: 240, fameXp: 37, itemChance: 0.57, itemTier: 3, ingredientChance: 1.0, ingredientTierMax: 4 }
+      rewards: { xp: 390, goldMin: 162, goldMax: 360, fameXp: 48, itemChance: 0.57, itemTier: 3, ingredientChance: 1.0, ingredientTierMax: 4 
     },
     {
       id: 324, tier: 3, minFame: 150, classMission: 'druido',
@@ -1595,7 +1595,7 @@ const DB = {
           partialText: "Stabilizzi parzialmente la situazione. Non è normale ma è stabile.",
           failText: "Il caos è troppo imprevedibile per essere razionalizzato." }
       ],
-      rewards: { xp: 280, goldMin: 120, goldMax: 270, fameXp: 42, itemChance: 0.62, itemTier: 3, ingredientChance: 1.0, ingredientTierMax: 4 }
+      rewards: { xp: 420, goldMin: 180, goldMax: 405, fameXp: 55, itemChance: 0.62, itemTier: 3, ingredientChance: 1.0, ingredientTierMax: 4 
     },
     {
       id: 325, tier: 3, minFame: 150, classMission: 'druido',
@@ -1612,7 +1612,7 @@ const DB = {
           partialText: "Ne convinci alcune a tornare. Il portale si restringe.",
           failText: "Le creature primordiali non hanno interesse nel dialogo." }
       ],
-      rewards: { xp: 265, goldMin: 110, goldMax: 248, fameXp: 38, itemChance: 0.58, itemTier: 3, ingredientChance: 1.0, ingredientTierMax: 4 }
+      rewards: { xp: 398, goldMin: 165, goldMax: 372, fameXp: 49, itemChance: 0.58, itemTier: 3, ingredientChance: 1.0, ingredientTierMax: 4 
     },
     {
       id: 326, tier: 3, minFame: 150, classMission: 'druido',
@@ -1629,7 +1629,7 @@ const DB = {
           partialText: "Danneggi il cristallo. Le fiamme si riducono di intensità.",
           failText: "Il fuoco ti blocca prima che tu possa raggiungere la fonte." }
       ],
-      rewards: { xp: 275, goldMin: 118, goldMax: 256, fameXp: 40, itemChance: 0.6, itemTier: 3, ingredientChance: 1.0, ingredientTierMax: 4 }
+      rewards: { xp: 412, goldMin: 177, goldMax: 384, fameXp: 52, itemChance: 0.6, itemTier: 3, ingredientChance: 1.0, ingredientTierMax: 4 
     },
     {
       id: 327, tier: 3, minFame: 150, classMission: 'druido',
@@ -1646,7 +1646,7 @@ const DB = {
           partialText: "Guidi una parte del conclave. Il problema si riduce.",
           failText: "Il conclave è incontrollabile. Troppi istinti diversi." }
       ],
-      rewards: { xp: 268, goldMin: 112, goldMax: 250, fameXp: 39, itemChance: 0.59, itemTier: 3, ingredientChance: 1.0, ingredientTierMax: 4 }
+      rewards: { xp: 402, goldMin: 168, goldMax: 375, fameXp: 51, itemChance: 0.59, itemTier: 3, ingredientChance: 1.0, ingredientTierMax: 4 
     },
     {
       id: 328, tier: 3, minFame: 150, classMission: 'druido',
@@ -1663,7 +1663,7 @@ const DB = {
           partialText: "La barriera funziona ma non regge a lungo. Guadagni tempo.",
           failText: "Non hai abbastanza piante del tipo giusto nelle vicinanze." }
       ],
-      rewards: { xp: 285, goldMin: 122, goldMax: 275, fameXp: 43, itemChance: 0.63, itemTier: 3, ingredientChance: 1.0, ingredientTierMax: 4 }
+      rewards: { xp: 428, goldMin: 183, goldMax: 412, fameXp: 56, itemChance: 0.63, itemTier: 3, ingredientChance: 1.0, ingredientTierMax: 4 
     },
     {
       id: 329, tier: 3, minFame: 150, classMission: 'druido',
@@ -1680,7 +1680,7 @@ const DB = {
           partialText: "Lo ferisci abbastanza da rallentare il risveglio. Guadagni tempo.",
           failText: "La sua resistenza nel torpore è già troppa per te." }
       ],
-      rewards: { xp: 295, goldMin: 128, goldMax: 285, fameXp: 44, itemChance: 0.64, itemTier: 3, ingredientChance: 1.0, ingredientTierMax: 4 }
+      rewards: { xp: 442, goldMin: 192, goldMax: 428, fameXp: 57, itemChance: 0.64, itemTier: 3, ingredientChance: 1.0, ingredientTierMax: 4 
     },
     {
       id: 330, tier: 3, minFame: 150, classMission: 'druido',
@@ -1697,7 +1697,7 @@ const DB = {
           partialText: "Ripari il ciclo parzialmente. La situazione si stabilizza ma non è risolta.",
           failText: "Il ciclo è spezzato in troppi punti. Non sai da dove cominciare." }
       ],
-      rewards: { xp: 400, goldMin: 300, goldMax: 600, fameXp: 55, itemChance: 0.65, itemTier: 3, ingredientChance: 1.0, ingredientTierMax: 4 }
+      rewards: { xp: 600, goldMin: 450, goldMax: 900, fameXp: 72, itemChance: 0.65, itemTier: 3, ingredientChance: 1.0, ingredientTierMax: 4 
     },
 
     /* ═══════════════  GUERRIERO — TIER 1 (0+ fama) ═══════════════ */
@@ -1716,7 +1716,7 @@ const DB = {
           partialText: "Quasi perfetto, ma uno scontro minore ritarda la consegna.",
           failText: "Un agguato ben organizzato sorprende anche te." }
       ],
-      rewards: { xp: 65, goldMin: 10, goldMax: 22, fameXp: 5, itemChance: 0.1, itemTier: 1 }
+      rewards: { xp: 98, goldMin: 15, goldMax: 33, fameXp: 6, itemChance: 0.1, itemTier: 1 
     },
     {
       id: 402, tier: 1, minFame: 0, classMission: 'guerriero',
@@ -1733,7 +1733,7 @@ const DB = {
           partialText: "Reggi a lungo ma alla fine chiamate patta. Il bruto smette comunque.",
           failText: "Le sue dita di ferro ti piegano. Ritirata strategica." }
       ],
-      rewards: { xp: 70, goldMin: 15, goldMax: 28, fameXp: 6, itemChance: 0.1, itemTier: 1 }
+      rewards: { xp: 105, goldMin: 22, goldMax: 42, fameXp: 8, itemChance: 0.1, itemTier: 1 
     },
     {
       id: 403, tier: 1, minFame: 0, classMission: 'guerriero',
@@ -1750,7 +1750,7 @@ const DB = {
           partialText: "Lo convinci a metà. Torna ma è riluttante.",
           failText: "Non vuole sentire ragioni. Fugge senza guardare indietro." }
       ],
-      rewards: { xp: 60, goldMin: 12, goldMax: 20, fameXp: 5, itemChance: 0.05, itemTier: 1 }
+      rewards: { xp: 90, goldMin: 18, goldMax: 30, fameXp: 6, itemChance: 0.05, itemTier: 1 
     },
     {
       id: 404, tier: 1, minFame: 0, classMission: 'guerriero',
@@ -1767,7 +1767,7 @@ const DB = {
           partialText: "Reggi quasi tutto il turno. Una piccola violazione nel finale.",
           failText: "La mente vaga. Perdi la concentrazione troppe volte." }
       ],
-      rewards: { xp: 55, goldMin: 10, goldMax: 18, fameXp: 4, itemChance: 0.05, itemTier: 1 }
+      rewards: { xp: 82, goldMin: 15, goldMax: 27, fameXp: 5, itemChance: 0.05, itemTier: 1 
     },
     {
       id: 405, tier: 1, minFame: 0, classMission: 'guerriero',
@@ -1784,7 +1784,7 @@ const DB = {
           partialText: "Metà si fermano. Riesci a separare i gruppi principali.",
           failText: "Nessuno ti ascolta nel caos." }
       ],
-      rewards: { xp: 60, goldMin: 8, goldMax: 20, fameXp: 5, itemChance: 0.1, itemTier: 1 }
+      rewards: { xp: 90, goldMin: 12, goldMax: 30, fameXp: 6, itemChance: 0.1, itemTier: 1 
     },
 
     /* ═══════════════  GUERRIERO — TIER 2 (50+ fama) ═══════════════ */
@@ -1803,7 +1803,7 @@ const DB = {
           partialText: "Reggi a lungo. Quando si accorgono che non cadi, i più deboli fuggono.",
           failText: "Il loro attacco coordinato è troppo. Non reggi." }
       ],
-      rewards: { xp: 140, goldMin: 40, goldMax: 75, fameXp: 13, itemChance: 0.25, itemTier: 2 }
+      rewards: { xp: 210, goldMin: 60, goldMax: 112, fameXp: 17, itemChance: 0.25, itemTier: 2 
     },
     {
       id: 407, tier: 2, minFame: 50, classMission: 'guerriero',
@@ -1820,7 +1820,7 @@ const DB = {
           partialText: "Bel torneo, ma in semifinale un errore ti costa caro.",
           failText: "Troppo lento nelle manovre. Eliminato precocemente." }
       ],
-      rewards: { xp: 150, goldMin: 60, goldMax: 100, fameXp: 15, itemChance: 0.3, itemTier: 2 }
+      rewards: { xp: 225, goldMin: 90, goldMax: 150, fameXp: 20, itemChance: 0.3, itemTier: 2 
     },
     {
       id: 408, tier: 2, minFame: 50, classMission: 'guerriero',
@@ -1837,7 +1837,7 @@ const DB = {
           partialText: "Reggi abbastanza da farlo esaurire. Missione compiuta, ammaccato.",
           failText: "La sua furia non conosce fine. Non riesci a resistere abbastanza." }
       ],
-      rewards: { xp: 160, goldMin: 55, goldMax: 90, fameXp: 14, itemChance: 0.3, itemTier: 2 }
+      rewards: { xp: 240, goldMin: 82, goldMax: 135, fameXp: 18, itemChance: 0.3, itemTier: 2 
     },
     {
       id: 409, tier: 2, minFame: 50, classMission: 'guerriero',
@@ -1854,7 +1854,7 @@ const DB = {
           partialText: "Il tuo piano funziona in parte. La difesa regge ma è stata dura.",
           failText: "I razziatori ignorano i tuoi piani e attaccano dove non te l'aspetti." }
       ],
-      rewards: { xp: 145, goldMin: 45, goldMax: 80, fameXp: 14, itemChance: 0.2, itemTier: 2 }
+      rewards: { xp: 218, goldMin: 68, goldMax: 120, fameXp: 18, itemChance: 0.2, itemTier: 2 
     },
     {
       id: 410, tier: 2, minFame: 50, classMission: 'guerriero',
@@ -1871,7 +1871,7 @@ const DB = {
           partialText: "Si stanca ma prima che tu possa agire, colpisce un civile. Ricompensa ridotta.",
           failText: "Non reggi abbastanza. La sua furia non si esaurisce." }
       ],
-      rewards: { xp: 135, goldMin: 40, goldMax: 70, fameXp: 12, itemChance: 0.2, itemTier: 2 }
+      rewards: { xp: 202, goldMin: 60, goldMax: 105, fameXp: 16, itemChance: 0.2, itemTier: 2 
     },
 
     /* ═══════════════  GUERRIERO — TIER 3 (150+ fama) ═══════════════ */
@@ -1890,7 +1890,7 @@ const DB = {
           partialText: "Un duello di resistenza. Alla fine non ce la fai, ma hai mostrato il tuo valore.",
           failText: "Il campione ti supera anche in resistenza. Sconfitta totale." }
       ],
-      rewards: { xp: 320, goldMin: 180, goldMax: 350, fameXp: 42, itemChance: 0.5, itemTier: 3 }
+      rewards: { xp: 480, goldMin: 270, goldMax: 525, fameXp: 55, itemChance: 0.5, itemTier: 3 
     },
     {
       id: 412, tier: 3, minFame: 150, classMission: 'guerriero',
@@ -1907,7 +1907,7 @@ const DB = {
           partialText: "Raggiungi le mura, ma le perdite sono elevate. Missione a metà.",
           failText: "Il fuoco nemico è troppo intenso. Ritirata." }
       ],
-      rewards: { xp: 350, goldMin: 220, goldMax: 420, fameXp: 45, itemChance: 0.55, itemTier: 3 }
+      rewards: { xp: 525, goldMin: 330, goldMax: 630, fameXp: 58, itemChance: 0.55, itemTier: 3 
     },
     {
       id: 413, tier: 3, minFame: 150, classMission: 'guerriero',
@@ -1924,7 +1924,7 @@ const DB = {
           partialText: "Reggi abbastanza da ferirlo. Si ritira, ma tornerà.",
           failText: "Nessuno regge al fuoco di drago. Batti in ritirata ustionato." }
       ],
-      rewards: { xp: 380, goldMin: 250, goldMax: 480, fameXp: 48, itemChance: 0.6, itemTier: 3 }
+      rewards: { xp: 570, goldMin: 375, goldMax: 720, fameXp: 62, itemChance: 0.6, itemTier: 3 
     },
     {
       id: 414, tier: 3, minFame: 150, classMission: 'guerriero',
@@ -1941,7 +1941,7 @@ const DB = {
           partialText: "Convinci metà della guardia. Il generale viene fermato ma con difficoltà.",
           failText: "La guardia è troppo fedele. Non ascolteranno le tue parole." }
       ],
-      rewards: { xp: 330, goldMin: 190, goldMax: 370, fameXp: 43, itemChance: 0.5, itemTier: 3 }
+      rewards: { xp: 495, goldMin: 285, goldMax: 555, fameXp: 56, itemChance: 0.5, itemTier: 3 
     },
     {
       id: 415, tier: 3, minFame: 150, classMission: 'guerriero',
@@ -1958,7 +1958,7 @@ const DB = {
           partialText: "Reggi abbastanza. I rinforzi arrivano tardi. Vittoria parziale.",
           failText: "La tua resistenza cede prima dei rinforzi." }
       ],
-      rewards: { xp: 420, goldMin: 300, goldMax: 600, fameXp: 55, itemChance: 0.65, itemTier: 3 }
+      rewards: { xp: 630, goldMin: 450, goldMax: 900, fameXp: 72, itemChance: 0.65, itemTier: 3 
     },
 
     /* ═══════════════  PALADINO — TIER 1 (0+ fama) ═══════════════ */
@@ -1977,7 +1977,7 @@ const DB = {
           partialText: "Li tieni uniti ma il percorso è più duro del previsto.",
           failText: "La paura li paralizza. Non riesci a tenerli insieme." }
       ],
-      rewards: { xp: 60, goldMin: 10, goldMax: 20, fameXp: 5, itemChance: 0.1, itemTier: 1 }
+      rewards: { xp: 90, goldMin: 15, goldMax: 30, fameXp: 6, itemChance: 0.1, itemTier: 1 
     },
     {
       id: 502, tier: 1, minFame: 0, classMission: 'paladino',
@@ -1994,7 +1994,7 @@ const DB = {
           partialText: "Localizzi lo spirito e lo indebolisci, ma non riesci a eliminarlo.",
           failText: "I tuoi sensi sono ingannati. Lo spirito ti elide nel buio." }
       ],
-      rewards: { xp: 65, goldMin: 12, goldMax: 25, fameXp: 5, itemChance: 0.1, itemTier: 1 }
+      rewards: { xp: 98, goldMin: 18, goldMax: 38, fameXp: 6, itemChance: 0.1, itemTier: 1 
     },
     {
       id: 503, tier: 1, minFame: 0, classMission: 'paladino',
@@ -2011,7 +2011,7 @@ const DB = {
           partialText: "Lo intimidisci abbastanza da fargli restituire una parte.",
           failText: "Ha delle guardie del corpo. Non puoi agire con la forza." }
       ],
-      rewards: { xp: 55, goldMin: 10, goldMax: 18, fameXp: 4, itemChance: 0.05, itemTier: 1 }
+      rewards: { xp: 82, goldMin: 15, goldMax: 27, fameXp: 5, itemChance: 0.05, itemTier: 1 
     },
     {
       id: 504, tier: 1, minFame: 0, classMission: 'paladino',
@@ -2028,7 +2028,7 @@ const DB = {
           partialText: "Reggi abbastanza da ferisci. Non la elimini, ma la respingi.",
           failText: "L'aura di paura ti sopraffà. Non riesci ad avanzare." }
       ],
-      rewards: { xp: 70, goldMin: 15, goldMax: 25, fameXp: 6, itemChance: 0.15, itemTier: 1 }
+      rewards: { xp: 105, goldMin: 22, goldMax: 38, fameXp: 8, itemChance: 0.15, itemTier: 1 
     },
     {
       id: 505, tier: 1, minFame: 0, classMission: 'paladino',
@@ -2045,7 +2045,7 @@ const DB = {
           partialText: "Trovi qualcosa di sospetto, ma non riesci a eliminarlo completamente.",
           failText: "Non riesci a identificare la causa. La malattia continua." }
       ],
-      rewards: { xp: 60, goldMin: 8, goldMax: 20, fameXp: 5, itemChance: 0.1, itemTier: 1 }
+      rewards: { xp: 90, goldMin: 12, goldMax: 30, fameXp: 6, itemChance: 0.1, itemTier: 1 
     },
 
     /* ═══════════════  PALADINO — TIER 2 (50+ fama) ═══════════════ */
@@ -2064,7 +2064,7 @@ const DB = {
           partialText: "Reggi a lungo, ma l'aura ti indebolisce. Elimini solo il nucleo principale.",
           failText: "L'aura di morte ti prosciuga le energie. Devi ritirar." }
       ],
-      rewards: { xp: 150, goldMin: 50, goldMax: 85, fameXp: 14, itemChance: 0.3, itemTier: 2 }
+      rewards: { xp: 225, goldMin: 75, goldMax: 128, fameXp: 18, itemChance: 0.3, itemTier: 2 
     },
     {
       id: 507, tier: 2, minFame: 50, classMission: 'paladino',
@@ -2081,7 +2081,7 @@ const DB = {
           partialText: "Identifichi metà dei cultisti. Informazioni parziali ma utili.",
           failText: "I simboli sono troppo obliqui. Non riesci a decifrarli." }
       ],
-      rewards: { xp: 155, goldMin: 55, goldMax: 95, fameXp: 14, itemChance: 0.3, itemTier: 2 }
+      rewards: { xp: 232, goldMin: 82, goldMax: 142, fameXp: 18, itemChance: 0.3, itemTier: 2 
     },
     {
       id: 508, tier: 2, minFame: 50, classMission: 'paladino',
@@ -2098,7 +2098,7 @@ const DB = {
           partialText: "Reggi abbastanza da farlo esaurire. Vittoria tirata.",
           failText: "I suoi colpi portano con sé un veleno oscuro. Il corpo cede." }
       ],
-      rewards: { xp: 160, goldMin: 60, goldMax: 100, fameXp: 15, itemChance: 0.3, itemTier: 2 }
+      rewards: { xp: 240, goldMin: 90, goldMax: 150, fameXp: 20, itemChance: 0.3, itemTier: 2 
     },
     {
       id: 509, tier: 2, minFame: 50, classMission: 'paladino',
@@ -2115,7 +2115,7 @@ const DB = {
           partialText: "Una guardia ti aiuta di nascosto. Metà dei prigionieri escono.",
           failText: "Le guardie erano fanaticamente fedeli. Non cedono." }
       ],
-      rewards: { xp: 145, goldMin: 50, goldMax: 85, fameXp: 13, itemChance: 0.25, itemTier: 2 }
+      rewards: { xp: 218, goldMin: 75, goldMax: 128, fameXp: 17, itemChance: 0.25, itemTier: 2 
     },
     {
       id: 510, tier: 2, minFame: 50, classMission: 'paladino',
@@ -2132,7 +2132,7 @@ const DB = {
           partialText: "Purificazione parziale. Il tempio si riprende lentamente.",
           failText: "La profanazione era troppo profonda. La tua preghiera non basta." }
       ],
-      rewards: { xp: 140, goldMin: 45, goldMax: 80, fameXp: 13, itemChance: 0.2, itemTier: 2 }
+      rewards: { xp: 210, goldMin: 68, goldMax: 120, fameXp: 17, itemChance: 0.2, itemTier: 2 
     },
 
     /* ═══════════════  PALADINO — TIER 3 (150+ fama) ═══════════════ */
@@ -2151,7 +2151,7 @@ const DB = {
           partialText: "Reggi abbastanza da ferirlo gravemente. Si ritira.",
           failText: "L'aura paralizzante del lich ti immobilizza. Sconfitta." }
       ],
-      rewards: { xp: 330, goldMin: 190, goldMax: 370, fameXp: 43, itemChance: 0.55, itemTier: 3 }
+      rewards: { xp: 495, goldMin: 285, goldMax: 555, fameXp: 56, itemChance: 0.55, itemTier: 3 
     },
     {
       id: 512, tier: 3, minFame: 150, classMission: 'paladino',
@@ -2168,7 +2168,7 @@ const DB = {
           partialText: "Trovi il sigillo ma riesci solo a danneggiarlo. Il demone si indebolisce.",
           failText: "I suoi inganni confondono i tuoi sensi. Non trovi il sigillo." }
       ],
-      rewards: { xp: 360, goldMin: 230, goldMax: 440, fameXp: 47, itemChance: 0.55, itemTier: 3 }
+      rewards: { xp: 540, goldMin: 345, goldMax: 660, fameXp: 61, itemChance: 0.55, itemTier: 3 
     },
     {
       id: 513, tier: 3, minFame: 150, classMission: 'paladino',
@@ -2185,7 +2185,7 @@ const DB = {
           partialText: "Alcuni soldati ti seguono con fede. La battaglia è vinta a caro prezzo.",
           failText: "La paura è troppo forte. L'esercito si sbanda." }
       ],
-      rewards: { xp: 380, goldMin: 260, goldMax: 500, fameXp: 50, itemChance: 0.6, itemTier: 3 }
+      rewards: { xp: 570, goldMin: 390, goldMax: 750, fameXp: 65, itemChance: 0.6, itemTier: 3 
     },
     {
       id: 514, tier: 3, minFame: 150, classMission: 'paladino',
@@ -2202,7 +2202,7 @@ const DB = {
           partialText: "Vacilla, ma il male è troppo radicato. Non è ancora pronto.",
           failText: "Ride delle tue parole. Non c'è più nulla da redimere." }
       ],
-      rewards: { xp: 340, goldMin: 200, goldMax: 380, fameXp: 44, itemChance: 0.55, itemTier: 3 }
+      rewards: { xp: 510, goldMin: 300, goldMax: 570, fameXp: 57, itemChance: 0.55, itemTier: 3 
     },
     {
       id: 515, tier: 3, minFame: 150, classMission: 'paladino',
@@ -2219,7 +2219,7 @@ const DB = {
           partialText: "Raggiungi una tregua. La guerra finisce ma la pace è fragile.",
           failText: "Nessuna delle due fazioni vuole cedere. La guerra continua." }
       ],
-      rewards: { xp: 400, goldMin: 280, goldMax: 550, fameXp: 52, itemChance: 0.65, itemTier: 3 }
+      rewards: { xp: 600, goldMin: 420, goldMax: 825, fameXp: 68, itemChance: 0.65, itemTier: 3 
     },
 
     /* ═══════════════  CHIERICO — TIER 1 (0+ fama) ═══════════════ */
@@ -2238,7 +2238,7 @@ const DB = {
           partialText: "La famiglia collabora a metà. Il rituale funziona parzialmente.",
           failText: "La famiglia non si fida di te. Il rituale fallisce senza il loro aiuto." }
       ],
-      rewards: { xp: 60, goldMin: 10, goldMax: 20, fameXp: 5, itemChance: 0.1, itemTier: 1 }
+      rewards: { xp: 90, goldMin: 15, goldMax: 30, fameXp: 6, itemChance: 0.1, itemTier: 1 
     },
     {
       id: 602, tier: 1, minFame: 0, classMission: 'chierico',
@@ -2255,7 +2255,7 @@ const DB = {
           partialText: "Li aiuti abbastanza da stabilizzarli.",
           failText: "Non riesci a connetterti con la loro sofferenza." }
       ],
-      rewards: { xp: 50, goldMin: 8, goldMax: 18, fameXp: 4, itemChance: 0.05, itemTier: 1 }
+      rewards: { xp: 75, goldMin: 12, goldMax: 27, fameXp: 5, itemChance: 0.05, itemTier: 1 
     },
     {
       id: 603, tier: 1, minFame: 0, classMission: 'chierico',
@@ -2272,7 +2272,7 @@ const DB = {
           partialText: "Reggi abbastanza da completare metà del rituale. Purificazione parziale.",
           failText: "L'energia maligna ti respinge prima che tu possa finire." }
       ],
-      rewards: { xp: 65, goldMin: 12, goldMax: 22, fameXp: 5, itemChance: 0.1, itemTier: 1 }
+      rewards: { xp: 98, goldMin: 18, goldMax: 33, fameXp: 6, itemChance: 0.1, itemTier: 1 
     },
     {
       id: 604, tier: 1, minFame: 0, classMission: 'chierico',
@@ -2289,7 +2289,7 @@ const DB = {
           partialText: "La tua interpretazione convince metà dei presenti.",
           failText: "La questione è più complessa di quanto pensassi." }
       ],
-      rewards: { xp: 55, goldMin: 8, goldMax: 18, fameXp: 4, itemChance: 0.05, itemTier: 1 }
+      rewards: { xp: 82, goldMin: 12, goldMax: 27, fameXp: 5, itemChance: 0.05, itemTier: 1 
     },
     {
       id: 605, tier: 1, minFame: 0, classMission: 'chierico',
@@ -2306,7 +2306,7 @@ const DB = {
           partialText: "Reggi abbastanza da compiere un esorcismo parziale.",
           failText: "L'aura perturbante spezza la tua concentrazione." }
       ],
-      rewards: { xp: 60, goldMin: 10, goldMax: 20, fameXp: 5, itemChance: 0.1, itemTier: 1 }
+      rewards: { xp: 90, goldMin: 15, goldMax: 30, fameXp: 6, itemChance: 0.1, itemTier: 1 
     },
 
     /* ═══════════════  CHIERICO — TIER 2 (50+ fama) ═══════════════ */
@@ -2325,7 +2325,7 @@ const DB = {
           partialText: "Curi metà dei malati prima di cedere alla stanchezza.",
           failText: "Il contagio è troppo virulento. Anche tu soccumbi parzialmente." }
       ],
-      rewards: { xp: 155, goldMin: 55, goldMax: 90, fameXp: 14, itemChance: 0.25, itemTier: 2 }
+      rewards: { xp: 232, goldMin: 82, goldMax: 135, fameXp: 18, itemChance: 0.25, itemTier: 2 
     },
     {
       id: 607, tier: 2, minFame: 50, classMission: 'chierico',
@@ -2342,7 +2342,7 @@ const DB = {
           partialText: "Trovi prove di metà delle attività del culto.",
           failText: "I segni sono stati nascosti con cura. Non trovi nulla di concreto." }
       ],
-      rewards: { xp: 150, goldMin: 50, goldMax: 85, fameXp: 14, itemChance: 0.3, itemTier: 2 }
+      rewards: { xp: 225, goldMin: 75, goldMax: 128, fameXp: 18, itemChance: 0.3, itemTier: 2 
     },
     {
       id: 608, tier: 2, minFame: 50, classMission: 'chierico',
@@ -2359,7 +2359,7 @@ const DB = {
           partialText: "Con la loro collaborazione parziale, riesci a ridurre gli effetti.",
           failText: "La famiglia è scettica. Senza la loro fede, il rituale fallisce." }
       ],
-      rewards: { xp: 145, goldMin: 50, goldMax: 85, fameXp: 13, itemChance: 0.25, itemTier: 2 }
+      rewards: { xp: 218, goldMin: 75, goldMax: 128, fameXp: 17, itemChance: 0.25, itemTier: 2 
     },
     {
       id: 609, tier: 2, minFame: 50, classMission: 'chierico',
@@ -2376,7 +2376,7 @@ const DB = {
           partialText: "Le prove sono inconcludenti ma bastano a rimandare la sentenza.",
           failText: "L'interpretazione teologica è dibattuta. Non riesci a convincere." }
       ],
-      rewards: { xp: 140, goldMin: 45, goldMax: 80, fameXp: 13, itemChance: 0.2, itemTier: 2 }
+      rewards: { xp: 210, goldMin: 68, goldMax: 120, fameXp: 17, itemChance: 0.2, itemTier: 2 
     },
     {
       id: 610, tier: 2, minFame: 50, classMission: 'chierico',
@@ -2393,7 +2393,7 @@ const DB = {
           partialText: "Reggi abbastanza da completare un esorcismo parziale.",
           failText: "L'aura corruttrice ti sopraffà. Non puoi completare l'esorcismo." }
       ],
-      rewards: { xp: 155, goldMin: 55, goldMax: 90, fameXp: 14, itemChance: 0.3, itemTier: 2 }
+      rewards: { xp: 232, goldMin: 82, goldMax: 135, fameXp: 18, itemChance: 0.3, itemTier: 2 
     },
 
     /* ═══════════════  CHIERICO — TIER 3 (150+ fama) ═══════════════ */
@@ -2412,7 +2412,7 @@ const DB = {
           partialText: "Curi i casi più critici prima di crollare. La situazione si stabilizza.",
           failText: "L'epidemia ti sopraffà. Anche tu ti ammali." }
       ],
-      rewards: { xp: 340, goldMin: 200, goldMax: 390, fameXp: 44, itemChance: 0.55, itemTier: 3 }
+      rewards: { xp: 510, goldMin: 300, goldMax: 585, fameXp: 57, itemChance: 0.55, itemTier: 3 
     },
     {
       id: 612, tier: 3, minFame: 150, classMission: 'chierico',
@@ -2429,7 +2429,7 @@ const DB = {
           partialText: "Trovi i nomi di quattro. Gli altri ti restano ignoti.",
           failText: "I nomi veri erano nascosti in modi che non conosci." }
       ],
-      rewards: { xp: 360, goldMin: 230, goldMax: 450, fameXp: 47, itemChance: 0.6, itemTier: 3 }
+      rewards: { xp: 540, goldMin: 345, goldMax: 675, fameXp: 61, itemChance: 0.6, itemTier: 3 
     },
     {
       id: 613, tier: 3, minFame: 150, classMission: 'chierico',
@@ -2446,7 +2446,7 @@ const DB = {
           partialText: "Reggi la maggior parte del rituale prima di essere scosso. Sigillo parzialmente rinforzato.",
           failText: "Il dio oscuro ti spezza mentalmente prima che il rituale finisca." }
       ],
-      rewards: { xp: 380, goldMin: 260, goldMax: 500, fameXp: 50, itemChance: 0.6, itemTier: 3 }
+      rewards: { xp: 570, goldMin: 390, goldMax: 750, fameXp: 65, itemChance: 0.6, itemTier: 3 
     },
     {
       id: 614, tier: 3, minFame: 150, classMission: 'chierico',
@@ -2463,7 +2463,7 @@ const DB = {
           partialText: "Smascherai alcune sue bugie. I fedeli più saggi ti credono.",
           failText: "Il profeta aveva una risposta per ogni tua accusa." }
       ],
-      rewards: { xp: 370, goldMin: 240, goldMax: 460, fameXp: 48, itemChance: 0.6, itemTier: 3 }
+      rewards: { xp: 555, goldMin: 360, goldMax: 690, fameXp: 62, itemChance: 0.6, itemTier: 3 
     },
     {
       id: 615, tier: 3, minFame: 150, classMission: 'chierico',
@@ -2480,7 +2480,7 @@ const DB = {
           partialText: "La maggior parte collabora. Il rituale riesce a metà.",
           failText: "Le rivalità religiose sono troppo profonde. Nessuno collabora." }
       ],
-      rewards: { xp: 420, goldMin: 300, goldMax: 600, fameXp: 55, itemChance: 0.65, itemTier: 3 }
+      rewards: { xp: 630, goldMin: 450, goldMax: 900, fameXp: 72, itemChance: 0.65, itemTier: 3 
     }
   ],
 
@@ -3136,229 +3136,229 @@ const SPELL_RECIPES = [
   { id: 's001', name: 'Dardo Magico',             quality: 1, icon: '🏹',
     components: [2001, 2003],
     desc: 'Il classico dardo di energia arcana. Veloce, preciso, infallibile.',
-    reward: { xp: 40, gold: 25 }, clientGold: 60 },
+    reward: { xp: 64, gold: 40 }, clientGold: 96 },
   { id: 's002', name: 'Scintilla Arcana',         quality: 1, icon: '⚡',
     components: [2002, 2004],
     desc: 'Piccola scarica elettrica. Stordisce per qualche secondo.',
-    reward: { xp: 35, gold: 20 }, clientGold: 50 },
+    reward: { xp: 56, gold: 32 }, clientGold: 80 },
   { id: 's003', name: 'Mano Maga',                quality: 1, icon: '🖐️',
     components: [2005, 2006],
     desc: 'Mano spettrale che manipola oggetti a distanza.',
-    reward: { xp: 30, gold: 18 }, clientGold: 42 },
+    reward: { xp: 48, gold: 29 }, clientGold: 67 },
   { id: 's004', name: 'Nebbia Oscurante',         quality: 1, icon: '🌫️',
     components: [2001, 2008],
     desc: 'Nebbia magica che blocca la visione nell\'area bersaglio.',
-    reward: { xp: 35, gold: 20 }, clientGold: 48 },
+    reward: { xp: 56, gold: 32 }, clientGold: 77 },
   { id: 's005', name: 'Globo di Luce',            quality: 1, icon: '💡',
     components: [2004, 2009],
     desc: 'Sfera luminosa fluttuante. Illumina senza consumare torce.',
-    reward: { xp: 30, gold: 15 }, clientGold: 38 },
+    reward: { xp: 48, gold: 24 }, clientGold: 61 },
   { id: 's006', name: 'Sigillo Silenzioso',       quality: 1, icon: '🤫',
     components: [2007, 2009],
     desc: 'Sigillo che impedisce al bersaglio di emettere suoni.',
-    reward: { xp: 38, gold: 22 }, clientGold: 52 },
+    reward: { xp: 61, gold: 35 }, clientGold: 83 },
   { id: 's007', name: 'Tiro di Acido',            quality: 1, icon: '☠️',
     components: [2005, 2010],
     desc: 'Goccia di acido magico. Corrode qualsiasi materiale.',
-    reward: { xp: 40, gold: 24 }, clientGold: 55 },
+    reward: { xp: 64, gold: 38 }, clientGold: 88 },
   { id: 's008', name: 'Lingua di Fuoco',          quality: 1, icon: '🔥',
     components: [2003, 2010],
     desc: 'Fiamma concentrata che si estende come una frusta.',
-    reward: { xp: 42, gold: 25 }, clientGold: 58 },
+    reward: { xp: 67, gold: 40 }, clientGold: 93 },
   { id: 's009', name: 'Stordimento Minore',       quality: 1, icon: '😵',
     components: [2006, 2008],
     desc: 'Onda psichica minore. Causa confusione per pochi secondi.',
-    reward: { xp: 35, gold: 20 }, clientGold: 48 },
+    reward: { xp: 56, gold: 32 }, clientGold: 77 },
   { id: 's010', name: 'Vento Ostile',             quality: 1, icon: '💨',
     components: [2002, 2007],
     desc: 'Raffica di vento magico che respinge i nemici.',
-    reward: { xp: 35, gold: 20 }, clientGold: 46 },
+    reward: { xp: 56, gold: 32 }, clientGold: 74 },
   // Qualità 2 — 2 componenti
   { id: 's011', name: 'Fulmine',                  quality: 2, icon: '⚡',
     components: [2011, 2019],
     desc: 'Fulmine arcano che colpisce in linea retta. Paralizzante.',
-    reward: { xp: 70, gold: 45 }, clientGold: 110 },
+    reward: { xp: 112, gold: 72 }, clientGold: 176 },
   { id: 's012', name: 'Sfera di Ghiaccio',        quality: 2, icon: '🧊',
     components: [2011, 2015],
     desc: 'Sfera di ghiaccio arcano. Congela al contatto.',
-    reward: { xp: 65, gold: 40 }, clientGold: 100 },
+    reward: { xp: 104, gold: 64 }, clientGold: 160 },
   { id: 's013', name: 'Manto d\'Oscurità',        quality: 2, icon: '🌑',
     components: [2013, 2018],
     desc: 'Mantello di ombre reali. Chi lo indossa scompare dal campo visivo.',
-    reward: { xp: 75, gold: 50 }, clientGold: 120 },
+    reward: { xp: 120, gold: 80 }, clientGold: 192 },
   { id: 's014', name: 'Incantesimo di Paura',     quality: 2, icon: '😱',
     components: [2012, 2017],
     desc: 'Illusione spaventosa che costringe il bersaglio alla fuga.',
-    reward: { xp: 68, gold: 42 }, clientGold: 105 },
+    reward: { xp: 109, gold: 67 }, clientGold: 168 },
   { id: 's015', name: 'Armatura Arcana',          quality: 2, icon: '🛡️',
     components: [2014, 2016],
     desc: 'Barriera di energia magica. Riduce i danni fisici subiti.',
-    reward: { xp: 72, gold: 46 }, clientGold: 112 },
+    reward: { xp: 115, gold: 74 }, clientGold: 179 },
   { id: 's016', name: 'Rilevamento Magico',       quality: 2, icon: '🔍',
     components: [2016, 2020],
     desc: 'Rivela oggetti e creature magiche nell\'area circostante.',
-    reward: { xp: 60, gold: 38 }, clientGold: 92 },
+    reward: { xp: 96, gold: 61 }, clientGold: 147 },
   { id: 's017', name: 'Illusione Minore',         quality: 2, icon: '🎭',
     components: [2013, 2020],
     desc: 'Crea una copia illusoria di un oggetto o persona.',
-    reward: { xp: 65, gold: 40 }, clientGold: 98 },
+    reward: { xp: 104, gold: 64 }, clientGold: 157 },
   { id: 's018', name: 'Frecce Velenose',          quality: 2, icon: '🏹',
     components: [2012, 2015],
     desc: 'Tre frecce di veleno arcano. Avvelenamento progressivo.',
-    reward: { xp: 70, gold: 44 }, clientGold: 108 },
+    reward: { xp: 112, gold: 70 }, clientGold: 173 },
   { id: 's019', name: 'Rallentare',               quality: 2, icon: '🐢',
     components: [2014, 2019],
     desc: 'Rallenta drasticamente il bersaglio. Come muoversi nel miele.',
-    reward: { xp: 68, gold: 42 }, clientGold: 105 },
+    reward: { xp: 109, gold: 67 }, clientGold: 168 },
   { id: 's020', name: 'Volo del Corvo',           quality: 2, icon: '🐦',
     components: [2017, 2018],
     desc: 'Trasforma il mago in corvo per alcune ore.',
-    reward: { xp: 78, gold: 52 }, clientGold: 125 },
+    reward: { xp: 125, gold: 83 }, clientGold: 200 },
   // Qualità 3 — 2 componenti
   { id: 's021', name: 'Palla di Fuoco',           quality: 3, icon: '🔥',
     components: [2021, 2025],
     desc: 'Sfera di fuoco esplosiva. L\'incantesimo iconico di ogni mago.',
-    reward: { xp: 120, gold: 90 }, clientGold: 220 },
+    reward: { xp: 192, gold: 144 }, clientGold: 352 },
   { id: 's022', name: 'Folgore',                  quality: 3, icon: '⚡',
     components: [2022, 2024],
     desc: 'Colpo di fulmine devastante. Danneggia tutto in linea retta.',
-    reward: { xp: 130, gold: 100 }, clientGold: 250 },
+    reward: { xp: 208, gold: 160 }, clientGold: 400 },
   { id: 's023', name: 'Invisibilità',             quality: 3, icon: '👻',
     components: [2023, 2027],
     desc: 'Rende completamente invisibili finché si rimane fermi.',
-    reward: { xp: 125, gold: 95 }, clientGold: 235 },
+    reward: { xp: 200, gold: 152 }, clientGold: 376 },
   { id: 's024', name: 'Charme del Vampiro',       quality: 3, icon: '🧛',
     components: [2021, 2029],
     desc: 'Incantesimo di controllo mentale. Il bersaglio obbedisce per un\'ora.',
-    reward: { xp: 135, gold: 105 }, clientGold: 260 },
+    reward: { xp: 216, gold: 168 }, clientGold: 416 },
   { id: 's025', name: 'Porta Dimensionale',       quality: 3, icon: '🌀',
     components: [2028, 2030],
     desc: 'Apre un portale istantaneo verso un luogo conosciuto.',
-    reward: { xp: 140, gold: 110 }, clientGold: 270 },
+    reward: { xp: 224, gold: 176 }, clientGold: 432 },
   { id: 's026', name: 'Pioggia di Acido',         quality: 3, icon: '☠️',
     components: [2022, 2026],
     desc: 'Nube di acido arcano. Corrode armature e strutture.',
-    reward: { xp: 118, gold: 88 }, clientGold: 215 },
+    reward: { xp: 189, gold: 141 }, clientGold: 344 },
   { id: 's027', name: 'Onda Psichica',            quality: 3, icon: '🧠',
     components: [2023, 2028],
     desc: 'Esplosione di energia psichica. Stordisce nell\'area.',
-    reward: { xp: 122, gold: 92 }, clientGold: 228 },
+    reward: { xp: 195, gold: 147 }, clientGold: 365 },
   { id: 's028', name: 'Metamorfosi',              quality: 3, icon: '🦋',
     components: [2025, 2030],
     desc: 'Trasforma il bersaglio in un animale per alcune ore.',
-    reward: { xp: 132, gold: 102 }, clientGold: 248 },
+    reward: { xp: 211, gold: 163 }, clientGold: 397 },
   { id: 's029', name: 'Convocare Famiglio',       quality: 3, icon: '🐱',
     components: [2024, 2029],
     desc: 'Invoca un famiglio magico che obbedisce al mago.',
-    reward: { xp: 115, gold: 85 }, clientGold: 210 },
+    reward: { xp: 184, gold: 136 }, clientGold: 336 },
   { id: 's030', name: 'Occhio di Medusa',         quality: 3, icon: '👁️',
     components: [2026, 2027],
     desc: 'Sguardo pietrificante. Il bersaglio si trasforma in pietra per minuti.',
-    reward: { xp: 138, gold: 108 }, clientGold: 265 },
+    reward: { xp: 221, gold: 173 }, clientGold: 424 },
   // Qualità 3 aggiuntiva — 2 componenti
   { id: 's051', name: 'Nebbia Velenosa',          quality: 3, icon: '🌫️',
     components: [2021, 2026],
     desc: 'Nube di gas velenoso che persiste nell\'area per minuti.',
-    reward: { xp: 128, gold: 98 }, clientGold: 240 },
+    reward: { xp: 205, gold: 157 }, clientGold: 384 },
   { id: 's052', name: 'Muro di Fuoco',            quality: 3, icon: '🧱',
     components: [2022, 2025],
     desc: 'Barriera di fuoco magico. Blocca il passaggio e brucia chi tenta.',
-    reward: { xp: 126, gold: 96 }, clientGold: 236 },
+    reward: { xp: 202, gold: 154 }, clientGold: 378 },
   { id: 's053', name: 'Scudo Etereo',             quality: 3, icon: '🛡️',
     components: [2023, 2024],
     desc: 'Scudo del piano etereo. Blocca danni fisici e magici.',
-    reward: { xp: 120, gold: 92 }, clientGold: 225 },
+    reward: { xp: 192, gold: 147 }, clientGold: 360 },
   // Qualità 4 — 3 componenti
   { id: 's031', name: 'Meteora Arcana',           quality: 4, icon: '☄️',
     components: [2031, 2035, 2039],
     desc: 'Meteorite di energia arcana pura. Cratere di venti metri.',
-    reward: { xp: 220, gold: 180 }, clientGold: 450 },
+    reward: { xp: 352, gold: 288 }, clientGold: 720 },
   { id: 's032', name: 'Interruzione del Tempo',   quality: 4, icon: '⏱️',
     components: [2032, 2038, 2039],
     desc: 'Ferma il tempo per tutti tranne il mago. Due round extra.',
-    reward: { xp: 240, gold: 195 }, clientGold: 490 },
+    reward: { xp: 384, gold: 312 }, clientGold: 784 },
   { id: 's033', name: 'Controllo Mentale',        quality: 4, icon: '👑',
     components: [2034, 2036, 2038],
     desc: 'Controllo totale della mente del bersaglio. Permanente se non spezzato.',
-    reward: { xp: 250, gold: 200 }, clientGold: 500 },
+    reward: { xp: 400, gold: 320 }, clientGold: 800 },
   { id: 's034', name: 'Fusione con l\'Ombra',     quality: 4, icon: '🌑',
     components: [2031, 2037, 2040],
     desc: 'Il mago diventa un\'ombra reale. Intangibile e invisibile.',
-    reward: { xp: 230, gold: 188 }, clientGold: 470 },
+    reward: { xp: 368, gold: 301 }, clientGold: 752 },
   { id: 's035', name: 'Invocazione Abissale',     quality: 4, icon: '🌀',
     components: [2033, 2036, 2037],
     desc: 'Invoca una creatura dall\'abisso. Servitore potente ma imprevedibile.',
-    reward: { xp: 245, gold: 198 }, clientGold: 492 },
+    reward: { xp: 392, gold: 317 }, clientGold: 787 },
   { id: 's036', name: 'Tocco del Lich',           quality: 4, icon: '💀',
     components: [2032, 2034, 2040],
     desc: 'Il tocco drena la vita del bersaglio e la trasferisce al mago.',
-    reward: { xp: 235, gold: 192 }, clientGold: 480 },
+    reward: { xp: 376, gold: 307 }, clientGold: 768 },
   { id: 's037', name: 'Vortice Cosmico',          quality: 4, icon: '🌪️',
     components: [2035, 2037, 2040],
     desc: 'Vortice di energia cosmica. Risucchia tutto nell\'area.',
-    reward: { xp: 248, gold: 200 }, clientGold: 498 },
+    reward: { xp: 397, gold: 320 }, clientGold: 797 },
   { id: 's038', name: 'Sigillo del Male',         quality: 4, icon: '🔒',
     components: [2031, 2033, 2038],
     desc: 'Sigillo che imprigiona un\'entità per anni. Irremovibile senza contrincantesimo.',
-    reward: { xp: 225, gold: 184 }, clientGold: 460 },
+    reward: { xp: 360, gold: 294 }, clientGold: 736 },
   { id: 's039', name: 'Tempesta di Caos',         quality: 4, icon: '⛈️',
     components: [2032, 2039, 2033],
     desc: 'Tempesta di energia caotica. Effetti imprevedibili e devastanti.',
-    reward: { xp: 238, gold: 194 }, clientGold: 485 },
+    reward: { xp: 381, gold: 310 }, clientGold: 776 },
   { id: 's040', name: 'Annullamento',             quality: 4, icon: '❌',
     components: [2034, 2035, 2036],
     desc: 'Cancella completamente ogni magia nell\'area di effetto.',
-    reward: { xp: 220, gold: 180 }, clientGold: 448 },
+    reward: { xp: 352, gold: 288 }, clientGold: 717 },
   // Qualità 4 aggiuntiva — 2 componenti
   { id: 's054', name: 'Ruggito del Drago',        quality: 4, icon: '🐉',
     components: [2033, 2035],
     desc: 'Ruggito magico di potenza draconica. Terrorizza tutti nell\'area.',
-    reward: { xp: 215, gold: 175 }, clientGold: 440 },
+    reward: { xp: 344, gold: 280 }, clientGold: 704 },
   { id: 's055', name: 'Trono del Male',           quality: 4, icon: '🖤',
     components: [2032, 2040],
     desc: 'Incantesimo di dominazione totale. Tutto nell\'area si inchina.',
-    reward: { xp: 228, gold: 186 }, clientGold: 465 },
+    reward: { xp: 365, gold: 298 }, clientGold: 744 },
   // Qualità 5 — 3 componenti
   { id: 's041', name: 'Disintegrazione',          quality: 5, icon: '💥',
     components: [2041, 2043, 2047],
     desc: 'Riduce il bersaglio a polvere cosmica. Nessun modo per tornare.',
-    reward: { xp: 400, gold: 350 }, clientGold: 900 },
+    reward: { xp: 640, gold: 560 }, clientGold: 1440 },
   { id: 's042', name: 'Apocalisse Arcana',        quality: 5, icon: '🌋',
     components: [2044, 2048, 2050],
     desc: 'L\'incantesimo finale. Cancella tutto nell\'area di una città.',
-    reward: { xp: 500, gold: 500 }, clientGold: 1300 },
+    reward: { xp: 800, gold: 800 }, clientGold: 2080 },
   { id: 's043', name: 'Creare Lich',              quality: 5, icon: '💀',
     components: [2042, 2046, 2049],
     desc: 'Trasforma il mago in un lich. Immortalità al prezzo dell\'anima.',
-    reward: { xp: 480, gold: 430 }, clientGold: 1100 },
+    reward: { xp: 768, gold: 688 }, clientGold: 1760 },
   { id: 's044', name: 'Riscrivere la Realtà',     quality: 5, icon: '✳️',
     components: [2043, 2045, 2047],
     desc: 'Il mago riscrive le leggi della fisica locali per un\'ora.',
-    reward: { xp: 460, gold: 410 }, clientGold: 1050 },
+    reward: { xp: 736, gold: 656 }, clientGold: 1680 },
   { id: 's045', name: 'Divorare il Cosmo',        quality: 5, icon: '🌌',
     components: [2041, 2049, 2050],
     desc: 'Il mago diventa un buco nero temporaneo. Risucchia e distrugge.',
-    reward: { xp: 490, gold: 440 }, clientGold: 1150 },
+    reward: { xp: 784, gold: 704 }, clientGold: 1840 },
   { id: 's046', name: 'Caos Primordiale',         quality: 5, icon: '🌀',
     components: [2044, 2045, 2046],
     desc: 'Richiama il caos delle origini. Tutto è possibile, nulla è sicuro.',
-    reward: { xp: 470, gold: 420 }, clientGold: 1080 },
+    reward: { xp: 752, gold: 672 }, clientGold: 1728 },
   { id: 's047', name: 'Frammento Divino',         quality: 5, icon: '⭐',
     components: [2041, 2046, 2048],
     desc: 'Canalizza un frammento di potere divino. Il mago tocca la divinità.',
-    reward: { xp: 450, gold: 400 }, clientGold: 1000 },
+    reward: { xp: 720, gold: 640 }, clientGold: 1600 },
   { id: 's048', name: 'Nulla Assoluto',           quality: 5, icon: '⬛',
     components: [2042, 2043, 2049],
     desc: 'Chiama il nulla. Tutto ciò che tocca semplicemente smette di esistere.',
-    reward: { xp: 480, gold: 440 }, clientGold: 1120 },
+    reward: { xp: 768, gold: 704 }, clientGold: 1792 },
   { id: 's049', name: 'Risveglio Infinito',       quality: 5, icon: '♾️',
     components: [2045, 2047, 2048],
     desc: 'Il mago risveglia la mente cosmica. Sa tutto per dieci minuti.',
-    reward: { xp: 420, gold: 370 }, clientGold: 950 },
+    reward: { xp: 672, gold: 592 }, clientGold: 1520 },
   { id: 's050', name: 'La Grande Cancellazione',  quality: 5, icon: '🌟',
     components: [2043, 2044, 2050],
     desc: 'Cancella una cosa dall\'esistenza per sempre. Mai e poi mai vista.',
-    reward: { xp: 500, gold: 500 }, clientGold: 1300 },
+    reward: { xp: 800, gold: 800 }, clientGold: 2080 },
 ];
 
 /* ── COMBAT SYSTEM ─────────────────────────────────────── */
