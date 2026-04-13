@@ -1734,40 +1734,41 @@ const UI = {
     }
   },
 
-  /* ─── Modal Studia la Foresta (Druido) ─────────────────── */
+  /* ─── Modal Coltiva la Foresta (Druido) ─────────────────── */
   openForestStudyModal() {
-    document.getElementById('forest-timer-label').textContent = '60';
-    document.getElementById('forest-timer-bar').style.width  = '100%';
-    document.getElementById('forest-errors').textContent     = '0';
-    document.getElementById('forest-pairs').textContent      = '0';
-    document.getElementById('forest-col-left').innerHTML     = '';
-    document.getElementById('forest-col-right').innerHTML    = '';
-    document.getElementById('forest-result').classList.add('d-none');
-    document.getElementById('forest-study-game').classList.remove('d-none');
-    const modal = new bootstrap.Modal(document.getElementById('modal-forest-study'));
-    modal.show();
+    document.getElementById('farm-result').classList.add('d-none');
+    document.getElementById('farm-grid-wrapper').classList.remove('d-none');
+    const bar = document.getElementById('farm-plant-bar');
+    if (bar) {
+      bar.innerHTML = FARM_PLANTS.map(p =>
+        `<button class="farm-plant-btn${p.id === 'grano' ? ' active' : ''}" data-plant="${p.id}" title="${p.name} — ${p.pts} pt">
+          ${p.icon} <span>${p.name}</span>
+        </button>`
+      ).join('');
+      bar.querySelectorAll('.farm-plant-btn').forEach(b =>
+        b.addEventListener('click', () => App._selectFarmPlant(b.dataset.plant))
+      );
+    }
+    bootstrap.Modal.getOrCreateInstance(document.getElementById('modal-forest-study')).show();
+    App._startFarmGame();
   },
 
-  showForestStudyResult(win, timeLeft, errors) {
-    document.getElementById('forest-study-game').classList.add('d-none');
-    const resultEl  = document.getElementById('forest-result');
-    const titleEl   = document.getElementById('forest-result-title');
-    const rewardEl  = document.getElementById('forest-result-rewards');
-    resultEl.classList.remove('d-none');
-    if (win) {
-      let tier;
-      if (timeLeft > 45 && errors === 0)      tier = '🌟 Maestro della Foresta';
-      else if (timeLeft > 20 && errors <= 2)  tier = '✅ Buona Conoscenza';
-      else                                    tier = '🌿 Sufficiente';
-      titleEl.innerHTML = `<span class="text-gold">${tier}</span>`;
-      const result = Game.applyForestStudyReward(timeLeft, errors);
-      rewardEl.textContent = `+${result.xp} PE   +${result.gold} mo`;
-      this.refresh();
-      if (result.levelUpResult) App._triggerLevelUp(result.levelUpResult);
-    } else {
-      titleEl.innerHTML = '<span class="text-danger">Il tempo è scaduto!</span>';
-      rewardEl.textContent = 'Nessuna ricompensa.';
-    }
+  showForestStudyResult(score) {
+    document.getElementById('farm-grid-wrapper').classList.add('d-none');
+    const res = document.getElementById('farm-result');
+    res.classList.remove('d-none');
+    let title, titleClass;
+    if      (score >= 300) { title = '🌟 Raccolta Eccellente!'; titleClass = 'text-gold'; }
+    else if (score >= 150) { title = '🌿 Buon Raccolto';        titleClass = 'text-success'; }
+    else if (score >= 50)  { title = '🪴 Raccolto Modesto';     titleClass = 'text-muted'; }
+    else                   { title = '🥀 Scarso Raccolto';      titleClass = 'text-danger'; }
+    document.getElementById('farm-result-title').innerHTML = `<span class="${titleClass}">${title}</span>`;
+    const result = Game.applyForestStudyReward(score);
+    document.getElementById('farm-result-rewards').innerHTML =
+      `Punteggio: <b>${score}</b> pt — +${result.xp} PE, +${result.gold} mo` +
+      (result.ingredient ? `<br>🎁 Ingrediente: ${result.ingredient.icon} ${result.ingredient.name}` : '');
+    this.refresh();
+    if (result.levelUpResult?.leveledUp) App._triggerLevelUp(result.levelUpResult);
   },
 
   /* ─── Modal confronto ───────────────────────────────────── */

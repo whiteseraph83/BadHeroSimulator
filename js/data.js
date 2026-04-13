@@ -3735,3 +3735,17 @@ const STATUS_EFFECTS = {
   scudo_magico:     { id: 'scudo_magico',     name: 'Scudo Magico',        icon: '✨',      trigger: 'passive', caBonus: 0, color: '#ab47bc' },
   manovra_difensiva:{ id: 'manovra_difensiva',name: 'Manovra Difensiva',   icon: '🛡️', trigger: 'passive', caBonus: 0, color: '#ef5350' },
 };
+
+/* ──────────────────────────────────────────────────────────
+   FARM PLANTS (usate nel gioco "Coltiva la Foresta" — Druido)
+   growTime: ms per passare da GROWING a READY
+   sickClicks: clic necessari per curare la malattia
+   sickChance: probabilità che la pianta si ammali durante la crescita
+   ────────────────────────────────────────────────────────── */
+const FARM_PLANTS = [
+  { id: 'grano',        name: 'Grano',        icon: '🌾', growTime: 10000, pts: 10,  sickChance: 0.15, sickClicks: 5  },
+  { id: 'bacche',       name: 'Bacche',       icon: '🫐', growTime: 20000, pts: 25,  sickChance: 0.25, sickClicks: 8  },
+  { id: 'erbe_magiche', name: 'Erbe Magiche', icon: '🌿', growTime: 35000, pts: 50,  sickChance: 0.30, sickClicks: 10 },
+  { id: 'fiore_raro',   name: 'Fiore Raro',   icon: '🌸', growTime: 55000, pts: 100, sickChance: 0.40, sickClicks: 12 },
+  { id: 'albero_sacro', name: 'Albero Sacro', icon: '🌳', growTime: 80000, pts: 250, sickChance: 0.45, sickClicks: 15 },
+];

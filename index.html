@@ -1389,34 +1389,33 @@
   </div>
 </div>
 
-<!-- ===== MODAL: STUDIA LA FORESTA (Matching Game — solo Druido) ===== -->
+<!-- ===== MODAL: COLTIVA LA FORESTA (Farming Game — solo Druido) ===== -->
 <div class="modal fade" id="modal-forest-study" tabindex="-1" data-bs-backdrop="static">
   <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content modal-dark">
       <div class="modal-header border-gold">
-        <h5 class="modal-title text-gold">🌿 Studia la Foresta</h5>
+        <h5 class="modal-title text-gold">🌿 Coltiva la Foresta</h5>
       </div>
       <div class="modal-body">
         <!-- HUD -->
         <div class="d-flex justify-content-between align-items-center mb-2 px-1">
-          <div class="memory-hud-item" style="min-width:120px">
-            ⏱️ <span id="forest-timer-label" class="fw-bold">60</span>s
-            <div class="forest-timer-bar mt-1" id="forest-timer-bar" style="width:100%"></div>
-          </div>
-          <div class="memory-hud-item">❌ Errori: <span id="forest-errors" class="fw-bold">0</span></div>
-          <div class="memory-hud-item">✅ Coppie: <span id="forest-pairs" class="fw-bold">0</span>/6</div>
+          <div>⏱️ <span id="farm-timer" class="fw-bold">90</span>s</div>
+          <div>🌟 Punti: <span id="farm-score" class="fw-bold text-gold">0</span></div>
         </div>
-        <!-- Due colonne -->
-        <div id="forest-study-game">
-          <div class="forest-study-cols">
-            <div class="forest-study-col" id="forest-col-left"></div>
-            <div class="forest-study-col" id="forest-col-right"></div>
+        <div id="farm-grid-wrapper">
+          <!-- Selezione pianta -->
+          <div id="farm-plant-bar" class="farm-plant-bar mb-2"></div>
+          <!-- Griglia 4x4 -->
+          <div id="farm-grid" class="farm-grid"></div>
+          <!-- Legenda -->
+          <div class="farm-legend text-muted mt-2 small text-center">
+            Clicca: Zappa → Pianta → Annaffia → Raccogli &nbsp;|&nbsp; Cura la pianta malata con clic rapidi!
           </div>
         </div>
         <!-- Risultato -->
-        <div id="forest-result" class="d-none text-center py-3 mt-3">
-          <div id="forest-result-title" class="fs-4 fw-bold mb-2"></div>
-          <div id="forest-result-rewards" class="mb-3 text-muted"></div>
+        <div id="farm-result" class="d-none text-center py-3 mt-3">
+          <div id="farm-result-title" class="fs-4 fw-bold mb-2"></div>
+          <div id="farm-result-rewards" class="mb-3 text-muted"></div>
           <button class="btn btn-gold" data-bs-dismiss="modal" id="btn-close-forest">Chiudi</button>
         </div>
       </div>

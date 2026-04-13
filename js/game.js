@@ -402,21 +402,30 @@ const Game = {
     return { ok: true, win, xp, gold, completedChallenges, levelUpResult };
   },
 
-  /* ─── Studio la Foresta (solo Druido) ───────────────── */
-  applyForestStudyReward(timeLeft, errors) {
+  /* ─── Coltiva la Foresta (solo Druido) ───────────────── */
+  applyForestStudyReward(score) {
     let xp, gold;
-    if (timeLeft > 45 && errors === 0)     { xp = 180; gold = 100; }
-    else if (timeLeft > 20 && errors <= 2) { xp = 100; gold =  55; }
-    else                                   { xp =  50; gold =  25; }
+    if      (score >= 300) { xp = 300; gold = 180; }
+    else if (score >= 150) { xp = 180; gold = 100; }
+    else if (score >= 50)  { xp = 100; gold =  55; }
+    else                   { xp =  50; gold =  25; }
     const char = this.state.character;
-    char.xp   += xp;
-    char.gold += gold;
-    const logEntry = { day: char.day, text: `Studio della Foresta completato — +${xp} PE, +${gold} mo`, type: 'success' };
+    char.xp += xp; char.gold += gold;
+    let ingredient = null;
+    if (score >= 150 && this.state.ingredientInventory) {
+      const tierMax = score >= 300 ? 3 : 2;
+      const pool = INGREDIENTS.filter(i => i.quality <= tierMax);
+      if (pool.length) {
+        ingredient = pool[Math.floor(Math.random() * pool.length)];
+        this.state.ingredientInventory.push(ingredient.id);
+      }
+    }
+    const logEntry = { day: char.day, text: `Coltiva la Foresta — ${score} pt, +${xp} PE, +${gold} mo`, type: 'success' };
     char.log.unshift(logEntry); if (char.log.length > 500) char.log.pop();
     const completedChallenges = this.checkChallenges('passive');
     const levelUpResult = this.checkLevelUp();
     this.save();
-    return { ok: true, xp, gold, completedChallenges, levelUpResult };
+    return { ok: true, xp, gold, ingredient, completedChallenges, levelUpResult };
   },
 
   /* ─── Incantesimi (solo Mago) ──────────────────────────── */

@@ -540,12 +540,13 @@ const App = {
       UI.refresh();
     });
 
-    // Chiusura modal forest study (Druido) — ferma timer
+    // Chiusura modal farming (Druido) — ferma tutti i timer
     document.getElementById('modal-forest-study').addEventListener('hidden.bs.modal', () => {
-      if (this._forestTimerInterval) {
-        clearInterval(this._forestTimerInterval);
-        this._forestTimerInterval = null;
+      if (this._farmSessionInterval) {
+        clearInterval(this._farmSessionInterval);
+        this._farmSessionInterval = null;
       }
+      this._farmTiles.forEach((_, i) => this._clearFarmTileTimers(i));
       UI.refresh();
     });
 
@@ -1862,131 +1863,161 @@ const App = {
     if (result.levelUpResult) this._triggerLevelUp(result.levelUpResult);
   },
 
-  /* ─── Forest Study Matching Game (Druido) ─────────────── */
-  _forestPairsPool: [
-    { left:{icon:'🌙',name:'Luna'},     right:{icon:'🐺',name:'Lupo'} },
-    { left:{icon:'🌳',name:'Quercia'},  right:{icon:'🌰',name:'Ghianda'} },
-    { left:{icon:'🌧️',name:'Pioggia'}, right:{icon:'🍄',name:'Fungo'} },
-    { left:{icon:'☀️',name:'Sole'},    right:{icon:'🌻',name:'Girasole'} },
-    { left:{icon:'🏞️',name:'Fiume'}, right:{icon:'🦦',name:'Lontra'} },
-    { left:{icon:'💨',name:'Vento'},    right:{icon:'🌱',name:'Seme'} },
-    { left:{icon:'🔥',name:'Fuoco'},    right:{icon:'🦅',name:'Fenice'} },
-    { left:{icon:'🪵',name:'Radice'},   right:{icon:'🌍',name:'Terra'} },
-    { left:{icon:'🌫️',name:'Nebbia'}, right:{icon:'🦉',name:'Gufo'} },
-    { left:{icon:'⭐',name:'Stelle'},       right:{icon:'🦌',name:'Cervo'} },
-    { left:{icon:'❄️',name:'Gelo'},   right:{icon:'🐻',name:'Orso'} },
-    { left:{icon:'🌊',name:'Mare'},     right:{icon:'🐳',name:'Balena'} },
-    { left:{icon:'⛈️',name:'Tempesta'}, right:{icon:'🦅',name:'Aquila'} },
-    { left:{icon:'🌺',name:'Fiore'},    right:{icon:'🐝',name:'Ape'} },
-    { left:{icon:'🍃',name:'Foglia'},   right:{icon:'🐛',name:'Bruco'} },
-    { left:{icon:'🌑',name:'Notte'},    right:{icon:'🦇',name:'Pipistrello'} },
-    { left:{icon:'🌅',name:'Alba'},     right:{icon:'🐓',name:'Gallo'} },
-    { left:{icon:'🌰',name:'Castagna'}, right:{icon:'🐿️',name:'Scoiattolo'} },
-  ],
+  /* ─── Farming Game (Druido) ──────────────────────────── */
+  _farmTiles: [],
+  _farmScore: 0,
+  _farmTimeLeft: 90,
+  _farmSessionInterval: null,
+  _farmSelectedPlant: 'grano',
 
-  _startForestStudyGame() {
-    const level    = Game.state.character.level;
-    const timerMax = level >= 11 ? 45 : 60;
-    const shuffled = [...this._forestPairsPool].sort(() => Math.random() - 0.5);
-    this._fsPairs      = shuffled.slice(0, 6).map((p, i) => ({...p, id:i, matched:false}));
-    this._fsLeftSel    = null;
-    this._fsErrors     = 0;
-    this._fsPairsFound = 0;
-    this._fsTimeLeft   = timerMax;
-    this._fsTimerMax   = timerMax;
-    this._fsRightOrder = this._fsPairs.map(p => p.id).sort(() => Math.random() - 0.5);
-    this._renderForestStudyCols();
-
-    if (this._forestTimerInterval) clearInterval(this._forestTimerInterval);
-    this._forestTimerInterval = setInterval(() => {
-      this._fsTimeLeft--;
-      const lbl = document.getElementById('forest-timer-label');
-      const bar = document.getElementById('forest-timer-bar');
-      if (lbl) lbl.textContent = this._fsTimeLeft;
-      if (bar) {
-        const pct = Math.max(0, (this._fsTimeLeft / this._fsTimerMax) * 100);
-        bar.style.width = pct + '%';
-        bar.style.background = pct > 40 ? 'rgba(50,180,80,.6)' : pct > 15 ? 'rgba(200,150,30,.7)' : 'rgba(200,50,50,.7)';
-      }
-      if (this._fsTimeLeft <= 0) {
-        clearInterval(this._forestTimerInterval);
-        this._forestTimerInterval = null;
-        UI.showForestStudyResult(false, 0, this._fsErrors);
-      }
+  _startFarmGame() {
+    if (this._farmSessionInterval) clearInterval(this._farmSessionInterval);
+    this._farmTiles = Array.from({length: 16}, () => ({
+      state: 'EMPTY', plant: null,
+      growTimer: null, sickCheckTimer: null, sickInterval: null,
+      sickClicks: 0, sickNeeded: 0, sickProgress: 0, wiltTimer: null,
+    }));
+    this._farmScore = 0;
+    this._farmTimeLeft = 90;
+    this._farmSelectedPlant = 'grano';
+    this._renderFarmGrid();
+    this._renderFarmHUD();
+    this._farmSessionInterval = setInterval(() => {
+      this._farmTimeLeft--;
+      this._renderFarmHUD();
+      if (this._farmTimeLeft <= 0) this._endFarmSession();
     }, 1000);
   },
 
-  _renderForestStudyCols() {
-    const leftEl  = document.getElementById('forest-col-left');
-    const rightEl = document.getElementById('forest-col-right');
-    if (!leftEl || !rightEl) return;
+  _endFarmSession() {
+    clearInterval(this._farmSessionInterval);
+    this._farmSessionInterval = null;
+    this._farmTiles.forEach((_, i) => this._clearFarmTileTimers(i));
+    UI.showForestStudyResult(this._farmScore);
+  },
 
-    leftEl.innerHTML = this._fsPairs.map(p => {
-      const matched  = p.matched ? 'matched' : '';
-      const selected = (!p.matched && this._fsLeftSel === p.id) ? 'selected' : '';
-      return `<div class="forest-elem ${matched} ${selected}" data-left-id="${p.id}">
-        <span style="font-size:1.3rem">${p.left.icon}</span> <span>${p.left.name}</span>
-      </div>`;
-    }).join('');
+  _clearFarmTileTimers(idx) {
+    const t = this._farmTiles[idx];
+    if (!t) return;
+    clearTimeout(t.growTimer); clearTimeout(t.sickCheckTimer);
+    clearTimeout(t.wiltTimer); clearInterval(t.sickInterval);
+    t.growTimer = null; t.sickCheckTimer = null; t.wiltTimer = null; t.sickInterval = null;
+  },
 
-    rightEl.innerHTML = this._fsRightOrder.map(id => {
-      const p = this._fsPairs[id];
-      return `<div class="forest-elem ${p.matched ? 'matched' : ''}" data-right-id="${id}">
-        <span style="font-size:1.3rem">${p.right.icon}</span> <span>${p.right.name}</span>
-      </div>`;
-    }).join('');
+  _onFarmTileClick(idx) {
+    const t = this._farmTiles[idx];
+    if (!t) return;
+    const plant = FARM_PLANTS.find(p => p.id === this._farmSelectedPlant);
+    switch (t.state) {
+      case 'EMPTY':
+        t.state = 'DUG';
+        break;
+      case 'DUG':
+        t.state = 'PLANTED'; t.plant = plant;
+        break;
+      case 'PLANTED':
+        t.state = 'GROWING';
+        t.growTimer = setTimeout(() => { t.state = 'READY'; this._renderTile(idx); }, t.plant.growTime);
+        const sickDelay = t.plant.growTime * (0.4 + Math.random() * 0.3);
+        t.sickCheckTimer = setTimeout(() => {
+          if (t.state === 'GROWING' && Math.random() < t.plant.sickChance) this._triggerFarmSick(idx);
+        }, sickDelay);
+        break;
+      case 'SICK':
+        t.sickClicks++;
+        if (t.sickClicks >= t.sickNeeded) this._cureFarmTile(idx);
+        else this._renderTile(idx);
+        return;
+      case 'READY':
+        this._farmScore += t.plant.pts;
+        t.state = 'HARVESTED'; t.plant = null;
+        this._renderFarmHUD();
+        this._renderTile(idx);
+        setTimeout(() => { t.state = 'EMPTY'; this._renderTile(idx); }, 500);
+        return;
+      case 'DEAD':
+        t.state = 'EMPTY';
+        break;
+    }
+    this._renderTile(idx);
+  },
 
-    leftEl.querySelectorAll('.forest-elem:not(.matched)').forEach(el => {
-      el.addEventListener('click', () => {
-        this._fsLeftSel = parseInt(el.dataset.leftId);
-        this._renderForestStudyCols();
-      });
-    });
-    rightEl.querySelectorAll('.forest-elem:not(.matched)').forEach(el => {
-      el.addEventListener('click', () => this._onForestRightClick(parseInt(el.dataset.rightId)));
+  _triggerFarmSick(idx) {
+    const t = this._farmTiles[idx];
+    if (!t || t.state !== 'GROWING') return;
+    clearTimeout(t.growTimer); t.growTimer = null;
+    t.state = 'SICK'; t.sickClicks = 0; t.sickNeeded = t.plant.sickClicks; t.sickProgress = 0;
+    t.sickInterval = setInterval(() => {
+      t.sickProgress += 3;
+      if (t.sickProgress >= 100) {
+        clearInterval(t.sickInterval); t.sickInterval = null;
+        this._killFarmTile(idx);
+      } else {
+        this._renderTile(idx);
+      }
+    }, 200);
+    this._renderTile(idx);
+  },
+
+  _cureFarmTile(idx) {
+    const t = this._farmTiles[idx];
+    clearInterval(t.sickInterval); t.sickInterval = null;
+    t.state = 'GROWING'; t.sickProgress = 0; t.sickClicks = 0;
+    const remaining = Math.round(t.plant.growTime * 0.5);
+    t.growTimer = setTimeout(() => { t.state = 'READY'; this._renderTile(idx); }, remaining);
+    this._renderTile(idx);
+  },
+
+  _killFarmTile(idx) {
+    const t = this._farmTiles[idx];
+    this._clearFarmTileTimers(idx);
+    t.state = 'DEAD'; t.plant = null;
+    this._renderTile(idx);
+  },
+
+  _renderFarmGrid() {
+    const grid = document.getElementById('farm-grid');
+    if (!grid) return;
+    grid.innerHTML = this._farmTiles.map((_, i) =>
+      `<div class="farm-tile farm-tile--empty" data-idx="${i}"></div>`
+    ).join('');
+    grid.querySelectorAll('.farm-tile').forEach(el => {
+      el.addEventListener('click', () => this._onFarmTileClick(+el.dataset.idx));
     });
   },
 
-  _onForestRightClick(rightId) {
-    if (this._fsLeftSel === null) return;
-    if (this._fsPairs[rightId].matched) return;
-
-    if (this._fsLeftSel === rightId) {
-      // Coppia corretta
-      this._fsPairs[rightId].matched = true;
-      this._fsPairsFound++;
-      this._fsLeftSel = null;
-      document.getElementById('forest-pairs').textContent = this._fsPairsFound;
-      this._renderForestStudyCols();
-      if (this._fsPairsFound === 6) {
-        clearInterval(this._forestTimerInterval);
-        this._forestTimerInterval = null;
-        UI.showForestStudyResult(true, this._fsTimeLeft, this._fsErrors);
+  _renderTile(idx) {
+    const el = document.querySelector(`#farm-grid .farm-tile[data-idx="${idx}"]`);
+    if (!el) return;
+    const t = this._farmTiles[idx];
+    const STATE_ICONS = { EMPTY: '', DUG: '🪱', PLANTED: '🌱', DEAD: '💀', HARVESTED: '✨' };
+    el.className = `farm-tile farm-tile--${t.state.toLowerCase()}`;
+    if (t.state === 'GROWING' || t.state === 'SICK' || t.state === 'READY') {
+      let html = t.plant.icon;
+      if (t.state === 'SICK') {
+        const pct = Math.min(100, t.sickProgress);
+        const cure = Math.min(100, Math.round((t.sickClicks / t.sickNeeded) * 100));
+        html += `<div class="farm-tile__sick-bar"><div style="width:${pct}%"></div></div>`;
+        html += `<div class="farm-tile__cure-bar"><div style="width:${cure}%"></div></div>`;
       }
+      el.innerHTML = html;
     } else {
-      // Sbagliato: shake + -5s
-      this._fsErrors++;
-      document.getElementById('forest-errors').textContent = this._fsErrors;
-      this._fsTimeLeft = Math.max(0, this._fsTimeLeft - 5);
-      const lbl = document.getElementById('forest-timer-label');
-      if (lbl) lbl.textContent = this._fsTimeLeft;
-      const leftEl  = document.getElementById('forest-col-left');
-      const rightEl = document.getElementById('forest-col-right');
-      const lItem = leftEl?.querySelector(`[data-left-id="${this._fsLeftSel}"]`);
-      const rItem = rightEl?.querySelector(`[data-right-id="${rightId}"]`);
-      [lItem, rItem].forEach(el => {
-        if (!el) return;
-        el.classList.add('wrong');
-        setTimeout(() => el.classList.remove('wrong'), 500);
-      });
-      this._fsLeftSel = null;
-      setTimeout(() => this._renderForestStudyCols(), 520);
-      if (this._fsTimeLeft <= 0) {
-        clearInterval(this._forestTimerInterval);
-        this._forestTimerInterval = null;
-        UI.showForestStudyResult(false, 0, this._fsErrors);
-      }
+      el.textContent = STATE_ICONS[t.state] || '';
     }
+  },
+
+  _renderFarmHUD() {
+    const timerEl = document.getElementById('farm-timer');
+    const scoreEl = document.getElementById('farm-score');
+    if (timerEl) timerEl.textContent = this._farmTimeLeft;
+    if (scoreEl) scoreEl.textContent = this._farmScore;
+  },
+
+  _selectFarmPlant(id) {
+    this._farmSelectedPlant = id;
+    document.querySelectorAll('.farm-plant-btn').forEach(b =>
+      b.classList.toggle('active', b.dataset.plant === id)
+    );
   },
 
   /* ─── Arena ─────────────────────────────────────────────── */
