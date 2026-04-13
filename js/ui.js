@@ -100,7 +100,8 @@ const UI = {
       if (e.xpBoost)   parts.push(`+${Math.round(e.xpBoost*100)}% PE`);
       if (e.goldBoost)  parts.push(`+${Math.round(e.goldBoost*100)}% oro`);
       if (e.fameBoost) parts.push(`+${Math.round(e.fameBoost*100)}% fama`);
-      return `<div class="reward-row"><span class="reward-icon">⏱️</span><span class="text-info">${parts.join(' ')}</span> <span class="text-muted small">per ${e.duration} giorni</span></div>`;
+      if (e.hpBoost)   parts.push(`+${Math.round(e.hpBoost*100)}% PV (combatti)`);
+      return `<div class="reward-row"><span class="reward-icon">⏱️</span><span class="text-info">${parts.join(', ')}</span> <span class="text-muted small">per ${e.duration} giorni</span></div>`;
     }
   },
 
@@ -778,6 +779,7 @@ const UI = {
             <div class="item-stats-row mt-1">${statsHtml}</div>
             ${abilitiesHtml ? `<div class="item-abilities-row mt-1">${abilitiesHtml}</div>` : ''}
             ${item.consumable && item.desc ? `<div class="item-desc-text mt-1">${item.desc}</div>` : ''}
+            ${item.consumable ? `<div class="mt-1">${this._consumableEffectHtml(item)}</div>` : ''}
             ${warningHtml}
             <div class="d-flex justify-content-between align-items-center mt-2 gap-1">
               <span class="item-price"><i class="bi bi-coin"></i> ${entry.buyPrice} mo</span>
