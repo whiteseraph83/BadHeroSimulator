@@ -1944,7 +1944,7 @@ body {
 .nature-card .card-name { font-size: .65rem; color: #b0d090; display: block; margin-top: 2px; }
 
 /* ══════════════════════════════════════════════════════════
-   COLTIVA LA FORESTA (Druido)
+   COLTIVA LA FORESTA v2 (Druido)
    ══════════════════════════════════════════════════════════ */
 .farm-grid {
   display: grid;
@@ -1956,54 +1956,85 @@ body {
 .farm-tile {
   aspect-ratio: 1;
   border-radius: 8px;
-  cursor: pointer;
+  cursor: default;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.8rem;
+  font-size: 1.6rem;
   position: relative;
   overflow: hidden;
-  transition: transform .1s, border-color .2s;
   border: 2px solid transparent;
   user-select: none;
+  transition: border-color .3s, background .3s, box-shadow .3s;
 }
-.farm-tile--empty     { background: #1a1a1a; border-color: #333; }
-.farm-tile--empty:hover { border-color: #666; background: #222; }
-.farm-tile--dug       { background: #3b2a1a; border-color: #6b4c2a; }
-.farm-tile--planted   { background: #1a2e1a; border-color: #2d5a2d; }
-.farm-tile--growing   { background: #1a3a1a; border-color: #3d8b3d; animation: farmPulse 2s infinite; }
-.farm-tile--sick      { background: #3a1a1a; border-color: #aa3333; animation: farmShake .4s infinite; }
-.farm-tile--ready     { background: #2a3a1a; border-color: #c9a84c; animation: farmGlow 1s infinite alternate; }
-.farm-tile--harvested { background: rgba(82,183,136,.15); border-color: #52b788; }
-.farm-tile--dead      { background: #1a1010; border-color: #550000; opacity: .6; }
-@keyframes farmPulse { 0%,100%{opacity:.85} 50%{opacity:1} }
-@keyframes farmGlow  { from{box-shadow:0 0 4px #c9a84c} to{box-shadow:0 0 14px #c9a84c} }
-@keyframes farmShake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-3px)} 75%{transform:translateX(3px)} }
-.farm-tile__sick-bar, .farm-tile__cure-bar {
-  position: absolute; bottom: 0; left: 0; width: 100%; height: 4px;
+.farm-tile--idle          { background: #141414; border-color: #252525; }
+.farm-tile--growing       { background: #192819; border-color: #2d5a2d; }
+.farm-tile--cued          { background: #1e381e; border-color: #c9a84c; cursor: pointer;
+                            animation: farmTileCue .65s infinite alternate; }
+.farm-tile--harvesting    { background: #253818; border-color: #5a9a3a; cursor: pointer; }
+.farm-tile--done          { background: rgba(82,183,136,.2); border-color: #52b788;
+                            animation: farmTileDone .8s ease; }
+.farm-tile--deteriorating { background: #281212; border-color: #7a1a1a;
+                            animation: farmTileDet .3s infinite alternate; }
+.farm-tile--spotted       { border-color: #8b2fc9 !important;
+                            box-shadow: 0 0 10px rgba(139,47,201,.5) !important; }
+
+@keyframes farmTileCue  { from{box-shadow:0 0 5px rgba(201,168,76,.25)} to{box-shadow:0 0 20px rgba(201,168,76,.8)} }
+@keyframes farmTileDone { 0%{background:rgba(82,183,136,.5)} 100%{background:rgba(82,183,136,.2)} }
+@keyframes farmTileDet  { from{box-shadow:0 0 4px rgba(180,30,30,.3)} to{box-shadow:0 0 16px rgba(230,50,50,.9)} }
+
+.farm-icon { font-size: 1.7rem; line-height: 1; pointer-events: none; display: block; }
+.farm-icon--bounce { animation: farmIconBounce .4s infinite alternate; }
+@keyframes farmIconBounce { from{transform:translateY(0) scale(1)} to{transform:translateY(-6px) scale(1.15)} }
+
+/* Barre di stato */
+.farm-bar {
+  position: absolute;
+  bottom: 0; left: 0;
+  width: 100%; height: 5px;
+  pointer-events: none;
+  background: rgba(255,255,255,.05);
 }
-.farm-tile__sick-bar { background: rgba(255,255,255,.08); }
-.farm-tile__sick-bar div { height: 4px; background: #cc3333; transition: width .2s; }
-.farm-tile__cure-bar { bottom: 4px; background: rgba(255,255,255,.05); }
-.farm-tile__cure-bar div { height: 4px; background: #52b788; transition: width .1s; }
-.farm-plant-bar {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-  justify-content: center;
+.farm-bar--auto::after {
+  content: '';
+  display: block;
+  height: 100%;
+  background: linear-gradient(to right, #2a6b2a, #52b788);
+  animation: farmBarFill var(--dur, 8s) linear forwards;
 }
-.farm-plant-btn {
-  padding: 4px 10px;
-  border-radius: 20px;
-  border: 1px solid rgba(201,168,76,.3);
-  background: rgba(255,255,255,.03);
-  color: #ccc;
-  cursor: pointer;
-  font-size: .8rem;
-  transition: all .15s;
+.farm-bar--cue::after {
+  content: '';
+  display: block;
+  height: 100%;
+  background: linear-gradient(to right, #c9a84c, #ffd700);
+  animation: farmBarDrain var(--dur, 5s) linear forwards;
 }
-.farm-plant-btn:hover { border-color: rgba(201,168,76,.6); }
-.farm-plant-btn.active { border-color: #c9a84c; background: rgba(201,168,76,.1); color: #c9a84c; }
+.farm-bar--harvest > div {
+  height: 100%;
+  background: linear-gradient(to right, #52b788, #9be0b4);
+  transition: width .12s ease;
+}
+@keyframes farmBarFill  { from{width:0%}    to{width:100%} }
+@keyframes farmBarDrain { from{width:100%}  to{width:0%}   }
+
+/* Macchie viola */
+.farm-spots {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.farm-spot {
+  position: absolute;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(175,20,240,.9) 0%, rgba(100,0,180,.55) 55%, transparent 100%);
+  animation: farmSpotIn .25s ease-out;
+  pointer-events: none;
+}
+@keyframes farmSpotIn {
+  from { transform: translate(-50%,-50%) scale(0); opacity: 0; }
+  to   { transform: translate(-50%,-50%) scale(1); opacity: 1; }
+}
 .farm-legend { font-size: .75rem; }
 
 [data-theme="light"] .nature-cell.low  { background: rgba(220,80,80,.18);  border-color: rgba(200,60,60,.5);  color: #c02020; }
@@ -2011,8 +2042,8 @@ body {
 [data-theme="light"] .nature-cell.high { background: rgba(130,50,200,.12); border-color: rgba(130,50,200,.4); color: #6020b0; }
 [data-theme="light"] .nature-card      { background: rgba(220,250,210,.5); border-color: rgba(80,160,50,.35); }
 [data-theme="light"] .nature-card.selected { border-color: #b8860b; background: rgba(200,240,180,.7); }
-[data-theme="light"] .farm-tile--empty { background: #e8e8e8; border-color: #ccc; }
-[data-theme="light"] .farm-plant-btn   { color: #333; background: rgba(0,0,0,.04); }
+[data-theme="light"] .farm-tile--idle  { background: #e8e8e8; border-color: #ccc; }
+[data-theme="light"] .farm-tile--cued  { background: #fffde7; }
 
 /* ── LOBBY COMBATTIMENTO — POSTA IN GIOCO ───────────────── */
 .combat-stakes {

@@ -1738,17 +1738,6 @@ const UI = {
   openForestStudyModal() {
     document.getElementById('farm-result').classList.add('d-none');
     document.getElementById('farm-grid-wrapper').classList.remove('d-none');
-    const bar = document.getElementById('farm-plant-bar');
-    if (bar) {
-      bar.innerHTML = FARM_PLANTS.map(p =>
-        `<button class="farm-plant-btn${p.id === 'grano' ? ' active' : ''}" data-plant="${p.id}" title="${p.name} — ${p.pts} pt">
-          ${p.icon} <span>${p.name}</span>
-        </button>`
-      ).join('');
-      bar.querySelectorAll('.farm-plant-btn').forEach(b =>
-        b.addEventListener('click', () => App._selectFarmPlant(b.dataset.plant))
-      );
-    }
     bootstrap.Modal.getOrCreateInstance(document.getElementById('modal-forest-study')).show();
     App._startFarmGame();
   },

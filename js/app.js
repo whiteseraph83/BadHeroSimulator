@@ -1863,30 +1863,44 @@ const App = {
     if (result.levelUpResult) this._triggerLevelUp(result.levelUpResult);
   },
 
-  /* ─── Farming Game (Druido) ──────────────────────────── */
+  /* ─── Farming Game v2 (Druido) ──────────────────────── */
+  // Fasi: 0=Annaffia 1=Tendi 2=Raccogli(harvest)
+  _FARM_PHASES: [
+    { autoDuration: 7000, cueWindow: 5000, cueIcon: '💧', autoIcon: '🌱' },
+    { autoDuration: 9000, cueWindow: 5000, cueIcon: '☀️', autoIcon: '🌿' },
+    { autoDuration: null, cueWindow: null, cueIcon: '✂️', autoIcon: '🌾' },
+  ],
+  _HARVEST_CLICKS: 12,
+  _SPOT_MAX: 10,
+  _DISEASE_CHANCE: 0.45,
   _farmTiles: [],
   _farmScore: 0,
   _farmTimeLeft: 90,
   _farmSessionInterval: null,
-  _farmSelectedPlant: 'grano',
 
   _startFarmGame() {
     if (this._farmSessionInterval) clearInterval(this._farmSessionInterval);
-    this._farmTiles = Array.from({length: 16}, () => ({
-      state: 'EMPTY', plant: null,
-      growTimer: null, sickCheckTimer: null, sickInterval: null,
-      sickClicks: 0, sickNeeded: 0, sickProgress: 0, wiltTimer: null,
-    }));
     this._farmScore = 0;
     this._farmTimeLeft = 90;
-    this._farmSelectedPlant = 'grano';
+    this._farmTiles = Array.from({length: 16}, (_, i) => this._newFarmTile(i));
     this._renderFarmGrid();
     this._renderFarmHUD();
+    this._farmTiles.forEach((_, i) => setTimeout(() => this._farmBegin(i), 300 + i * 350));
     this._farmSessionInterval = setInterval(() => {
       this._farmTimeLeft--;
       this._renderFarmHUD();
       if (this._farmTimeLeft <= 0) this._endFarmSession();
     }, 1000);
+  },
+
+  _newFarmTile(i) {
+    return {
+      idx: i,
+      plant: FARM_PLANTS[Math.floor(Math.random() * FARM_PLANTS.length)],
+      phase: -1, state: 'idle',
+      autoTimer: null, cueExpireTimer: null, diseaseTimer: null, spotInterval: null,
+      spots: 0, harvestClicks: 0, cueDuration: 0,
+    };
   },
 
   _endFarmSession() {
@@ -1899,110 +1913,203 @@ const App = {
   _clearFarmTileTimers(idx) {
     const t = this._farmTiles[idx];
     if (!t) return;
-    clearTimeout(t.growTimer); clearTimeout(t.sickCheckTimer);
-    clearTimeout(t.wiltTimer); clearInterval(t.sickInterval);
-    t.growTimer = null; t.sickCheckTimer = null; t.wiltTimer = null; t.sickInterval = null;
+    clearTimeout(t.autoTimer); clearTimeout(t.cueExpireTimer);
+    clearTimeout(t.diseaseTimer); clearInterval(t.spotInterval);
+    t.autoTimer = null; t.cueExpireTimer = null; t.diseaseTimer = null; t.spotInterval = null;
+  },
+
+  // Avvia una tile dalla fase 0
+  _farmBegin(idx) {
+    const t = this._farmTiles[idx];
+    if (!t) return;
+    this._clearFarmTileTimers(idx);
+    t.phase = 0; t.spots = 0; t.harvestClicks = 0;
+    t.plant = FARM_PLANTS[Math.floor(Math.random() * FARM_PLANTS.length)];
+    this._farmGrow(idx);
+  },
+
+  // Fase auto (crescita automatica) → poi cue
+  _farmGrow(idx) {
+    const t = this._farmTiles[idx];
+    if (!t) return;
+    const phase = this._FARM_PHASES[t.phase];
+    if (!phase.autoDuration) { this._farmHarvest(idx); return; }
+    t.state = 'growing';
+    this._renderTile(idx);
+    t.autoTimer = setTimeout(() => this._farmCue(idx), phase.autoDuration);
+  },
+
+  // Cue: prompt visivo + countdown → il giocatore deve cliccare
+  _farmCue(idx) {
+    const t = this._farmTiles[idx];
+    if (!t) return;
+    this._clearFarmTileTimers(idx);
+    const phase = this._FARM_PHASES[t.phase];
+    t.state = 'cued'; t.spots = 0; t.cueDuration = phase.cueWindow;
+    this._renderTile(idx);
+    if (Math.random() < this._DISEASE_CHANCE) this._farmStartSpots(idx);
+    t.cueExpireTimer = setTimeout(() => {
+      if (t.state === 'cued') this._farmDeteriorate(idx);
+    }, phase.cueWindow);
+  },
+
+  // Fase raccolta: multi-clic
+  _farmHarvest(idx) {
+    const t = this._farmTiles[idx];
+    if (!t) return;
+    t.state = 'harvesting'; t.harvestClicks = 0; t.spots = 0;
+    this._renderTile(idx);
+    if (Math.random() < this._DISEASE_CHANCE) {
+      t.diseaseTimer = setTimeout(() => {
+        if (t.state === 'harvesting') this._farmStartSpots(idx);
+      }, 2000 + Math.random() * 3000);
+    }
+  },
+
+  // Macchie viola ogni 500ms
+  _farmStartSpots(idx) {
+    const t = this._farmTiles[idx];
+    if (!t || t.spotInterval) return;
+    t.spotInterval = setInterval(() => {
+      if (!this._farmTiles[idx] || (t.state !== 'cued' && t.state !== 'harvesting')) {
+        clearInterval(t.spotInterval); t.spotInterval = null; return;
+      }
+      t.spots++;
+      if (t.spots >= this._SPOT_MAX) {
+        clearInterval(t.spotInterval); t.spotInterval = null;
+        this._farmDeteriorate(idx);
+      } else {
+        this._renderTileSpots(idx);
+      }
+    }, 500);
+  },
+
+  // Deterioramento: animazione + riavvio dalla fase 0
+  _farmDeteriorate(idx) {
+    const t = this._farmTiles[idx];
+    if (!t) return;
+    this._clearFarmTileTimers(idx);
+    t.state = 'deteriorating'; t.spots = 0;
+    this._renderTile(idx);
+    setTimeout(() => {
+      t.state = 'idle'; this._renderTile(idx);
+      setTimeout(() => this._farmBegin(idx), 600);
+    }, 900);
+  },
+
+  // Raccolto completato → punteggio
+  _farmDone(idx) {
+    const t = this._farmTiles[idx];
+    if (!t) return;
+    this._clearFarmTileTimers(idx);
+    t.spots = 0;
+    this._farmScore += t.plant.pts;
+    t.state = 'done';
+    this._renderFarmHUD();
+    this._renderTile(idx);
+    setTimeout(() => {
+      t.state = 'idle'; this._renderTile(idx);
+      setTimeout(() => this._farmBegin(idx), 800);
+    }, 900);
   },
 
   _onFarmTileClick(idx) {
     const t = this._farmTiles[idx];
     if (!t) return;
-    const plant = FARM_PLANTS.find(p => p.id === this._farmSelectedPlant);
-    switch (t.state) {
-      case 'EMPTY':
-        t.state = 'DUG';
-        break;
-      case 'DUG':
-        t.state = 'PLANTED'; t.plant = plant;
-        break;
-      case 'PLANTED':
-        t.state = 'GROWING';
-        t.growTimer = setTimeout(() => { t.state = 'READY'; this._renderTile(idx); }, t.plant.growTime);
-        const sickDelay = t.plant.growTime * (0.4 + Math.random() * 0.3);
-        t.sickCheckTimer = setTimeout(() => {
-          if (t.state === 'GROWING' && Math.random() < t.plant.sickChance) this._triggerFarmSick(idx);
-        }, sickDelay);
-        break;
-      case 'SICK':
-        t.sickClicks++;
-        if (t.sickClicks >= t.sickNeeded) this._cureFarmTile(idx);
-        else this._renderTile(idx);
-        return;
-      case 'READY':
-        this._farmScore += t.plant.pts;
-        t.state = 'HARVESTED'; t.plant = null;
-        this._renderFarmHUD();
-        this._renderTile(idx);
-        setTimeout(() => { t.state = 'EMPTY'; this._renderTile(idx); }, 500);
-        return;
-      case 'DEAD':
-        t.state = 'EMPTY';
-        break;
+    // Clic nel momento sbagliato (growing) → deteriora e ricomincia
+    if (t.state === 'growing') {
+      this._farmDeteriorate(idx); return;
     }
-    this._renderTile(idx);
-  },
-
-  _triggerFarmSick(idx) {
-    const t = this._farmTiles[idx];
-    if (!t || t.state !== 'GROWING') return;
-    clearTimeout(t.growTimer); t.growTimer = null;
-    t.state = 'SICK'; t.sickClicks = 0; t.sickNeeded = t.plant.sickClicks; t.sickProgress = 0;
-    t.sickInterval = setInterval(() => {
-      t.sickProgress += 3;
-      if (t.sickProgress >= 100) {
-        clearInterval(t.sickInterval); t.sickInterval = null;
-        this._killFarmTile(idx);
-      } else {
-        this._renderTile(idx);
+    if (t.state === 'cued') {
+      if (t.spots > 0) { t.spots--; this._renderTileSpots(idx); }
+      else {
+        this._clearFarmTileTimers(idx);
+        t.phase++; t.spots = 0;
+        this._farmGrow(idx);
       }
-    }, 200);
-    this._renderTile(idx);
-  },
-
-  _cureFarmTile(idx) {
-    const t = this._farmTiles[idx];
-    clearInterval(t.sickInterval); t.sickInterval = null;
-    t.state = 'GROWING'; t.sickProgress = 0; t.sickClicks = 0;
-    const remaining = Math.round(t.plant.growTime * 0.5);
-    t.growTimer = setTimeout(() => { t.state = 'READY'; this._renderTile(idx); }, remaining);
-    this._renderTile(idx);
-  },
-
-  _killFarmTile(idx) {
-    const t = this._farmTiles[idx];
-    this._clearFarmTileTimers(idx);
-    t.state = 'DEAD'; t.plant = null;
-    this._renderTile(idx);
+      return;
+    }
+    if (t.state === 'harvesting') {
+      if (t.spots > 0) { t.spots--; this._renderTileSpots(idx); }
+      else {
+        t.harvestClicks++;
+        if (t.harvestClicks >= this._HARVEST_CLICKS) {
+          clearTimeout(t.diseaseTimer); t.diseaseTimer = null;
+          clearInterval(t.spotInterval); t.spotInterval = null;
+          this._farmDone(idx);
+        } else {
+          this._renderTileHarvestBar(idx);
+          // Malattia a metà raccolto
+          if (!t.spotInterval && !t.diseaseTimer && t.harvestClicks === 4 && Math.random() < 0.3)
+            this._farmStartSpots(idx);
+        }
+      }
+      return;
+    }
   },
 
   _renderFarmGrid() {
     const grid = document.getElementById('farm-grid');
     if (!grid) return;
     grid.innerHTML = this._farmTiles.map((_, i) =>
-      `<div class="farm-tile farm-tile--empty" data-idx="${i}"></div>`
+      `<div class="farm-tile farm-tile--idle" data-idx="${i}"></div>`
     ).join('');
-    grid.querySelectorAll('.farm-tile').forEach(el => {
-      el.addEventListener('click', () => this._onFarmTileClick(+el.dataset.idx));
-    });
+    grid.querySelectorAll('.farm-tile').forEach(el =>
+      el.addEventListener('click', () => this._onFarmTileClick(+el.dataset.idx))
+    );
   },
 
   _renderTile(idx) {
     const el = document.querySelector(`#farm-grid .farm-tile[data-idx="${idx}"]`);
     if (!el) return;
     const t = this._farmTiles[idx];
-    const STATE_ICONS = { EMPTY: '', DUG: '🪱', PLANTED: '🌱', DEAD: '💀', HARVESTED: '✨' };
-    el.className = `farm-tile farm-tile--${t.state.toLowerCase()}`;
-    if (t.state === 'GROWING' || t.state === 'SICK' || t.state === 'READY') {
-      let html = t.plant.icon;
-      if (t.state === 'SICK') {
-        const pct = Math.min(100, t.sickProgress);
-        const cure = Math.min(100, Math.round((t.sickClicks / t.sickNeeded) * 100));
-        html += `<div class="farm-tile__sick-bar"><div style="width:${pct}%"></div></div>`;
-        html += `<div class="farm-tile__cure-bar"><div style="width:${cure}%"></div></div>`;
+    el.className = `farm-tile farm-tile--${t.state}${t.spots > 0 ? ' farm-tile--spotted' : ''}`;
+    let html = '';
+    switch (t.state) {
+      case 'idle': break;
+      case 'growing': {
+        const ph = this._FARM_PHASES[t.phase];
+        html = `<span class="farm-icon">${ph.autoIcon}</span><div class="farm-bar farm-bar--auto" style="--dur:${ph.autoDuration}ms"></div>`;
+        break;
       }
-      el.innerHTML = html;
-    } else {
-      el.textContent = STATE_ICONS[t.state] || '';
+      case 'cued': {
+        const ph = this._FARM_PHASES[t.phase];
+        html = `<span class="farm-icon farm-icon--bounce">${ph.cueIcon}</span><div class="farm-bar farm-bar--cue" style="--dur:${t.cueDuration}ms"></div>`;
+        break;
+      }
+      case 'harvesting': {
+        const pct = Math.min(100, Math.round((t.harvestClicks / this._HARVEST_CLICKS) * 100));
+        html = `<span class="farm-icon">🌾</span><div class="farm-bar farm-bar--harvest"><div style="width:${pct}%"></div></div>`;
+        break;
+      }
+      case 'done':          html = '<span class="farm-icon">✨</span>'; break;
+      case 'deteriorating': html = '<span class="farm-icon">🥀</span>'; break;
+    }
+    html += '<div class="farm-spots"></div>';
+    el.innerHTML = html;
+    if (t.spots > 0) this._renderTileSpots(idx);
+  },
+
+  _renderTileSpots(idx) {
+    const el = document.querySelector(`#farm-grid .farm-tile[data-idx="${idx}"]`);
+    if (!el) return;
+    const t = this._farmTiles[idx];
+    el.classList.toggle('farm-tile--spotted', t.spots > 0);
+    const spotsEl = el.querySelector('.farm-spots');
+    if (!spotsEl) return;
+    const POS = [[22,28],[62,68],[18,52],[72,22],[42,78],[12,62],[82,38],[48,12],[32,72],[68,48]];
+    spotsEl.innerHTML = Array.from({length: Math.min(t.spots, 10)}, (_, i) => {
+      const [top, left] = POS[i % POS.length];
+      const size = 12 + Math.floor(i / 2) * 3;
+      return `<span class="farm-spot" style="top:${top}%;left:${left}%;width:${size}px;height:${size}px"></span>`;
+    }).join('');
+  },
+
+  _renderTileHarvestBar(idx) {
+    const el = document.querySelector(`#farm-grid .farm-tile[data-idx="${idx}"] .farm-bar--harvest > div`);
+    if (el) {
+      const t = this._farmTiles[idx];
+      el.style.width = Math.min(100, Math.round((t.harvestClicks / this._HARVEST_CLICKS) * 100)) + '%';
     }
   },
 
@@ -2011,13 +2118,6 @@ const App = {
     const scoreEl = document.getElementById('farm-score');
     if (timerEl) timerEl.textContent = this._farmTimeLeft;
     if (scoreEl) scoreEl.textContent = this._farmScore;
-  },
-
-  _selectFarmPlant(id) {
-    this._farmSelectedPlant = id;
-    document.querySelectorAll('.farm-plant-btn').forEach(b =>
-      b.classList.toggle('active', b.dataset.plant === id)
-    );
   },
 
   /* ─── Arena ─────────────────────────────────────────────── */
