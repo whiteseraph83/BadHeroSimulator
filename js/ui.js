@@ -2128,7 +2128,7 @@ const UI = {
     const level = char.level || 1;
     const abbr  = { str:'FOR', dex:'DES', con:'COS', int:'INT', wis:'SAG', cha:'CAR' };
     const fmt   = n => n >= 0 ? `+${n}` : `${n}`;
-    const hitA  = s.hitStat || s.stat || 'str';
+    const hitA  = (s.classHitStat?.[cls.id]) || s.hitStat || s.stat || 'str';
     const hitMod = Game.modifier(Game.effectiveStat(hitA));
     const prof   = profs.includes(hitA) ? (char.proficiency || 2) : 0;
     const profTxt = prof > 0 ? ` ${fmt(prof)} comp.` : '';

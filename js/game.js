@@ -2262,7 +2262,8 @@ const Game = {
     }
 
     // Attacco fisico/magico
-    const rollR = this._combatRollToHit(skill.hitStat, skill.hitPenalty || 0, c.enemy.evasion, c.enemy.stats);
+    const effectiveHitStat = (skill.classHitStat?.[this.getClasse().id]) || skill.hitStat;
+    const rollR = this._combatRollToHit(effectiveHitStat, skill.hitPenalty || 0, c.enemy.evasion, c.enemy.stats);
     const { hit, critical } = rollR;
     const rollDesc = this._rollSummary(rollR);
     if (hit) {
