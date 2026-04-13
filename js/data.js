@@ -3433,6 +3433,7 @@ const COMBAT_SKILLS = [
   { id: 'attacca',             name: 'Attacca',              icon: '⚔️',
     type: 'physical', stat: 'str', hitStat: 'str',
     classHitStat: { guerriero: 'str', mago: 'int', paladino: 'cha', druido: 'wis', chierico: 'wis' },
+    classStat:    { guerriero: 'str', mago: 'int', paladino: 'cha', druido: 'wis', chierico: 'wis' },
     damageDice: 'weapon', damageBonus: 0,
     target: 'enemy', availableFor: ['guerriero','mago','paladino','druido','chierico'],
     hitPenalty: 0, unlockLevel: 1 },

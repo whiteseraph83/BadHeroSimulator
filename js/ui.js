@@ -2129,6 +2129,7 @@ const UI = {
     const abbr  = { str:'FOR', dex:'DES', con:'COS', int:'INT', wis:'SAG', cha:'CAR' };
     const fmt   = n => n >= 0 ? `+${n}` : `${n}`;
     const hitA  = (s.classHitStat?.[cls.id]) || s.hitStat || s.stat || 'str';
+    const dmgA  = (s.classStat?.[cls.id])    || s.stat    || 'str';
     const hitMod = Game.modifier(Game.effectiveStat(hitA));
     const prof   = profs.includes(hitA) ? (char.proficiency || 2) : 0;
     const profTxt = prof > 0 ? ` ${fmt(prof)} comp.` : '';
@@ -2164,10 +2165,10 @@ const UI = {
     } else {
       const typeL = s.type === 'magical' ? 'Attacco magico' : 'Attacco fisico';
       lines.push(`${typeL}: <b>${hitTxt}</b> vs CA nemica.`);
-      if (s.damageDice === 'weapon') lines.push(`Danno: arma ${fmt(Game.modifier(Game.effectiveStat(s.stat)))}${abbr[s.stat]}.`);
+      if (s.damageDice === 'weapon') lines.push(`Danno: arma ${fmt(Game.modifier(Game.effectiveStat(dmgA)))}${abbr[dmgA]}.`);
       else if (s.damageDice) {
-        const dMod = Game.modifier(Game.effectiveStat(s.stat));
-        lines.push(`Danno: <b>${s.damageDice}</b> ${fmt(dMod)}${abbr[s.stat]}${s.damageBonus > 0 ? ' +'+s.damageBonus : ''}.`);
+        const dMod = Game.modifier(Game.effectiveStat(dmgA));
+        lines.push(`Danno: <b>${s.damageDice}</b> ${fmt(dMod)}${abbr[dmgA]}${s.damageBonus > 0 ? ' +'+s.damageBonus : ''}.`);
       }
       if (s.statusApply) { const e = STATUS_EFFECTS?.[s.statusApply]; const dur = s.statusDuration || 2; lines.push(`Se colpisci: <b>${e?.name || s.statusApply}</b> per ${dur} turni.`); }
       if (s.drain) lines.push(`Drenaggio: recuperi metà del danno inflitto.`);

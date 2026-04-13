@@ -2262,12 +2262,15 @@ const Game = {
     }
 
     // Attacco fisico/magico
-    const effectiveHitStat = (skill.classHitStat?.[this.getClasse().id]) || skill.hitStat;
+    const clsId = this.getClasse().id;
+    const effectiveHitStat = (skill.classHitStat?.[clsId]) || skill.hitStat;
+    const effectiveStat    = (skill.classStat?.[clsId])    || skill.stat;
+    const skillForRoll     = effectiveStat !== skill.stat ? { ...skill, stat: effectiveStat } : skill;
     const rollR = this._combatRollToHit(effectiveHitStat, skill.hitPenalty || 0, c.enemy.evasion, c.enemy.stats);
     const { hit, critical } = rollR;
     const rollDesc = this._rollSummary(rollR);
     if (hit) {
-      let dmg = this._combatCalcDamage(skill, critical);
+      let dmg = this._combatCalcDamage(skillForRoll, critical);
       const shieldIdx = c.enemy.statusEffects.findIndex(s => s.id === 'magic_shield' && s.duration > 0);
       if (shieldIdx >= 0) {
         dmg = Math.max(1, Math.floor(dmg * 0.5));
