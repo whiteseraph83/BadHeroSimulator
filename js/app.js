@@ -1870,8 +1870,8 @@ const App = {
     { autoDuration: 9000, cueWindow: 5000, cueIcon: '☀️', autoIcon: '🌿' },
     { autoDuration: null, cueWindow: null, cueIcon: '✂️', autoIcon: '🌾' },
   ],
-  _HARVEST_CLICKS: 12,
-  _SPOT_MAX: 10,
+  _HARVEST_CLICKS: 7,
+  _SPOT_MAX: 6,
   _DISEASE_CHANCE: 0.45,
   _farmTiles: [],
   _farmScore: 0,
@@ -2042,7 +2042,7 @@ const App = {
         } else {
           this._renderTileHarvestBar(idx);
           // Malattia a metà raccolto
-          if (!t.spotInterval && !t.diseaseTimer && t.harvestClicks === 4 && Math.random() < 0.3)
+          if (!t.spotInterval && !t.diseaseTimer && t.harvestClicks === 3 && Math.random() < 0.3)
             this._farmStartSpots(idx);
         }
       }
