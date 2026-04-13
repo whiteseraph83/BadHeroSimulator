@@ -1882,7 +1882,7 @@ const App = {
     if (this._farmSessionInterval) clearInterval(this._farmSessionInterval);
     this._farmScore = 0;
     this._farmTimeLeft = 90;
-    this._farmTiles = Array.from({length: 16}, (_, i) => this._newFarmTile(i));
+    this._farmTiles = Array.from({length: 9}, (_, i) => this._newFarmTile(i));
     this._renderFarmGrid();
     this._renderFarmHUD();
     this._farmTiles.forEach((_, i) => setTimeout(() => this._farmBegin(i), 300 + i * 350));
