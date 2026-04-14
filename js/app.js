@@ -1866,8 +1866,8 @@ const App = {
   /* ─── Farming Game v2 (Druido) ──────────────────────── */
   // Fasi: 0=Annaffia 1=Tendi 2=Raccogli(harvest)
   _FARM_PHASES: [
-    { autoDuration: 13000, cueWindow: 7000, cueIcon: '💧', autoIcon: '🌱' },
-    { autoDuration: 17000, cueWindow: 7000, cueIcon: '☀️', autoIcon: '🌿' },
+    { autoDuration: 10000, cueWindow: 7000, cueIcon: '💧', autoIcon: '🌱' },
+    { autoDuration: 13000, cueWindow: 7000, cueIcon: '☀️', autoIcon: '🌿' },
     { autoDuration: null,  cueWindow: null, cueIcon: '✂️', autoIcon: '🌾' },
   ],
   _HARVEST_CLICKS: 7,
@@ -1885,7 +1885,7 @@ const App = {
     this._farmTiles = Array.from({length: 9}, (_, i) => this._newFarmTile(i));
     this._renderFarmGrid();
     this._renderFarmHUD();
-    this._farmTiles.forEach((_, i) => setTimeout(() => this._farmBegin(i), 300 + i * 350));
+    this._farmTiles.forEach((_, i) => setTimeout(() => this._farmBegin(i), Math.random() * 5000));
     this._farmSessionInterval = setInterval(() => {
       this._farmTimeLeft--;
       this._renderFarmHUD();
@@ -1994,7 +1994,7 @@ const App = {
     this._renderTile(idx);
     setTimeout(() => {
       t.state = 'idle'; this._renderTile(idx);
-      setTimeout(() => this._farmBegin(idx), 600);
+      setTimeout(() => this._farmBegin(idx), 400 + Math.random() * 2000);
     }, 900);
   },
 
@@ -2010,7 +2010,7 @@ const App = {
     this._renderTile(idx);
     setTimeout(() => {
       t.state = 'idle'; this._renderTile(idx);
-      setTimeout(() => this._farmBegin(idx), 800);
+      setTimeout(() => this._farmBegin(idx), 400 + Math.random() * 2000);
     }, 900);
   },
 
