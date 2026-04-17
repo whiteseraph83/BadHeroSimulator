@@ -1866,8 +1866,8 @@ const App = {
   /* ─── Farming Game v2 (Druido) ──────────────────────── */
   // Fasi: 0=Annaffia 1=Tendi 2=Raccogli(harvest)
   _FARM_PHASES: [
-    { autoDuration: 10000, cueWindow: 7000, cueIcon: '💧', autoIcon: '🌱' },
-    { autoDuration: 13000, cueWindow: 7000, cueIcon: '☀️', autoIcon: '🌿' },
+    { autoDuration: 7500,  cueWindow: 7000, cueIcon: '💧', autoIcon: '🌱' },
+    { autoDuration: 9750,  cueWindow: 7000, cueIcon: '☀️', autoIcon: '🌿' },
     { autoDuration: null,  cueWindow: null, cueIcon: '✂️', autoIcon: '🌾' },
   ],
   _HARVEST_CLICKS: 7,
