@@ -1923,7 +1923,7 @@ const App = {
     const t = this._farmTiles[idx];
     if (!t) return;
     this._clearFarmTileTimers(idx);
-    t.phase = 0; t.spots = 0; t.harvestClicks = 0; t.graceUntil = 0;
+    t.phase = 0; t.spots = 0; t.harvestClicks = 0;
     t.plant = FARM_PLANTS[Math.floor(Math.random() * FARM_PLANTS.length)];
     this._farmGrow(idx);
   },
@@ -1935,7 +1935,6 @@ const App = {
     const phase = this._FARM_PHASES[t.phase];
     if (!phase.autoDuration) { this._farmHarvest(idx); return; }
     t.state = 'growing';
-    t.graceUntil = Date.now() + 900;  // grazia: 900ms per clic residui dalla fase precedente
     this._renderTile(idx);
     t.autoTimer = setTimeout(() => this._farmCue(idx), phase.autoDuration);
   },
@@ -2017,11 +2016,8 @@ const App = {
   _onFarmTileClick(idx) {
     const t = this._farmTiles[idx];
     if (!t) return;
-    // Clic nel momento sbagliato (growing) → deteriora, ma non nella finestra di grazia
-    if (t.state === 'growing') {
-      if (Date.now() < (t.graceUntil || 0)) return;  // grazia: ignora clic residui
-      this._farmDeteriorate(idx); return;
-    }
+    // Clic durante growing → ignorato
+    if (t.state === 'growing') return;
     if (t.state === 'cued') {
       if (t.spots > 0) { t.spots--; this._renderTileSpots(idx); }
       else {
