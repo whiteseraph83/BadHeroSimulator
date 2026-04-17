@@ -2077,7 +2077,8 @@ const App = {
       }
       case 'harvesting': {
         const pct = Math.min(100, Math.round((t.harvestClicks / this._HARVEST_CLICKS) * 100));
-        html = `<span class="farm-icon">🌾</span><div class="farm-bar farm-bar--harvest"><div style="width:${pct}%"></div></div>`;
+        const left = this._HARVEST_CLICKS - t.harvestClicks;
+        html = `<span class="farm-icon farm-icon--bounce">✂️</span><span class="farm-harvest-count">👆×${left}</span><div class="farm-bar farm-bar--harvest"><div style="width:${pct}%"></div></div>`;
         break;
       }
       case 'done':          html = '<span class="farm-icon">✨</span>'; break;
@@ -2104,11 +2105,13 @@ const App = {
   },
 
   _renderTileHarvestBar(idx) {
-    const el = document.querySelector(`#farm-grid .farm-tile[data-idx="${idx}"] .farm-bar--harvest > div`);
-    if (el) {
-      const t = this._farmTiles[idx];
-      el.style.width = Math.min(100, Math.round((t.harvestClicks / this._HARVEST_CLICKS) * 100)) + '%';
-    }
+    const tile = document.querySelector(`#farm-grid .farm-tile[data-idx="${idx}"]`);
+    if (!tile) return;
+    const t = this._farmTiles[idx];
+    const bar = tile.querySelector('.farm-bar--harvest > div');
+    if (bar) bar.style.width = Math.min(100, Math.round((t.harvestClicks / this._HARVEST_CLICKS) * 100)) + '%';
+    const cnt = tile.querySelector('.farm-harvest-count');
+    if (cnt) cnt.textContent = `👆×${this._HARVEST_CLICKS - t.harvestClicks}`;
   },
 
   _renderFarmHUD() {

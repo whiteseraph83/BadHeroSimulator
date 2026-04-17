@@ -1986,6 +1986,10 @@ body {
 .farm-icon { font-size: 1.7rem; line-height: 1; pointer-events: none; display: block; }
 .farm-icon--bounce { animation: farmIconBounce .4s infinite alternate; }
 @keyframes farmIconBounce { from{transform:translateY(0) scale(1)} to{transform:translateY(-6px) scale(1.15)} }
+.farm-harvest-count {
+  font-size: .7rem; font-weight: 700; color: #9be0b4;
+  pointer-events: none; line-height: 1; margin-top: 2px;
+}
 
 /* Barre di stato */
 .farm-bar {
