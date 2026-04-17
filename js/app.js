@@ -1885,7 +1885,7 @@ const App = {
     this._farmTiles = Array.from({length: 9}, (_, i) => this._newFarmTile(i));
     this._renderFarmGrid();
     this._renderFarmHUD();
-    this._farmTiles.forEach((_, i) => setTimeout(() => this._farmBegin(i), Math.random() * 5000));
+    this._farmTiles.forEach((_, i) => setTimeout(() => this._farmBegin(i), Math.random() * 10000));
     this._farmSessionInterval = setInterval(() => {
       this._farmTimeLeft--;
       this._renderFarmHUD();
