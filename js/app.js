@@ -1981,7 +1981,7 @@ const App = {
       } else {
         this._renderTileSpots(idx);
       }
-    }, 500);
+    }, 1500);
   },
 
   // Deterioramento: animazione + riavvio dalla fase 0
