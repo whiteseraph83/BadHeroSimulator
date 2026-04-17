@@ -1899,7 +1899,7 @@ const App = {
       plant: FARM_PLANTS[Math.floor(Math.random() * FARM_PLANTS.length)],
       phase: -1, state: 'idle',
       autoTimer: null, cueExpireTimer: null, diseaseTimer: null, spotInterval: null,
-      spots: 0, harvestClicks: 0, cueDuration: 0,
+      spots: 0, harvestClicks: 0, harvestNeeded: 7, cueDuration: 0,
     };
   },
 
@@ -1958,6 +1958,7 @@ const App = {
     const t = this._farmTiles[idx];
     if (!t) return;
     t.state = 'harvesting'; t.harvestClicks = 0; t.spots = 0;
+    t.harvestNeeded = 1 + Math.floor(Math.random() * 10);  // 1–10 clic casuali
     this._renderTile(idx);
     if (Math.random() < this._DISEASE_CHANCE) {
       t.diseaseTimer = setTimeout(() => {
@@ -2031,14 +2032,14 @@ const App = {
       if (t.spots > 0) { t.spots--; this._renderTileSpots(idx); }
       else {
         t.harvestClicks++;
-        if (t.harvestClicks >= this._HARVEST_CLICKS) {
+        if (t.harvestClicks >= t.harvestNeeded) {
           clearTimeout(t.diseaseTimer); t.diseaseTimer = null;
           clearInterval(t.spotInterval); t.spotInterval = null;
           this._farmDone(idx);
         } else {
           this._renderTileHarvestBar(idx);
           // Malattia a metà raccolto
-          if (!t.spotInterval && !t.diseaseTimer && t.harvestClicks === 3 && Math.random() < 0.3)
+          if (!t.spotInterval && !t.diseaseTimer && t.harvestClicks === Math.max(1, Math.floor(t.harvestNeeded * 0.4)) && Math.random() < 0.3)
             this._farmStartSpots(idx);
         }
       }
@@ -2076,8 +2077,8 @@ const App = {
         break;
       }
       case 'harvesting': {
-        const pct = Math.min(100, Math.round((t.harvestClicks / this._HARVEST_CLICKS) * 100));
-        const left = this._HARVEST_CLICKS - t.harvestClicks;
+        const pct = Math.min(100, Math.round((t.harvestClicks / t.harvestNeeded) * 100));
+        const left = t.harvestNeeded - t.harvestClicks;
         html = `<span class="farm-icon farm-icon--bounce">✂️</span><span class="farm-harvest-count">👆×${left}</span><div class="farm-bar farm-bar--harvest"><div style="width:${pct}%"></div></div>`;
         break;
       }
@@ -2109,9 +2110,9 @@ const App = {
     if (!tile) return;
     const t = this._farmTiles[idx];
     const bar = tile.querySelector('.farm-bar--harvest > div');
-    if (bar) bar.style.width = Math.min(100, Math.round((t.harvestClicks / this._HARVEST_CLICKS) * 100)) + '%';
+    if (bar) bar.style.width = Math.min(100, Math.round((t.harvestClicks / t.harvestNeeded) * 100)) + '%';
     const cnt = tile.querySelector('.farm-harvest-count');
-    if (cnt) cnt.textContent = `👆×${this._HARVEST_CLICKS - t.harvestClicks}`;
+    if (cnt) cnt.textContent = `👆×${t.harvestNeeded - t.harvestClicks}`;
   },
 
   _renderFarmHUD() {
