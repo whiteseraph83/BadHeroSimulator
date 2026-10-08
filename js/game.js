@@ -128,12 +128,16 @@ const Game = {
 
   save() {
     if (this.state) {
-      localStorage.setItem(SAVE_KEY, JSON.stringify(this.state));
+      const json = JSON.stringify(this.state);
+      localStorage.setItem(SAVE_KEY, json);
+      // Also persist to Playgama cloud storage when available
+      if (typeof Playgama !== 'undefined') Playgama.cloudSave(SAVE_KEY, json);
     }
   },
 
   reset() {
     localStorage.removeItem(SAVE_KEY);
+    if (typeof Playgama !== 'undefined') Playgama.cloudDelete(SAVE_KEY);
     this.state = null;
   },
 

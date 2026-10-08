@@ -252,6 +252,24 @@ const App = {
     modal.show();
   },
 
+  _onPlatformPause(isPaused) {
+    // Pause/resume any active farming or mini-game timers
+    if (isPaused) {
+      // Stop farming timer if running
+      if (this._farmTimerInterval) {
+        clearInterval(this._farmTimerInterval);
+        this._farmTimerInterval = null;
+        this._farmPausedByPlatform = true;
+      }
+    } else {
+      // Resume farming if it was paused by platform
+      if (this._farmPausedByPlatform && this._farmRunning) {
+        this._farmPausedByPlatform = false;
+        this._farmStartTimer();
+      }
+    }
+  },
+
   _updateThemeToggleIcon(theme) {
     const btn = document.getElementById('btn-theme-toggle');
     if (btn) btn.textContent = theme === 'light' ? '🌙' : '☀️';
@@ -366,10 +384,13 @@ const App = {
 
       if (result.gameOver) {
         UI.refresh();
+        Playgama.showInterstitial('game_over');
         UI.showGameOverModal();
         return;
       }
 
+      // Show interstitial between days (natural pause)
+      Playgama.showInterstitial('day_transition');
       UI.refresh();
 
       // Torna automaticamente al tab missioni
@@ -4079,4 +4100,10 @@ function _nbAdj(r, c, fn) {
 }
 
 /* ─── Avvio ─────────────────────────────────────────────── */
-document.addEventListener('DOMContentLoaded', () => App.init());
+document.addEventListener('DOMContentLoaded', async () => {
+  // Initialize Playgama Bridge (cloud save sync, platform language, events)
+  // before starting the game so saved data is ready in localStorage
+  await Playgama.init();
+  App.init();
+  Playgama.gameReady();
+});
