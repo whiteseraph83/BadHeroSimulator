@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
@@ -13,13 +13,14 @@
 
 <!-- NAVBAR -->
 <nav class="navbar navbar-dark px-3 py-2 border-bottom border-gold">
-  <span class="navbar-brand fw-bold"><i class="bi bi-gem"></i> BadHeroSimulator <span style="font-size:.65rem;font-weight:400;opacity:.55;letter-spacing:.03em;">v2.4.9</span></span>
+  <span class="navbar-brand fw-bold"><i class="bi bi-gem"></i> BadHeroSimulator <span style="font-size:.65rem;font-weight:400;opacity:.55;letter-spacing:.03em;">v2.5.0</span></span>
   <div class="d-flex gap-2 align-items-center">
-    <button class="btn btn-sm btn-outline-secondary" id="btn-theme-toggle" title="Cambia tema">☀️</button>
-    <button class="btn btn-sm btn-outline-gold" id="btn-save" title="Esporta salvataggio su file"><i class="bi bi-download"></i> Salva</button>
-    <button class="btn btn-sm btn-outline-info" id="btn-load" title="Importa salvataggio da file"><i class="bi bi-upload"></i> Carica</button>
+    <button class="btn btn-sm btn-outline-secondary" id="btn-lang-toggle" title="Switch language" style="font-size:1rem;line-height:1;padding:.2rem .45rem;">🇮🇹</button>
+    <button class="btn btn-sm btn-outline-secondary" id="btn-theme-toggle" data-i18n-title="nav.theme" title="Toggle theme">☀️</button>
+    <button class="btn btn-sm btn-outline-gold" id="btn-save" data-i18n-title="nav.export" title="Export save to file"><i class="bi bi-download"></i> <span data-i18n="nav.save">Save</span></button>
+    <button class="btn btn-sm btn-outline-info" id="btn-load" data-i18n-title="nav.import" title="Import save from file"><i class="bi bi-upload"></i> <span data-i18n="nav.load">Load</span></button>
     <input type="file" id="input-load-file" accept=".json" style="display:none">
-    <button class="btn btn-sm btn-outline-danger" id="btn-newgame"><i class="bi bi-arrow-counterclockwise"></i> Nuova Partita</button>
+    <button class="btn btn-sm btn-outline-danger" id="btn-newgame"><i class="bi bi-arrow-counterclockwise"></i> <span data-i18n="nav.newgame">New Game</span></button>
   </div>
 </nav>
 
@@ -31,7 +32,7 @@
     <div class="col-xl-3 col-lg-4">
       <div class="card-dark h-100" id="character-card">
         <div class="card-dark-header">
-          <i class="bi bi-person-fill"></i> Scheda Personaggio
+          <i class="bi bi-person-fill"></i> <span data-i18n="char.card">Character Sheet</span>
         </div>
         <div class="card-dark-body text-center">
           <div class="avatar-wrapper mx-auto mb-2">
@@ -43,7 +44,7 @@
 
           <!-- Proficiency badge -->
           <div class="proficiency-row mb-2">
-            <span class="text-muted small">Competenza</span>
+            <span class="text-muted small" data-i18n="char.prof">Proficiency</span>
             <span class="prof-badge" id="prof-badge">+2</span>
             <span class="text-muted" style="font-size:0.65rem;" id="prof-stats-hint" title="Caratteristiche con competenza">
               <i class="bi bi-patch-check-fill text-green ms-1"></i> <span id="prof-stats-text">—</span>
@@ -53,32 +54,32 @@
           <!-- Stats grid -->
           <div class="stats-grid mb-3">
             <div class="stat-box" id="stat-str">
-              <div class="stat-label">FOR <i class="bi bi-patch-check-fill prof-icon"></i></div>
+              <div class="stat-label"><span data-i18n="stat.str">STR</span> <i class="bi bi-patch-check-fill prof-icon"></i></div>
               <div class="stat-value">—</div>
               <div class="stat-mod">—</div>
             </div>
             <div class="stat-box" id="stat-dex">
-              <div class="stat-label">DES <i class="bi bi-patch-check-fill prof-icon"></i></div>
+              <div class="stat-label"><span data-i18n="stat.dex">DEX</span> <i class="bi bi-patch-check-fill prof-icon"></i></div>
               <div class="stat-value">—</div>
               <div class="stat-mod">—</div>
             </div>
             <div class="stat-box" id="stat-con">
-              <div class="stat-label">COS <i class="bi bi-patch-check-fill prof-icon"></i></div>
+              <div class="stat-label"><span data-i18n="stat.con">CON</span> <i class="bi bi-patch-check-fill prof-icon"></i></div>
               <div class="stat-value">—</div>
               <div class="stat-mod">—</div>
             </div>
             <div class="stat-box" id="stat-int">
-              <div class="stat-label">INT <i class="bi bi-patch-check-fill prof-icon"></i></div>
+              <div class="stat-label"><span data-i18n="stat.int">INT</span> <i class="bi bi-patch-check-fill prof-icon"></i></div>
               <div class="stat-value">—</div>
               <div class="stat-mod">—</div>
             </div>
             <div class="stat-box" id="stat-wis">
-              <div class="stat-label">SAG <i class="bi bi-patch-check-fill prof-icon"></i></div>
+              <div class="stat-label"><span data-i18n="stat.wis">WIS</span> <i class="bi bi-patch-check-fill prof-icon"></i></div>
               <div class="stat-value">—</div>
               <div class="stat-mod">—</div>
             </div>
             <div class="stat-box" id="stat-cha">
-              <div class="stat-label">CAR <i class="bi bi-patch-check-fill prof-icon"></i></div>
+              <div class="stat-label"><span data-i18n="stat.cha">CHA</span> <i class="bi bi-patch-check-fill prof-icon"></i></div>
               <div class="stat-value">—</div>
               <div class="stat-mod">—</div>
             </div>
@@ -87,7 +88,7 @@
           <!-- XP bar -->
           <div class="mb-2">
             <div class="d-flex justify-content-between small mb-1">
-              <span class="text-gold stat-info-trigger" data-stat-info="xp" title="Clicca per saperne di più">Esperienza <i class="bi bi-info-circle" style="font-size:.7rem;opacity:.6"></i></span>
+              <span class="text-gold stat-info-trigger" data-stat-info="xp" title="Click for info"><span data-i18n="char.xp">Experience</span> <i class="bi bi-info-circle" style="font-size:.7rem;opacity:.6"></i></span>
               <span id="xp-text">0 / 300</span>
             </div>
             <div class="progress xp-bar">
@@ -98,13 +99,13 @@
           <!-- Fame bar -->
           <div class="mb-3">
             <div class="d-flex justify-content-between small mb-1">
-              <span class="text-gold stat-info-trigger" data-stat-info="fame" title="Clicca per saperne di più">Fama <i class="bi bi-info-circle" style="font-size:.7rem;opacity:.6"></i></span>
+              <span class="text-gold stat-info-trigger" data-stat-info="fame" title="Click for info"><span data-i18n="char.renown">Renown</span> <i class="bi bi-info-circle" style="font-size:.7rem;opacity:.6"></i></span>
               <span id="fame-title">Sconosciuto</span>
             </div>
             <div class="progress fame-bar">
               <div class="progress-bar bg-green" id="fame-bar" role="progressbar" style="width:0%"></div>
             </div>
-            <div class="small text-muted mt-1"><span id="fame-points">0</span> punti fama</div>
+            <div class="small text-muted mt-1"><span id="fame-points">0</span> <span data-i18n="char.renown.pts">renown points</span></div>
           </div>
 
 
@@ -123,14 +124,14 @@
 
           <!-- Boost attivi -->
           <div id="active-boosts-display" class="d-none mb-2">
-            <div class="small mb-1" style="color:#52b788;"><i class="bi bi-arrow-up-circle-fill"></i> Potenziamenti attivi</div>
+            <div class="small mb-1" style="color:#52b788;"><i class="bi bi-arrow-up-circle-fill"></i> <span data-i18n="char.boosts">Active boons</span></div>
             <div id="active-boosts-list"></div>
           </div>
 
           <!-- Pickpocket button (solo Ladro) -->
           <div class="mb-2 d-none" id="pickpocket-wrapper">
             <button class="btn btn-pickpocket w-100" id="btn-pickpocket">
-              <i class="bi bi-hand-index-thumb"></i> Borseggia
+              <i class="bi bi-hand-index-thumb"></i> <span data-i18n="char.pickpocket">Pickpocket</span>
               <span class="badge bg-dark ms-1" id="pickpocket-badge">1</span>
             </button>
           </div>
@@ -146,7 +147,7 @@
           <!-- Gara di Bevute button (solo Guerriero) -->
           <div class="mb-2 d-none" id="drinking-wrapper">
             <button class="btn btn-drinking w-100" id="btn-drinking-game">
-              🍺 Gara di Bevute
+              🍺 <span data-i18n="char.drink">Drinking Contest</span>
               <span class="badge bg-dark ms-1" id="drinking-badge">1</span>
             </button>
           </div>
@@ -154,7 +155,7 @@
           <!-- Prega button (solo Chierico) -->
           <div class="mb-2 d-none" id="prayer-wrapper">
             <button class="btn btn-prayer w-100" id="btn-prayer">
-              🙏 Prega
+              🙏 <span data-i18n="char.pray">Pray</span>
               <span class="badge bg-dark ms-1" id="prayer-badge">2</span>
             </button>
           </div>
@@ -162,7 +163,7 @@
           <!-- Cavalcatura button (solo Paladino) -->
           <div class="mb-2 d-none" id="stable-wrapper">
             <button class="btn btn-stable w-100" id="btn-stable">
-              🐎 Accudisci Cavalcatura
+              🐎 <span data-i18n="char.stable">Tend Mount</span>
               <span class="badge bg-dark ms-1" id="stable-badge">2</span>
             </button>
           </div>
@@ -181,12 +182,12 @@
           <div class="d-flex align-items-center gap-2 flex-wrap">
             <span class="badge bg-gold text-dark" id="day-badge">Giorno 1</span>
             <span class="hud-sep">|</span>
-            <span class="text-gold small fw-semibold"><i class="bi bi-coin"></i> <span id="char-gold">0</span> mo</span>
+            <span class="text-gold small fw-semibold"><i class="bi bi-coin"></i> <span id="char-gold">0</span> <span data-i18n="lbl.gp">gp</span></span>
             <span class="hud-sep">|</span>
             <span class="small text-muted stat-info-trigger" data-stat-info="tax" title="Clicca per saperne di più" id="day-tax-info" style="cursor:pointer"></span>
           </div>
           <button class="btn btn-sm btn-gold" id="btn-nextday">
-            Avanza Giorno <i class="bi bi-arrow-right"></i>
+            <span data-i18n="day.next">End Day</span> <i class="bi bi-arrow-right"></i>
           </button>
         </div>
       </div>
@@ -195,63 +196,63 @@
       <ul class="nav nav-tabs nav-dark mb-3" id="mainTabs">
         <li class="nav-item">
           <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-missions">
-            <i class="bi bi-scroll"></i> Missioni
+            <i class="bi bi-scroll"></i> <span data-i18n="tab.quests">Quests</span>
           </button>
         </li>
         <li class="nav-item">
           <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-market">
-            <i class="bi bi-shop-window"></i> Mercato
+            <i class="bi bi-shop-window"></i> <span data-i18n="tab.market">Market</span>
           </button>
         </li>
         <li class="nav-item">
           <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-inventory">
-            <i class="bi bi-backpack2"></i> Inventario
+            <i class="bi bi-backpack2"></i> <span data-i18n="tab.inventory">Inventory</span>
           </button>
         </li>
         <li class="nav-item">
           <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-challenges">
-            <i class="bi bi-trophy"></i> Sfide
+            <i class="bi bi-trophy"></i> <span data-i18n="tab.challenges">Challenges</span>
             <span id="challenges-badge" class="badge bg-warning text-dark ms-1 d-none">!</span>
           </button>
         </li>
         <li class="nav-item d-none" id="tab-dice-nav">
           <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-dice">
-            <i class="bi bi-dice-5"></i> Gioca a Dadi
+            <i class="bi bi-dice-5"></i> <span data-i18n="tab.dice">Play Dice</span>
           </button>
         </li>
         <li class="nav-item d-none" id="tab-pozioni-nav">
           <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-pozioni">
-            <i class="bi bi-tree"></i> Foresta
+            <i class="bi bi-tree"></i> <span data-i18n="tab.forest">Forest</span>
           </button>
         </li>
         <li class="nav-item d-none" id="tab-incantesimi-nav">
           <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-incantesimi">
-            <i class="bi bi-stars"></i> Incantesimi
+            <i class="bi bi-stars"></i> <span data-i18n="tab.spells">Spellcraft</span>
           </button>
         </li>
         <li class="nav-item d-none" id="tab-conversione-nav">
           <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-conversione">
-            ✝️ Conversione
+            ✝️ <span data-i18n="tab.convert">Conversion</span>
           </button>
         </li>
         <li class="nav-item d-none" id="tab-arena-nav">
           <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-arena">
-            ⚔️ Arena
+            ⚔️ <span data-i18n="tab.arena">Arena</span>
           </button>
         </li>
         <li class="nav-item d-none" id="tab-rescue-nav">
           <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-rescue">
-            🛡️ Salva i Prigionieri
+            🛡️ <span data-i18n="tab.rescue">Rescue Prisoners</span>
           </button>
         </li>
         <li class="nav-item d-none" id="tab-combat-nav">
           <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-combat">
-            ⚔️ Combatti
+            ⚔️ <span data-i18n="tab.combat">Combat</span>
           </button>
         </li>
         <li class="nav-item">
           <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-log">
-            <i class="bi bi-journal-text"></i> Diario
+            <i class="bi bi-journal-text"></i> <span data-i18n="tab.journal">Chronicle</span>
           </button>
         </li>
       </ul>
@@ -861,6 +862,81 @@
 </div><!-- /container -->
 
 
+<!-- ===== MODAL: TUTORIAL ===== -->
+<div class="modal fade" id="modal-tutorial" data-bs-backdrop="static" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content modal-dark">
+      <div class="modal-header border-gold">
+        <h5 class="modal-title text-gold">⚔️ BadHeroSimulator</h5>
+      </div>
+      <div class="modal-body pb-2">
+        <div class="tutorial-section mb-3">
+          <h6 class="text-gold mb-2" data-i18n="tut.story.h">The Story</h6>
+          <p class="text-muted small mb-0" data-i18n="tut.story">You are an adventurer deep in debt to the Thieves' Guild. Each day they demand their tithe — fail to pay and your reputation crumbles. Survive day by day: take quests, shop at the market, level up your hero, and keep the Guild satisfied.</p>
+        </div>
+        <div class="tutorial-section mb-3">
+          <h6 class="text-gold mb-2" data-i18n="tut.loop.h">Daily Loop</h6>
+          <div class="row g-2">
+            <div class="col-6 col-md-3">
+              <div class="tutorial-card text-center p-2">
+                <div style="font-size:1.6rem">📜</div>
+                <div class="small text-light mt-1" data-i18n="tab.quests">Quests</div>
+                <div class="small text-muted" data-i18n="tut.loop.quests">Earn XP &amp; gold</div>
+              </div>
+            </div>
+            <div class="col-6 col-md-3">
+              <div class="tutorial-card text-center p-2">
+                <div style="font-size:1.6rem">🏪</div>
+                <div class="small text-light mt-1" data-i18n="tab.market">Market</div>
+                <div class="small text-muted" data-i18n="tut.loop.market">Buy &amp; equip gear</div>
+              </div>
+            </div>
+            <div class="col-6 col-md-3">
+              <div class="tutorial-card text-center p-2">
+                <div style="font-size:1.6rem">⚔️</div>
+                <div class="small text-light mt-1" data-i18n="tab.combat">Combat</div>
+                <div class="small text-muted" data-i18n="tut.loop.combat">Fight for glory</div>
+              </div>
+            </div>
+            <div class="col-6 col-md-3">
+              <div class="tutorial-card text-center p-2">
+                <div style="font-size:1.6rem">🌅</div>
+                <div class="small text-light mt-1" data-i18n="day.next">End Day</div>
+                <div class="small text-muted" data-i18n="tut.loop.day">Pay the tithe</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="tutorial-section mb-3">
+          <h6 class="text-gold mb-2" data-i18n="tut.tips.h">Tips</h6>
+          <ul class="small text-muted mb-0 ps-3">
+            <li data-i18n="tut.tip1">Each class has unique special abilities — pick the playstyle that suits you.</li>
+            <li data-i18n="tut.tip2">The guild tithe rises each day — keep your gold reserves healthy.</li>
+            <li data-i18n="tut.tip3">Equipping items grants stat bonuses and special perks.</li>
+            <li data-i18n="tut.tip4">Renown unlocks titles and can reduce your Bounty or Notoriety.</li>
+          </ul>
+        </div>
+        <div class="tutorial-section mb-3">
+          <h6 class="text-gold mb-2" data-i18n="tut.classes.h">Classes</h6>
+          <div class="row g-1">
+            <div class="col-6 col-md-4"><div class="tutorial-class-row"><span>⚔️</span><span data-i18n="class.guerriero">Warrior</span> — <span class="text-muted small" data-i18n="tut.cls.guerriero">Brute force, arena champion</span></div></div>
+            <div class="col-6 col-md-4"><div class="tutorial-class-row"><span>🛡️</span><span data-i18n="class.paladino">Paladin</span> — <span class="text-muted small" data-i18n="tut.cls.paladino">Rescue quests, divine mount</span></div></div>
+            <div class="col-6 col-md-4"><div class="tutorial-class-row"><span>✝️</span><span data-i18n="class.chierico">Cleric</span> — <span class="text-muted small" data-i18n="tut.cls.chierico">Prayer &amp; conversion</span></div></div>
+            <div class="col-6 col-md-4"><div class="tutorial-class-row"><span>🌿</span><span data-i18n="class.druido">Druid</span> — <span class="text-muted small" data-i18n="tut.cls.druido">Tend the forest, herbalism</span></div></div>
+            <div class="col-6 col-md-4"><div class="tutorial-class-row"><span>🗝️</span><span data-i18n="class.ladro">Rogue</span> — <span class="text-muted small" data-i18n="tut.cls.ladro">Pickpocket &amp; dice games</span></div></div>
+            <div class="col-6 col-md-4"><div class="tutorial-class-row"><span>🔮</span><span data-i18n="class.mago">Mage</span> — <span class="text-muted small" data-i18n="tut.cls.mago">Spellcraft &amp; arcane study</span></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer border-0 pt-0">
+        <button class="btn btn-gold w-100" id="btn-tutorial-next">
+          <span data-i18n="tut.begin">Choose your class →</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ===== MODAL: CREAZIONE PERSONAGGIO ===== -->
 <div class="modal fade" id="modal-create" data-bs-backdrop="static" tabindex="-1">
   <div class="modal-dialog modal-lg modal-dialog-centered">
@@ -1352,11 +1428,11 @@
     <div class="modal-content modal-dark text-center">
       <div class="modal-body py-4">
         <i class="bi bi-exclamation-triangle text-warning fs-2"></i>
-        <h6 class="mt-2 text-light">Vuoi iniziare una nuova partita?</h6>
-        <p class="text-muted small">Tutti i progressi andranno persi.</p>
+        <h6 class="mt-2 text-light" data-i18n="newgame.q">Start a new game?</h6>
+        <p class="text-muted small" data-i18n="newgame.warn">All progress will be lost.</p>
         <div class="d-flex gap-2 justify-content-center mt-3">
-          <button class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Annulla</button>
-          <button class="btn btn-sm btn-danger" id="btn-confirm-newgame">Ricomincia</button>
+          <button class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal" data-i18n="newgame.cancel">Cancel</button>
+          <button class="btn btn-sm btn-danger" id="btn-confirm-newgame" data-i18n="newgame.ok">Start over</button>
         </div>
       </div>
     </div>
@@ -1394,20 +1470,20 @@
   <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content modal-dark">
       <div class="modal-header border-gold">
-        <h5 class="modal-title text-gold">🌿 Coltiva la Foresta</h5>
+        <h5 class="modal-title text-gold">🌿 <span data-i18n="farm.modal">Tend the Forest</span></h5>
       </div>
       <div class="modal-body">
         <!-- HUD -->
         <div class="d-flex justify-content-between align-items-center mb-2 px-1">
           <div>⏱️ <span id="farm-timer" class="fw-bold">90</span>s</div>
-          <div>🌟 Punti: <span id="farm-score" class="fw-bold text-gold">0</span></div>
+          <div>🌟 <span data-i18n="farm.score">Score:</span> <span id="farm-score" class="fw-bold text-gold">0</span></div>
         </div>
         <div id="farm-grid-wrapper">
           <!-- Griglia 4x4 -->
           <div id="farm-grid" class="farm-grid"></div>
           <!-- Legenda -->
-          <div class="farm-legend text-muted mt-2 small text-center">
-            Clicca quando 💧 o ☀️ lampeggia per avanzare &nbsp;·&nbsp; Quando compare ✂️ <b>clicca ripetutamente</b> per raccogliere &nbsp;·&nbsp; Debella le 🟣 macchie viola cliccando!
+          <div class="farm-legend text-muted mt-2 small text-center" data-i18n-html="farm.legend">
+            Click when 💧 or ☀️ flashes to advance &nbsp;·&nbsp; When ✂️ appears, <b>click repeatedly</b> to harvest &nbsp;·&nbsp; Dispel the 🟣 purple blight by clicking!
           </div>
         </div>
         <!-- Risultato -->
@@ -1535,6 +1611,7 @@
 <script>
   var _v = '?v=' + Date.now();
   document.getElementById('main-stylesheet').href = 'css/style.css' + _v;
+  document.write('<script src="js/i18n.js' + _v + '"><\/script>');
   document.write('<script src="js/data.js' + _v + '"><\/script>');
   document.write('<script src="js/game.js' + _v + '"><\/script>');
   document.write('<script src="js/ui.js' + _v + '"><\/script>');

@@ -17,7 +17,7 @@ const UI = {
 
     document.getElementById('char-name').textContent  = c.name;
     document.getElementById('char-level').textContent = `Lv.${c.level}`;
-    document.getElementById('day-badge').textContent  = `Giorno ${c.day}`;
+    document.getElementById('day-badge').textContent  = `${t('day.prefix')} ${c.day}`;
 
     // Bonus competenza
     document.getElementById('prof-badge').textContent = `+${c.proficiency}`;
@@ -57,7 +57,7 @@ const UI = {
     const wl        = Game.getWantedLevel();
     const maxPts    = isLadro ? 300 : 200;
     const wantedPct = Math.min(100, wanted / maxPts * 100);
-    document.getElementById('wanted-type-label').textContent         = isLadro ? 'Taglia' : 'Visibilità';
+    document.getElementById('wanted-type-label').textContent         = isLadro ? t('char.bounty') : t('char.notoriety');
     document.getElementById('wanted-label').textContent              = `${wl.icon} ${wl.label}`;
     document.getElementById('wanted-bar-fill').style.width           = wantedPct + '%';
     document.getElementById('wanted-bar-fill').style.background      = wl.color;
@@ -163,17 +163,17 @@ const UI = {
     const outcomeEl = document.getElementById('drinking-outcome');
     outcomeEl.className = `mission-outcome ${result.won ? 'outcome-success' : 'outcome-failure'}`;
     outcomeEl.textContent = result.won
-      ? (result.check.result === 'nat20' ? '🍺 Leggenda della Taverna! Un eroe senza pari!' : '🍺 Vittoria! Nessuno regge il confronto con te.')
-      : '😵 Sconfitto! Cadi dal sgabello tra le risate degli avventori.';
+      ? (result.check.result === 'nat20' ? t('drink.win.nat20') : t('drink.win'))
+      : t('drink.loss');
     const rewardEl = document.getElementById('drinking-rewards');
     rewardEl.classList.remove('d-none');
     const rows = [];
-    if (result.xp  > 0) rows.push(`<div class="reward-row"><span class="reward-icon">⭐</span> +${result.xp} PE</div>`);
-    if (result.gold > 0) rows.push(`<div class="reward-row"><span class="reward-icon">💰</span> +${result.gold} mo</div>`);
-    if (result.gold < 0) rows.push(`<div class="reward-row text-danger"><span class="reward-icon">💰</span> ${result.gold} mo</div>`);
-    if (result.fame > 0) rows.push(`<div class="reward-row"><span class="reward-icon">👁️</span> +${result.fame} fama</div>`);
-    const checkLabel = { nat20:'CRITICO 🎯', success:'Superato', partial:'Parziale', failure:'Fallito', nat1:'CRITICO 1' };
-    rows.push(`<div class="reward-row text-muted small"><span class="reward-icon">🎲</span> Tiro CON: ${result.check.roll}+${result.check.bonus}=${result.check.total} — ${checkLabel[result.check.result] || result.check.result}</div>`);
+    if (result.xp  > 0) rows.push(`<div class="reward-row"><span class="reward-icon">⭐</span> +${result.xp} ${t('lbl.xp')}</div>`);
+    if (result.gold > 0) rows.push(`<div class="reward-row"><span class="reward-icon">💰</span> +${result.gold} ${t('lbl.gp')}</div>`);
+    if (result.gold < 0) rows.push(`<div class="reward-row text-danger"><span class="reward-icon">💰</span> ${result.gold} ${t('lbl.gp')}</div>`);
+    if (result.fame > 0) rows.push(`<div class="reward-row"><span class="reward-icon">👁️</span> +${result.fame} ${t('char.renown')}</div>`);
+    const checkLabel = { nat20: t('roll.nat20'), success: t('roll.success'), partial: t('roll.partial'), failure: t('roll.fail'), nat1: t('roll.nat1') };
+    rows.push(`<div class="reward-row text-muted small"><span class="reward-icon">🎲</span> CON: ${result.check.roll}+${result.check.bonus}=${result.check.total} — ${checkLabel[result.check.result] || result.check.result}</div>`);
     rewardEl.innerHTML = rows.join('');
   },
 
@@ -202,19 +202,19 @@ const UI = {
     document.getElementById('conv-result').classList.remove('d-none');
     const outcomeEl = document.getElementById('conv-outcome');
     if (result.tier === 'benedizione') {
-      outcomeEl.innerHTML = '<span style="color:#fffde7;">✨ Benedizione Divina!</span>';
+      outcomeEl.innerHTML = `<span style="color:#fffde7;">${t('conv.r.divine')}</span>`;
     } else if (result.tier === 'alta') {
-      outcomeEl.innerHTML = '<span class="text-gold">✝️ Grande conversione!</span>';
+      outcomeEl.innerHTML = `<span class="text-gold">${t('conv.r.high')}</span>`;
     } else if (result.tier === 'media') {
-      outcomeEl.innerHTML = '<span class="text-warning">✝️ Il gregge cresce.</span>';
+      outcomeEl.innerHTML = `<span class="text-warning">${t('conv.r.mid')}</span>`;
     } else {
-      outcomeEl.innerHTML = '<span class="text-muted">✝️ Pochi cuori aperti oggi.</span>';
+      outcomeEl.innerHTML = `<span class="text-muted">${t('conv.r.low')}</span>`;
     }
     const rows = [];
-    if (result.xp    > 0) rows.push(`<div class="reward-row"><span class="reward-icon">⭐</span> +${result.xp} PE</div>`);
-    if (result.gold  > 0) rows.push(`<div class="reward-row"><span class="reward-icon">💰</span> +${result.gold} mo</div>`);
-    if (result.fameXp > 0) rows.push(`<div class="reward-row"><span class="reward-icon">👁️</span> +${result.fameXp} fama</div>`);
-    rows.push(`<div class="reward-row text-muted small"><span class="reward-icon">✝️</span> Punteggio: ${result.score}% · Benedetti: ${result.blessedCount}</div>`);
+    if (result.xp    > 0) rows.push(`<div class="reward-row"><span class="reward-icon">⭐</span> +${result.xp} ${t('lbl.xp')}</div>`);
+    if (result.gold  > 0) rows.push(`<div class="reward-row"><span class="reward-icon">💰</span> +${result.gold} ${t('lbl.gp')}</div>`);
+    if (result.fameXp > 0) rows.push(`<div class="reward-row"><span class="reward-icon">👁️</span> +${result.fameXp} ${t('char.renown')}</div>`);
+    rows.push(`<div class="reward-row text-muted small"><span class="reward-icon">✝️</span> ${t('conv.stats', {n: result.score, b: result.blessedCount})}</div>`);
     document.getElementById('conv-rewards').innerHTML = rows.join('');
   },
 
@@ -245,30 +245,30 @@ const UI = {
     const rewEl   = document.getElementById('rescue-result-rewards');
     if (result.tier === 'leggendario') {
       iconEl.textContent  = '👑';
-      titleEl.innerHTML   = '<span style="color:#ff80ff">Boss Sconfitto! Leggendario!</span>';
+      titleEl.innerHTML   = `<span style="color:#ff80ff">${t('rescue.r.leg')}</span>`;
     } else if (result.tier === 'glorioso') {
       iconEl.textContent  = '🏆';
-      titleEl.innerHTML   = '<span class="text-gold">Missione Gloriosa!</span>';
+      titleEl.innerHTML   = `<span class="text-gold">${t('rescue.r.glory')}</span>`;
     } else if (result.tier === 'buono') {
       iconEl.textContent  = '✅';
-      titleEl.innerHTML   = '<span style="color:#2ecc71">Missione Riuscita</span>';
+      titleEl.innerHTML   = `<span style="color:#2ecc71">${t('rescue.r.ok')}</span>`;
     } else if (result.tier === 'parziale') {
       iconEl.textContent  = '⚔️';
-      titleEl.innerHTML   = '<span class="text-warning">Missione Parziale</span>';
+      titleEl.innerHTML   = `<span class="text-warning">${t('rescue.r.part')}</span>`;
     } else if (result.died) {
       iconEl.textContent  = '💀';
-      titleEl.innerHTML   = '<span class="text-danger">Il Paladino è Caduto</span>';
+      titleEl.innerHTML   = `<span class="text-danger">${t('rescue.r.died')}</span>`;
     } else {
       iconEl.textContent  = '😔';
-      titleEl.innerHTML   = '<span class="text-muted">Missione Fallita</span>';
+      titleEl.innerHTML   = `<span class="text-muted">${t('rescue.r.fail')}</span>`;
     }
-    const bossNote = result.bossKilled ? ' <span style="color:#ff80ff">👑 Boss eliminato!</span>' : '';
-    subEl.innerHTML = `${result.saved}/${result.total} prigionieri liberati (${result.pct}%)${bossNote}`;
+    const bossNote = result.bossKilled ? ` <span style="color:#ff80ff">${t('rescue.boss')}</span>` : '';
+    subEl.innerHTML = `${t('rescue.freed', {n: result.saved, max: result.total, pct: result.pct})}${bossNote}`;
     if (result.xp > 0 || result.gold > 0) {
-      rewEl.innerHTML = `<span class="text-warning">+${result.xp} PE</span> &nbsp; <span class="text-gold">+${result.gold} mo</span>` +
-        (result.fameXp > 0 ? ` &nbsp; <span style="color:#a29bfe">+${result.fameXp} fama</span>` : '');
+      rewEl.innerHTML = `<span class="text-warning">+${result.xp} ${t('lbl.xp')}</span> &nbsp; <span class="text-gold">+${result.gold} ${t('lbl.gp')}</span>` +
+        (result.fameXp > 0 ? ` &nbsp; <span style="color:#a29bfe">+${result.fameXp} ${t('char.renown')}</span>` : '');
     } else {
-      rewEl.innerHTML = '<span class="text-muted small">Nessuna ricompensa</span>';
+      rewEl.innerHTML = `<span class="text-muted small">${t('lbl.no.rew')}</span>`;
     }
   },
 
@@ -1536,6 +1536,7 @@ const UI = {
 
   refresh() {
     if (!Game.state) return;
+    I18n.apply();
     this.updateClassConditionalUI();
     this.renderCharacter();
     this.renderPickpocketBtn();
@@ -1566,7 +1567,7 @@ const UI = {
   updateClassConditionalUI() {
     if (!Game.state) return;
     const cls = Game.getClasse();
-    const profAbbr = { str:'FOR', dex:'DES', con:'COS', int:'INT', wis:'SAG', cha:'CAR' };
+    const profAbbr = { str: t('stat.str'), dex: t('stat.dex'), con: t('stat.con'), int: t('stat.int'), wis: t('stat.wis'), cha: t('stat.cha') };
 
     // Pickpocket button (solo Ladro)
     document.getElementById('pickpocket-wrapper').classList.toggle('d-none', !cls.hasPickpocket);
@@ -1579,8 +1580,8 @@ const UI = {
     const studyLabelEl = document.getElementById('study-btn-label');
     if (studyLabelEl) {
       studyLabelEl.innerHTML = cls.id === 'druido'
-        ? '🌿 Studia la Foresta'
-        : '<i class="bi bi-book"></i> Studia';
+        ? t('char.druid.study')
+        : `<i class="bi bi-book"></i> ${t('char.study')}`;
     }
 
     // Tab Foresta (solo Druido)
@@ -1630,7 +1631,7 @@ const UI = {
     document.getElementById('create-step-2').classList.add('d-none');
 
     const grid = document.getElementById('class-selection-grid');
-    const profAbbr = { str:'FOR', dex:'DES', con:'COS', int:'INT', wis:'SAG', cha:'CAR' };
+    const profAbbr = { str: t('stat.str'), dex: t('stat.dex'), con: t('stat.con'), int: t('stat.int'), wis: t('stat.wis'), cha: t('stat.cha') };
     grid.innerHTML = CLASSES.map(cls => `
       <div class="col-6 col-md-4">
         <div class="class-card" data-class-id="${cls.id}">
@@ -1747,15 +1748,15 @@ const UI = {
     const res = document.getElementById('farm-result');
     res.classList.remove('d-none');
     let title, titleClass;
-    if      (score >= 300) { title = '🌟 Raccolta Eccellente!'; titleClass = 'text-gold'; }
-    else if (score >= 150) { title = '🌿 Buon Raccolto';        titleClass = 'text-success'; }
-    else if (score >= 50)  { title = '🪴 Raccolto Modesto';     titleClass = 'text-muted'; }
-    else                   { title = '🥀 Scarso Raccolto';      titleClass = 'text-danger'; }
+    if      (score >= 300) { title = t('farm.r.best'); titleClass = 'text-gold'; }
+    else if (score >= 150) { title = t('farm.r.good'); titleClass = 'text-success'; }
+    else if (score >= 50)  { title = t('farm.r.ok');   titleClass = 'text-muted'; }
+    else                   { title = t('farm.r.poor');  titleClass = 'text-danger'; }
     document.getElementById('farm-result-title').innerHTML = `<span class="${titleClass}">${title}</span>`;
     const result = Game.applyForestStudyReward(score);
     document.getElementById('farm-result-rewards').innerHTML =
-      `Punteggio: <b>${score}</b> pt — +${result.xp} PE, +${result.gold} mo` +
-      (result.ingredient ? `<br>🎁 Ingrediente: ${result.ingredient.icon} ${result.ingredient.name}` : '');
+      t('farm.reward', {n: score, xp: result.xp, gold: result.gold}) +
+      (result.ingredient ? `<br>${t('farm.ingr', {icon: result.ingredient.icon, name: result.ingredient.name})}` : '');
     this.refresh();
     if (result.levelUpResult?.leveledUp) App._triggerLevelUp(result.levelUpResult);
   },
@@ -1977,7 +1978,7 @@ const UI = {
     document.getElementById('btn-combat-start').disabled = Game.combatRemaining() <= 0 || Game.state.gameOver;
 
     // Mostra competenze nella lobby
-    const profAbbr = { str:'FOR', dex:'DES', con:'COS', int:'INT', wis:'SAG', cha:'CAR' };
+    const profAbbr = { str: t('stat.str'), dex: t('stat.dex'), con: t('stat.con'), int: t('stat.int'), wis: t('stat.wis'), cha: t('stat.cha') };
     const profs = (Game.getClasse().proficiencies || []).map(k => profAbbr[k] || k).join(', ');
     const profEl = document.getElementById('combat-prof-list');
     if (profEl) profEl.textContent = profs;

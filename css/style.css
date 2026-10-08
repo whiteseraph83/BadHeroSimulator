@@ -2041,6 +2041,22 @@ body {
 }
 .farm-legend { font-size: .75rem; }
 
+/* ── Tutorial modal ───────────────────────────────────────── */
+.tutorial-section { border-left: 2px solid var(--gold); padding-left: .75rem; }
+.tutorial-card {
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 8px;
+}
+.tutorial-class-row {
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  padding: .2rem .4rem;
+  font-size: .8rem;
+  color: var(--text-light);
+}
+
 [data-theme="light"] .nature-cell.low  { background: rgba(220,80,80,.18);  border-color: rgba(200,60,60,.5);  color: #c02020; }
 [data-theme="light"] .nature-cell.ok   { background: rgba(40,160,70,.15);  border-color: rgba(40,160,70,.45); color: #1a7a30; }
 [data-theme="light"] .nature-cell.high { background: rgba(130,50,200,.12); border-color: rgba(130,50,200,.4); color: #6020b0; }

@@ -211,6 +211,9 @@ const App = {
     document.documentElement.setAttribute('data-theme', savedTheme);
     this._updateThemeToggleIcon(savedTheme);
 
+    // Lingua — applica traduzioni statiche prima di tutto
+    I18n.apply();
+
     const hasGame = Game.init();
     if (hasGame) {
       if (Game.state.gameOver) {
@@ -232,8 +235,7 @@ const App = {
       }
     } else {
       this._showPlaceholder();
-      this._createModal = UI.showCreateModal();
-      UI.showClassStep();
+      this._showTutorial();
     }
     this._bindEvents();
   },
@@ -245,6 +247,11 @@ const App = {
       '<div class="col-12 text-center text-muted py-4"><i class="bi bi-lock fs-3"></i><p class="mt-2">Crea il tuo personaggio per iniziare.</p></div>';
   },
 
+  _showTutorial() {
+    const modal = new bootstrap.Modal(document.getElementById('modal-tutorial'));
+    modal.show();
+  },
+
   _updateThemeToggleIcon(theme) {
     const btn = document.getElementById('btn-theme-toggle');
     if (btn) btn.textContent = theme === 'light' ? '🌙' : '☀️';
@@ -252,6 +259,18 @@ const App = {
 
   /* ─── Binding eventi ──────────────────────────────────── */
   _bindEvents() {
+
+    // Toggle lingua IT / EN
+    document.getElementById('btn-lang-toggle').addEventListener('click', () => {
+      I18n.setLang(I18n.lang === 'it' ? 'en' : 'it');
+    });
+
+    // Tutorial → procedi alla creazione personaggio
+    document.getElementById('btn-tutorial-next').addEventListener('click', () => {
+      bootstrap.Modal.getInstance(document.getElementById('modal-tutorial')).hide();
+      this._createModal = UI.showCreateModal();
+      UI.showClassStep();
+    });
 
     // Toggle tema chiaro / scuro
     document.getElementById('btn-theme-toggle').addEventListener('click', () => {
