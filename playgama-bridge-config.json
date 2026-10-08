@@ -1,0 +1,12 @@
+{
+    "advertisement": {
+        "minimumDelayBetweenInterstitial": 120,
+        "initialInterstitialDelay": 30,
+        "interstitial": {
+            "placements": [
+                { "id": "day_transition" },
+                { "id": "game_over" }
+            ]
+        }
+    }
+}
